@@ -92,8 +92,8 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mKeyFirst p{flex-basis:100%;margin:0;text-align:center;color:var(--t3);font-size:11px}
 .page{position:relative;margin:0 auto 14px;background:#fff;box-shadow:0 0 0 1px var(--pageb),0 3px 12px -4px #00000040}
 .page canvas{display:block;width:100%;height:100%}
-.textLayer{position:absolute;inset:0;overflow:hidden;line-height:1;text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;z-index:2}
-.textLayer span,.textLayer br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0 0}
+.textLayer{position:absolute;inset:0;overflow:hidden;line-height:1;text-size-adjust:none;-webkit-text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;z-index:2;-webkit-user-select:text;user-select:text}
+.textLayer span,.textLayer br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0 0;-webkit-user-select:text;user-select:text}
 .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;user-select:none}
 .textLayer.selecting .endOfContent{top:0}
 /* ---------- highlights, links, selection bar ---------- */
@@ -776,9 +776,9 @@ const fOpen=()=>{if(!pdf)return;$('mFind').hidden=false;FQ.focus();FQ.select()},
 FQ.addEventListener('input',()=>{clearTimeout(fTm);fTm=setTimeout(fScan,180)});
 FQ.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const d=e.shiftKey?-1:1;fpages.length?fGo(d):(clearTimeout(fTm),fScan().then(()=>fGo(d)))}else if(e.key==='Escape'){e.preventDefault();fClose()}});
 // ---------- selection: Translate / Comment bar under the selection ----------
-let lastSel='';
+let lastSel='',autoT=0;
 const selT=$('mSelT'),selHide=()=>selT.hidden=true;
-V.addEventListener('mousedown',e=>{e.target.closest('.textLayer')?.classList.add('selecting');selHide()});
+V.addEventListener('mousedown',e=>{clearTimeout(autoT);e.target.closest('.textLayer')?.classList.add('selecting');selHide()});
 selT.onmousedown=e=>e.preventDefault();
 selT.onclick=e=>{const b=e.target.closest('button');if(!b||!selA)return;selHide();
   b.dataset.s==='c'?comment(selA.t,selA.rs):translate(selA.t,selA.rs);getSelection().removeAllRanges()};
@@ -788,8 +788,8 @@ document.addEventListener('mouseup',e=>{
   const s=getSelection();if(!s.rangeCount||!V.contains(s.anchorNode))return;
   const txt=s.toString().replace(/([A-Za-z])-\s*\n\s*(?=[a-z])/g,'$1').replace(/\s+/g,' ').trim();if(!txt)return;
   const rg=s.getRangeAt(0);
-  const auto=$('mAuto').checked&&txt!==lastSel;
-  selA={t:txt,rs:rects(rg)};lastSel=txt;auto&&translate(txt);
+  const auto=$('mAuto').checked&&txt!==lastSel&&txt.length>1,rs=rects(rg);
+  selA={t:txt,rs};lastSel=txt;if(auto){const t=txt;clearTimeout(autoT);autoT=setTimeout(()=>translate(t,rs),180)}  // a beat after the mouse, so a second drag cancels it
   const c=[...rg.getClientRects()].filter(r=>r.width>1&&r.height>1&&r.height<60*scale).at(-1),VR=V.getBoundingClientRect();
   if(!c)return;selT.querySelector('[data-s=t]').hidden=auto;selT.hidden=false;
   const x=Math.min(Math.max(c.right-selT.offsetWidth,VR.left+6),VR.right-selT.offsetWidth-18),
