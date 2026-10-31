@@ -153,6 +153,21 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mConn .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 10px;align-items:center}#mConn .kv>span{color:var(--h4);font-size:11.5px}
 #mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
 #mConn .gr{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
+/* ---------- palette (Cmd/Ctrl+K) ---------- */
+#mK{position:fixed;inset:0;z-index:60;background:#14141333}
+#mK[hidden]{display:none}
+#mK>div{position:absolute;left:50%;top:15vh;transform:translateX(-50%);width:min(520px,calc(100vw - 32px));padding:4px;border-radius:10px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 30px 70px -20px #0005}
+#mKq{display:block;width:100%;padding:7px 8px;font-size:13.5px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;outline:none}
+#mKl{max-height:min(52vh,380px);overflow:auto;padding:3px 0}
+#mKl div{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;white-space:nowrap;cursor:pointer;font-size:12.5px}
+#mKl div.on{background:var(--btnh)}
+#mKl div i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--line)}
+#mKl div i.cur{background:var(--onb)}
+#mKl div span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#mKl div small{flex:none;color:var(--h4);font-size:11px}
+#mKl p{margin:8px;color:var(--h4)}
+#mK>div>p{margin:0;padding:6px 8px 3px;border-top:1px solid var(--line);color:var(--h4);font-size:11px}
+#mK>div>p kbd{margin:0 3px 0 10px}#mK>div>p kbd:first-child{margin-left:0}
 /* ---------- find ---------- */
 #mFind{position:fixed;top:46px;left:50%;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}
 #mFind[hidden]{display:none}
@@ -183,6 +198,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <li><svg viewBox="0 0 16 16"><path d="M4 2.5h6l2 2v9H4z"/><path d="M6 6.5h4M6 9h4"/></svg><b>Open a PDF</b><span><kbd>O</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save notes</b><span><kbd>⌘</kbd><kbd>S</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><b>Save PDF</b><span><kbd>⌘</kbd><kbd>⇧</kbd><kbd>S</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><rect x="2.5" y="4.5" width="8" height="9" rx="1"/><path d="M5.5 2.5h7a1 1 0 0 1 1 1v7"/></svg><b>Documents</b><span><kbd>⌘</kbd><kbd>K</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M2.5 8h11M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg><b>Pages</b><span><kbd>←</kbd><kbd>→</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="M7 5v4M5 7h4"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Zoom</b><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Find</b><span><kbd>F</kbd></span></li>
@@ -211,6 +227,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <svg id="mLink"></svg>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
+<div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>↑↓</kbd>Move<kbd>↵</kbd>Open<kbd>Esc</kbd>Close</p></div></div>
 <div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
 <script>
 'use strict';
@@ -589,7 +606,25 @@ function mark(){const T=$('mThumb'),t=T.querySelector(`.tp[data-n="${curN}"]`);
 $('mThumb').onclick=e=>{const t=e.target.closest('.tp');t&&goto(+t.dataset.n)};
 setTh(ls('mrdThumbs')!=='0');
 
-// ---------- find (/) ----------
+// ---------- palette (Cmd/Ctrl+K): the open documents, filtered as you type ----------
+const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0;
+const kClose=()=>{$('mK').hidden=true;KQ.value=''},
+  kPaint=()=>{KL.replaceChildren();if(!kHits.length){KL.append(el('p',0,'No document matches'));return}
+    kHits.forEach((x,i)=>{const d=el('div',i===kOn?'on':'');d.append(el('i',i===TI?'cur':''),el('span',0,x.n));
+      i===TI&&d.append(el('small',0,'current'));
+      d.onmouseenter=()=>{kOn=i;kPaint()};d.onmousedown=e=>{e.preventDefault();kGo(i)};KL.append(d)})},
+  kBuild=()=>{const q=KQ.value.trim().toLowerCase();
+    kHits=TABS.map((t,i)=>({i,n:(t.name||'Untitled').replace(/\.pdf$/i,'')})).filter(x=>!q||x.n.toLowerCase().includes(q));
+    kOn=kHits.findIndex(x=>x.i===TI);kOn<0&&(kOn=0);kPaint()},
+  kOpen=()=>{if(!TABS.length)return;$('mK').hidden=false;KQ.value='';kBuild();KQ.focus()},
+  kGo=i=>{const x=kHits[i];if(!x)return;kClose();x.i!==TI&&tabGo(x.i)};
+KQ.addEventListener('input',kBuild);
+KQ.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!kHits.length)return;kOn=(kOn+(e.key==='ArrowDown'?1:-1)+kHits.length)%kHits.length;kPaint();KL.children[kOn]?.scrollIntoView({block:'nearest'})}
+  else if(e.key==='Enter'){e.preventDefault();kGo(kOn)}
+  else if(e.key==='Escape'){e.preventDefault();kClose()}});
+$('mK').addEventListener('mousedown',e=>{e.target===$('mK')&&kClose()});
+// ---------- find (F) ----------
 const FQ=$('mFindQ'),FS=$('mFindS');let fpages=[],fi=-1,fc=new Map(),fTm=0;
 const fOpen=()=>{if(!pdf)return;$('mFind').hidden=false;FQ.focus();FQ.select()},
   fUnmark=()=>document.querySelectorAll('#mView mark.fnd').forEach(m=>{const p=m.parentNode;p.replaceChild(document.createTextNode(m.textContent),m);p.normalize()}),
@@ -642,9 +677,9 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 // one key handler for the whole app: physical key codes (e.code) so a Chinese IME with full-width
 // punctuation cannot break it, and no shortcut fires while the IME is composing
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
+  if(e.key==='Escape'){$('mK').hidden||kClose();document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
-  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
+  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}else if(k==='k'){e.preventDefault();kOpen()}return}
   if(e.isComposing||e.keyCode===229)return;
   if(e.target.closest('input,textarea,select,button,a,[contenteditable]'))return;
   if(k==='Enter')hintOff();
