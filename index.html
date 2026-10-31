@@ -185,7 +185,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><b>Save PDF</b><span><kbd>⌘</kbd><kbd>⇧</kbd><kbd>S</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M2.5 8h11M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg><b>Pages</b><span><kbd>←</kbd><kbd>→</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="M7 5v4M5 7h4"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Zoom</b><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span></li>
-<li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Find</b><span><kbd>/</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Find</b><span><kbd>⌘</kbd><kbd>F</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5a5.5 5.5 0 0 0 0 11z" fill="currentColor" stroke="none"/></svg><b>Theme</b><span><kbd>T</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M6 3v10"/></svg><b>Thumbnails</b><span><kbd>H</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M3 5h6M12 5h1M3 11h1M7 11h6"/><circle cx="10.5" cy="5" r="1.5"/><circle cx="5.5" cy="11" r="1.5"/></svg><b>Settings</b><span><kbd>,</kbd></span></li>
@@ -644,12 +644,11 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
-  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
+  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}else if(k==='f'){e.preventDefault();fOpen()}return}
   if(e.isComposing||e.keyCode===229)return;
   if(e.target.closest('input,textarea,select,button,a,[contenteditable]'))return;
   if(k==='Enter')hintOff();
   else if(k==='?'||(c==='Slash'&&e.shiftKey))hintOn();
-  else if(k==='/'||c==='Slash')fOpen();
   else if(k==='['||c==='BracketLeft')tabGo((TI-1+TABS.length)%TABS.length);else if(k===']'||c==='BracketRight')tabGo((TI+1)%TABS.length);
   else if((k===','||c==='Comma')&&!e.shiftKey)cfg($('mConn').hidden);
   else if(k==='o'||c==='KeyO'){hintOff();A.open()}
