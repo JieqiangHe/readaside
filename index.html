@@ -494,12 +494,12 @@ const fpr=()=>pdf?.fingerprints?.[0]||'',
 // keep(blob,name,mime,ext,re): Chrome/Edge save dialog in the PDF's folder (re: remember the handle, so Save rewrites the same file), else a download
 async function keep(b,nm,mime,ext,re){
   if(window.showSaveFilePicker)try{let h=re&&jsH;h||=await showSaveFilePicker({suggestedName:nm,startIn:pdfH||'documents',types:[{description:nm,accept:{[mime]:[ext]}}]});re&&(jsH=h);
-    const w=await h.createWritable();await w.write(b);await w.close();return msg('Saved '+h.name+' — open it in ocrp to bring the notes back')}
-  catch(e){re&&(jsH=null);return msg(e.name==='AbortError'?'':'Could not save: '+e.message)}
+    const w=await h.createWritable();await w.write(b);await w.close();msg('Saved '+h.name);return true}
+  catch(e){re&&(jsH=null);msg(e.name==='AbortError'?'':'Could not save: '+e.message);return false}
   const a=el('a');a.href=URL.createObjectURL(b);a.download=nm;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3);
-  msg('Downloaded '+nm+' — keep it beside the PDF; open it in ocrp to bring the notes back')}
+  msg('Downloaded '+nm);return true}
 // nmd(): the notes as a Markdown file, page by page — the passage as a quote, then the translation or the comment, then the questions
-function nmd(){
+async function nmd(){
   if(!pdf)return msg('Open a PDF first');
   const ns=N.filter(o=>o.out?.trim()||o.img);
   if(!ns.length)return msg('No notes to save');
@@ -517,7 +517,7 @@ function nmd(){
     else{L.push(o.out.trim(),'')
       for(const [q,a] of o.chat||[])L.push('**Q.** '+q.trim(),'',a.trim(),'')}
   }
-  keep(new Blob([L.join('\n')],{type:'text/markdown'}),base+'.notes.md','text/markdown','.md',0);
+  if(!await keep(new Blob([L.join('\n')],{type:'text/markdown'}),base+'.notes.md','text/markdown','.md',0))return;  // cancelled: no stray pictures
   pics.forEach(([nm,url],i)=>setTimeout(()=>{const a=el('a');a.href=url;a.download=nm;a.click()},300+i*250));  // the pictures land beside the .md
 }
 
