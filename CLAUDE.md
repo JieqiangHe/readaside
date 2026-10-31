@@ -34,11 +34,12 @@ A single-file PDF reader with side-by-side AI translation (DeepSeek, your own ke
 - `#mRight [hidden]{display:none!important}` keeps hidden rows hidden against the panel's display rules; `#mSelT [hidden]` likewise. Inline `on*` handlers must not return `false` (it cancels the event) — wrap arrow bodies in braces.
 - The word-count line contains literal `\uXXXX` ranges; those can't be matched through the Edit tool (escapes get decoded). Edit that line via python or split edits around it.
 - pdf.js is pinned to 3.11.174: v4 replaced `pdfjsLib.renderTextLayer` with a `TextLayer` class — don't upgrade casually.
+- The repo has to stay public: Pages is a branch deploy from `main`, and a private repo drops the site (it went dark 2026-10-10 that way and was re-enabled 2026-10-31).
 - DeepSeek receives both `thinking:{type:'enabled'}` and `reasoning_effort`; fine with the current models, revisit if the API rejects them.
 - The card classes reuse svguest's chat names (`wt/sh/tm/tk/th/er/dim`) and the `MARK` waiting icon; keep them in sync when svguest changes.
 
 ## Testing
 
-- No test suite. Syntax-check every inline `<script>` block with node (`~/.local/bin/node`, `new Function(src)` per block). `/usr/bin/python3` and `osascript` are broken Xcode CLT stubs on this machine — don't use them.
+- No test suite. Syntax-check every inline `<script>` block with node (`~/.local/bin/node`, `new Function(src)` per block; if its micromamba shim is stuck on a lockfile, run `~/.local/share/mamba/envs/node_26.12.1/bin/node` directly, and the same for git). `/usr/bin/python3` and `osascript` are broken Xcode CLT stubs on this machine — don't use them.
 - Static checks in the same node run: id uniqueness, every `$()` reference has an element, every `data-a` button has an `A` entry.
 - Visual check: `open index.html`, then ⌘R to reload (the user reviews screenshots; `open` alone does not reload an existing tab).
