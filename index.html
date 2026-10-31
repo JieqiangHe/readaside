@@ -194,6 +194,8 @@ body.mq,body.mq *{cursor:crosshair!important}  /* the marquee is armed: the poin
 #mOv .row{display:flex;gap:8px;align-items:baseline;padding:6px;border-radius:6px;cursor:pointer}
 #mOv .row:hover{background:var(--btnh)}
 #mOv .row em{flex:none;font-style:normal;color:var(--t3);font-size:10.5px;min-width:26px}
+#mOv .mh{margin:0;padding:7px 12px;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;font-size:11px;color:var(--h4)}
+#mOv .mh kbd{height:17px;min-width:17px;padding:0 4px;border-radius:4px;background:var(--side);box-shadow:inset 0 0 0 1px var(--btnb);font:10.5px/17px ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;color:var(--h4)}
 #mOv .row s{text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--fg)}
 /* ---------- find ---------- */
 #mFind{position:fixed;top:46px;left:50%;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}
@@ -255,7 +257,7 @@ body.mq,body.mq *{cursor:crosshair!important}  /* the marquee is armed: the poin
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection" data-tt="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg><span data-t="Translate">Translate</span></button><button data-s="c" title="Write your own comment on the selection" data-tt="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg><span data-t="Comment">Comment</span></button></div>
 </div>
 <div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" data-tp="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>← →</kbd><span data-t="Move">Move</span><kbd data-k="ret">↵</kbd><span data-t="Open">Open</span><kbd>⌫</kbd><span data-t="Close tab">Close tab</span><kbd>Esc</kbd><span data-t="Close">Close</span></p></div></div>
-<div id="mOv" hidden><b id="mOvH"></b><div class="list" id="mOvL"></div></div>
+<div id="mOv" hidden><b id="mOvH"></b><div class="list" id="mOvL"></div><p class="mh"><kbd>M</kbd><span data-t="Close">Close</span></p></div>
 <div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" data-tp="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
 <script>
 'use strict';
