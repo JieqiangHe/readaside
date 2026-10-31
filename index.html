@@ -104,7 +104,9 @@ ismiss on an empty window */
 /* ---------- highlights, links, selection bar ---------- */
 .hl{position:absolute;z-index:1;pointer-events:none;border-radius:2px;background:#f5a50040;mix-blend-mode:multiply}.hl.on{background:#f5a50091}
 .hl.c{background:#1a73e826}.hl.c.on{background:#1a73e85c}
-.textLayer ::selection{background:#c9644252}
+.textLayer ::selection{background:#c964423d}
+#mMarq{position:fixed;z-index:8;border:1px dashed var(--onb);background:#c9644214;border-radius:3px;pointer-events:none}
+#mMarq[hidden]{display:none}
 #mSelT{position:fixed;z-index:9;display:flex;gap:2px;padding:3px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}#mSelT[hidden],#mSelT [hidden]{display:none}
 #mSelT button{display:flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border:0;border-radius:6px;background:none;color:var(--fg)}#mSelT button:hover{background:var(--btnh)}#mSelT .chg{width:14px;height:14px;color:var(--h4)}
 /* ---------- notes: a borderless right column beside the page, linked to their highlight by a line ---------- */
@@ -246,6 +248,7 @@ ismiss on an empty window */
 </div></div></section>
 </div>
 <svg id="mLink"></svg>
+<div id="mMarq" hidden></div>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection" data-tt="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg><span data-t="Translate">Translate</span></button><button data-s="c" title="Write your own comment on the selection" data-tt="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg><span data-t="Comment">Comment</span></button></div>
 </div>
 <div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" data-tp="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>← →</kbd><span data-t="Move">Move</span><kbd data-k="ret">↵</kbd><span data-t="Open">Open</span><kbd>⌫</kbd><span data-t="Close tab">Close tab</span><kbd>Esc</kbd><span data-t="Close">Close</span></p></div></div>
@@ -854,6 +857,47 @@ document.addEventListener('mouseup',e=>{
     y=c.bottom+6+selT.offsetHeight>innerHeight?c.top-selT.offsetHeight-6:c.bottom+6;
   selT.style.left=x+'px';selT.style.top=y+'px'});
 SC.addEventListener('scroll',selHide,{passive:true});
+
+// ---------- marquee selection (Option/Alt + drag): the text inside a box, in reading order, because a PDF's own text order is not its visual one
+let MQ=null;
+const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect();
+V.addEventListener('mousedown',e=>{
+  if(!pdf||!e.altKey||e.button!==0||!e.target.closest('.page'))return;
+  e.preventDefault();getSelection().removeAllRanges();selHide();
+  MQ={x:e.clientX,y:e.clientY};mqEl.hidden=false;
+  mqEl.style.left=MQ.x+'px';mqEl.style.top=MQ.y+'px';mqEl.style.width='0px';mqEl.style.height='0px';
+});
+document.addEventListener('mousemove',e=>{if(!MQ)return;
+  mqEl.style.left=Math.min(MQ.x,e.clientX)+'px';mqEl.style.top=Math.min(MQ.y,e.clientY)+'px';
+  mqEl.style.width=Math.abs(e.clientX-MQ.x)+'px';mqEl.style.height=Math.abs(e.clientY-MQ.y)+'px';
+});
+document.addEventListener('mouseup',()=>{if(!MQ)return;
+  const r=mqBox();MQ=null;mqEl.hidden=true;
+  if(r.width<4||r.height<4)return;
+  const rows=[];
+  for(const p of V.querySelectorAll('.page')){
+    const pr=p.getBoundingClientRect();if(pr.bottom<r.top||pr.top>r.bottom)continue;
+    for(const s of p.querySelectorAll('.textLayer span')){
+      const b=s.getBoundingClientRect();
+      if(!b.width||b.bottom<r.top||b.top>r.bottom||b.right<r.left||b.left>r.right)continue;
+      rows.push({n:+p.dataset.n,pl:pr.left,pt:pr.top,b,t:s.textContent});
+    }
+  }
+  if(!rows.length)return;
+  rows.sort((a,b)=>a.n-b.n||(a.b.top+a.b.height/2)-(b.b.top+b.b.height/2)||a.b.left-b.b.left);
+  const lines=[];
+  for(const s of rows){const yc=s.b.top+s.b.height/2,l=lines.find(l=>l.n===s.n&&Math.abs(l.y-yc)<s.b.height*.6);
+    l?(l.items.push(s),l.y=(l.y*(l.items.length-1)+yc)/l.items.length):lines.push({n:s.n,y:yc,items:[s]})}
+  const txt=lines.map(l=>l.items.map(i=>i.t).join(' ')).join('\n').replace(/([A-Za-z])-\s*\n\s*(?=[a-z])/g,'$1').replace(/\s+/g,' ').trim();
+  if(!txt)return;
+  const rs=lines.map(l=>{const it=l.items,p0=it[0];
+    const lft=Math.min(...it.map(i=>i.b.left)),rgt=Math.max(...it.map(i=>i.b.right)),
+      top=Math.min(...it.map(i=>i.b.top)),bot=Math.max(...it.map(i=>i.b.bottom));
+    return [l.n,(lft-p0.pl)/scale,(top-p0.pt)/scale,(rgt-lft)/scale,(bot-top)/scale]});
+  selA={t:txt,rs};selT.querySelector('[data-s=t]').hidden=false;selT.hidden=false;
+  const w=selT.offsetWidth,h=selT.offsetHeight,x=Math.min(Math.max(r.left+r.width/2-w/2,8),innerWidth-w-18);
+  selT.style.left=x+'px';selT.style.top=(r.bottom+6+h>innerHeight?r.top-h-6:r.bottom+6)+'px';
+});
 
 // ---------- files, keys, actions ----------
 $('mFile').onchange=e=>{const fs=[...e.target.files];fs.length&&openFiles(fs);e.target.value=''};
