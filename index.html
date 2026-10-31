@@ -604,13 +604,15 @@ const mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({sca
   c.width=Math.round(v2.width);c.height=Math.round(v2.height);
   await p.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;return c.toDataURL('image/jpeg',.72)}catch(_){return ''}};
 // ---------- palette (Cmd/Ctrl+K): a strip of big page previews, arrows to move, Enter to switch ----------
-const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map(),knodes=[];
+const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map(),knodes=[],kJob=0;
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   kRows=()=>{const q=KQ.value.trim().toLowerCase(),
     tabs=TABS.map((t,i)=>({k:'tab',i,n:tabNm(i),cur:i===TI})).filter(x=>x.n),  // empty slots (no PDF open yet) are not documents
     recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name.replace(/\.pdf$/i,''))).map(r=>({k:'rec',r,n:r.name,t:r.t})),
     f=x=>!q||x.n.toLowerCase().includes(q);
     kHits=[...tabs.filter(f),...recs.filter(f)]},
+  kSel=i=>{kOn=Math.max(0,Math.min(i,kHits.length-1));knodes.forEach((n,j)=>n.classList.toggle('on',j===kOn));  // arrows only move the ring: no DOM rebuild per key
+    knodes[kOn]?.scrollIntoView({block:'nearest',inline:'center'})},
   kPaint=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));imgs=new Map();knodes=[];KL.replaceChildren();
     if(!kHits.length){KL.append(el('p',0,'Nothing yet — press O to open a PDF'));return}
     let last='';
@@ -622,12 +624,17 @@ const kClose=()=>{$('mK').hidden=true;KQ.value=''},
       c.append(im,el('b',0,x.n));
       x.cur?c.append(el('small',0,'current')):x.t&&c.append(el('small',0,rel(x.t)));
       c.title=x.n+(x.k==='rec'?' — opened '+rel(x.t):'');
-      c.onmouseenter=()=>{kOn=i;knodes.forEach((n,j)=>n.classList.toggle('on',j===i))};
+      c.onmouseenter=()=>kSel(i);
       c.onmousedown=e=>{e.preventDefault();kGo(i)};
       knodes[i]=c;KL.append(c)});
-    kHits.forEach(x=>{const fp=x.k==='tab'?(x.i===TI?fpr():fprOf(TABS[x.i].pdf)):(x.r.fp||''),doc=x.k==='tab'?(x.i===TI?pdf:TABS[x.i].pdf):null;
-      if(!fp||!doc||kTh.has(fp))return;mkThumb(doc).then(u=>{if(!u)return;kTh.set(fp,u);const im=imgs.get(fp);im&&(im.src=u,im.classList.remove('mt'))})});
-    knodes[kOn]?.scrollIntoView({block:'nearest',inline:'center'})},
+    kSel(kOn);kThumbs()},
+  kThumbs=async()=>{const job=++kJob;  // one page render at a time, off the critical path, only while the palette is up
+    for(const x of kHits){if(job!==kJob||$('mK').hidden)return;
+      const fp=x.k==='tab'?(x.i===TI?fpr():fprOf(TABS[x.i].pdf)):(x.r.fp||''),doc=x.k==='tab'?(x.i===TI?pdf:TABS[x.i].pdf):null;
+      if(!fp||!doc||kTh.has(fp))continue;
+      const u=await mkThumb(doc);if(!u)continue;kTh.set(fp,u);
+      const im=imgs.get(fp);im&&(im.src=u,im.classList.remove('mt'));
+      await new Promise(r=>requestAnimationFrame(r))}},
   kBuild=()=>{kRows();const c=kHits.findIndex(x=>x.cur);kOn=c<0?0:c;kPaint()},
   kOpen=()=>{$('mK').hidden=false;KQ.value='';kBuild();KQ.focus();recLoad()},
   kGo=i=>{const x=kHits[i];if(!x)return;kClose();
@@ -643,8 +650,7 @@ KQ.addEventListener('input',kBuild);
 KQ.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp'){
     e.preventDefault();if(!kHits.length)return;
-    const d=(e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1;
-    kOn=(kOn+d+kHits.length)%kHits.length;kPaint()}
+    kSel(kOn+((e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1))}
   else if(e.key==='Enter'){e.preventDefault();kGo(kOn)}
   else if(e.key==='Escape'){e.preventDefault();kClose()}});
 $('mK').addEventListener('mousedown',e=>{e.target===$('mK')&&kClose()});
