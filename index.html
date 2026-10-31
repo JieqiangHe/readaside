@@ -58,6 +58,8 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mHint .hint{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--h4)}
 #mHint .wcard{pointer-events:auto;width:min(430px,92vw);border-radius:16px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 28px 70px -16px #0007;overflow:hidden}
 #mHint .wh{position:relative;height:160px;display:grid;justify-items:center;align-items:end;padding-bottom:14px;overflow:hidden;background:linear-gradient(180deg,var(--side),var(--btn));border-bottom:1px solid var(--line)}
+#mHint .wchip .cur{display:inline-block;width:1px;height:10px;margin-left:2px;vertical-align:-1px;background:var(--h4);animation:mBlink 1.1s steps(1) infinite}
+@keyframes mBlink{50%{opacity:0}}
 #mHint .wchip{position:absolute;left:16px;top:14px;padding:4px 9px;border-radius:999px;background:var(--btn);box-shadow:0 0 0 1px var(--line);font-size:10.5px;font-weight:600;letter-spacing:.03em;color:var(--h4)}
 #mHint .wp{position:relative;display:flex;gap:22px;width:300px;padding:10px;border-radius:12px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 12px 32px -10px #0004}
 #mHint .mp{flex:1;display:flex;flex-direction:column;gap:5px;padding:9px;border-radius:6px;background:#fff;box-shadow:0 0 0 1px #00000014}
@@ -221,7 +223,7 @@ body.mq,body.mq *{cursor:crosshair!important}  /* the marquee is armed: the poin
 <input id="mKey0" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false"><button class="lnk" id="mKeySave" data-t="Save">Save</button>
 <p data-t="Stored in this browser; change it later in Settings (,).">Stored in this browser; change it later in Settings (,).</p></div>
 <div class="wcard">
-<div class="wh"><span class="wchip">ocrp</span>
+<div class="wh"><span class="wchip"><span id="mTW">ocrp</span><i class="cur" aria-hidden="true"></i></span>
 <div class="wp"><svg class="wl" viewBox="0 0 300 90" preserveAspectRatio="none"><path pathLength="1" d="M174 30.5C182 30.5 188 11.5 196 11.5"/></svg><div class="mp"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div><div class="mc"><b></b><i></i><i></i><i></i></div></div>
 </div>
 <div class="wb"><h3>ocrp <span data-t="old, clean, read, paper">old, clean, read, paper</span></h3>
@@ -996,6 +998,17 @@ setTheme(document.documentElement.dataset.theme==='dark');
 MAC||document.querySelectorAll('[data-k]').forEach(k=>{k.textContent=KLBL[k.dataset.k]||k.textContent});
 document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]());
 langApply();  // the interface speaks the stored language from the first paint
+// the hero chip types: ocrp, then what it stands for, and back
+(function(){const el=$('mTW');if(!el||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const ws=['ocrp','old, clean, read, paper'];let w=0,i=4,del=1;
+  const step=()=>{const s=ws[w];
+    if(del){el.textContent=s.slice(0,--i);
+      if(i<=0){del=0;w=(w+1)%ws.length;return setTimeout(step,320)}
+      return setTimeout(step,38)}
+    el.textContent=s.slice(0,++i);
+    if(i>=s.length){del=1;return setTimeout(step,1500)}
+    setTimeout(step,80)};
+  setTimeout(step,1600)})();
 </script>
 <!-- pdf-lib 1.17.1 (MIT, https://github.com/Hopding/pdf-lib), minified; kept as text and run by plib() on the first Save PDF -->
 <script type="text/plain" id="mPlib">!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t=t||self).PDFLib={})}(this,(function(t){"use strict";
