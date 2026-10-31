@@ -269,7 +269,7 @@ function seg(id){const s=$(id),g=el('div','seg'),up=()=>[...g.children].forEach(
       try{c.getContext('2d').drawImage(im,0,0,W,H);cb('url("'+c.toDataURL('image/png')+'") '+Math.round(W/2)+' '+Math.round(H/2)+', text')}catch(_){cb('')}};
     im.onerror=()=>cb('');
     im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg(col,30))};
-  const H_SIZE=30,set=(k,v)=>v&&document.documentElement.style.setProperty(k,v);
+  const set=(k,v)=>v&&document.documentElement.style.setProperty(k,v);
   make('#141413',v=>set('--caret',v));  // the paper stays white in both themes, so the caret stays dark
 })();
 
