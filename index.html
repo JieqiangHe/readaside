@@ -41,6 +41,7 @@ button,.seg button,.item,.hl,.tp,.ci{transition:background-color .16s,color .16s
 #mMain{flex:1;display:flex;align-items:flex-start;min-height:0;overflow:auto;background:var(--view);scrollbar-width:thin}
 #mViewWrap{display:flex;align-items:flex-start;min-height:100%;position:relative;min-width:0}
 #mView{flex:1;min-width:max-content;padding:16px}
+#mView .page,#mView .textLayer,#mView .textLayer span{cursor:var(--caret,text)}  /* the caret the user drew, rasterised at load */
 #mThumb{display:none;width:94px;flex:none;position:sticky;top:0;left:0;align-self:flex-start;height:100vh;overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:8px 5px 12px;scrollbar-width:thin}
 body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 .tp{width:78px;margin:0 auto 10px;cursor:pointer;border-radius:3px}
@@ -259,6 +260,19 @@ function seg(id){const s=$(id),g=el('div','seg'),up=()=>[...g.children].forEach(
   for(const o of s.options){const b=btn(o.text);b.type='button';b.dataset.v=o.value;b.onclick=()=>{s.value=o.value;s.onchange?.();up()};g.append(b)}
   s.hidden=true;s.after(g);up()}
 
+// the reader's caret: the I-beam svg the user gave, rasterised once to a PNG cursor (Safari will not take an SVG cursor)
+(function(){
+  const P='M5.2 5.9c-.8.5-1.2 1.7-1 2.7.3 1.7 1.5 1.9 11.6 2.2l11.2.3v92.8l-11.2.3-11.3.3v5l24.6.3c21 .2 24.8 0 25.9-1.3 1-1.2 1-1.8 0-3s-3.7-1.5-12.1-1.5H32l.1-46.5.1-46.5H43c8.3 0 11-.3 12-1.5s1-1.8 0-3C54 5.2 49.9 5 30.1 5c-13 0-24.2.4-24.9.9';
+  const svg=(col,h)=>'<svg xmlns="http://www.w3.org/2000/svg" width="'+Math.round(59*h/115)+'" height="'+h+'" viewBox="0 0 59 115"><path fill="'+col+'" d="'+P+'"/></svg>';
+  const make=(col,cb)=>{const im=new Image();
+    im.onload=()=>{const H=30,W=Math.round(59*H/115),c=el('canvas');c.width=W;c.height=H;
+      try{c.getContext('2d').drawImage(im,0,0,W,H);cb('url("'+c.toDataURL('image/png')+'") '+Math.round(W/2)+' '+Math.round(H/2)+', text')}catch(_){cb('')}};
+    im.onerror=()=>cb('');
+    im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg(col,30))};
+  const H_SIZE=30,set=(k,v)=>v&&document.documentElement.style.setProperty(k,v);
+  make('#141413',v=>set('--caret',v));  // the paper stays white in both themes, so the caret stays dark
+})();
+
 // ---------- AI settings (DeepSeek), shown in the Settings sheet; stored as mrdDs<Key|Model|Ep> ----------
 const URL0='https://api.deepseek.com/chat/completions',MODELS=['deepseek-v4-pro','deepseek-flash'],
   aiF=[['mKey','Key'],['mModel','Model'],['mEp','Ep']],
@@ -330,7 +344,7 @@ const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(
   fade=e=>{e.classList.add('out');setTimeout(()=>e.remove(),RM.matches?0:180)},
   kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();fade(o.el);N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);!N.length&&pdf&&(col(),fit());nsave()},
   clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();fade(o.el)});N.length=0;hlAll();act(null);pdf&&(col(),fit())};
-// ---------- the notes dot: a small terracotta dot above the cards, opening an overview of every card in the paper ----------
+// ---------- the notes map (M): an overview of every card in the paper, in a corner panel ----------
 const OV=$('mOv'),OVL=$('mOvL'),OVH=$('mOvH');
 const ovClose=()=>{OV.hidden=true},
   ovOpen=()=>{if(!N.length)return;OV.hidden=false;ovRender()},
