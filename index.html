@@ -62,10 +62,15 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 #mHint{position:fixed;inset:0;z-index:4;display:grid;place-items:center;padding:24px;pointer-events:none}
 body.pdf #mHint{display:none}
 #mHint .hint{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--h4)}
-#mHint .open-line{margin:0;color:var(--h4);font-size:12.5px}
-#mHint .brand{margin:0 0 4px;font-size:14px;font-weight:600;color:var(--fg)}#mHint .brand span{font-weight:400;font-size:12px;color:var(--t3)}
-#mHint .keys{display:grid;grid-template-columns:repeat(3,max-content);gap:8px;justify-content:center}
-#mHint .k{display:flex;flex-direction:column;gap:5px;padding:8px 10px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb);color:var(--t3);font-size:11px;white-space:nowrap}#mHint .k span{display:flex;gap:3px}
+#mHint .ksheet{pointer-events:none;width:min(430px,92vw);border-radius:16px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 28px 70px -16px #0007}
+#mHint .kh{padding:18px 22px 0}
+#mHint .kh h3{margin:0;font-size:20px;font-weight:600;letter-spacing:-.02em;color:var(--fg)}#mHint .kh h3 small{margin-left:4px;font-size:13px;font-weight:400;letter-spacing:0;color:var(--t3)}
+#mHint .kh p{margin:5px 0 16px;font-size:12.5px;line-height:1.5;color:var(--h4)}
+#mHint ul{list-style:none;margin:0;padding:0 22px 20px;display:grid;grid-template-columns:1fr 1fr;gap:13px 18px}
+#mHint li{display:flex;gap:9px;align-items:flex-start;min-width:0}
+#mHint li kbd{flex:none;margin-top:1px}
+#mHint li b{display:block;font-size:12.5px;font-weight:600;line-height:1.35;color:var(--fg)}
+#mHint li span{display:block;margin-top:2px;font-size:11.5px;line-height:1.45;color:var(--h4)}
 #mKeyFirst{pointer-events:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb)}
 #mKeyFirst b{flex-basis:100%;text-align:center;font-size:12px;color:var(--fg)}
 #mKeyFirst input{width:230px}
@@ -157,19 +162,19 @@ body.pdf #mHint{display:none}
 <div id="mKeyFirst" hidden><b>DeepSeek API key</b>
 <input id="mKey0" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false"><button class="lnk" id="mKeySave">Save</button>
 <p>Stored in this browser; change it later in Settings (,).</p></div>
-<p class="brand">ocrp <span>— old, clean, read, paper</span></p>
-<p class="open-line">Press <kbd>O</kbd> to open a PDF, or drop it here</p>
-<div class="keys">
-<div class="k"><span><kbd>O</kbd></span>Open a PDF</div>
-<div class="k"><span><kbd>⌘</kbd><kbd>S</kbd></span>Save notes</div>
-<div class="k"><span><kbd>⌘</kbd><kbd>⇧</kbd><kbd>S</kbd></span>Save PDF</div>
-<div class="k"><span><kbd>←</kbd><kbd>→</kbd></span>Pages</div>
-<div class="k"><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span>Zoom</div>
-<div class="k"><span><kbd>T</kbd></span>Theme</div>
-<div class="k"><span><kbd>H</kbd></span>Thumbnails</div>
-<div class="k"><span><kbd>,</kbd></span>Settings</div>
-<div class="k"><span><kbd>?</kbd></span>All shortcuts</div>
-</div>
+<div class="ksheet"><div class="kh"><h3>ocrp <small>old, clean, read, paper</small></h3>
+<p>Press <kbd>O</kbd> to open a PDF, or drop it here.</p></div>
+<ul>
+<li><kbd>O</kbd><div><b>Open a PDF</b><span>or drop the file</span></div></li>
+<li><kbd>⌘S</kbd><div><b>Save notes</b><span>an .ocrp.json beside the PDF</span></div></li>
+<li><kbd>⌘⇧S</kbd><div><b>Save PDF</b><span>with the comments in it</span></div></li>
+<li><kbd>← →</kbd><div><b>Pages</b><span>Home and End for first and last</span></div></li>
+<li><kbd>+ − 0</kbd><div><b>Zoom</b><span>0 fits the width</span></div></li>
+<li><kbd>T</kbd><div><b>Theme</b><span>light or dark</span></div></li>
+<li><kbd>H</kbd><div><b>Thumbnails</b><span>show or hide</span></div></li>
+<li><kbd>,</kbd><div><b>Settings</b><span>model, key, language</span></div></li>
+<li><kbd>?</kbd><div><b>All shortcuts</b><span>the full list</span></div></li>
+</ul></div>
 </div></div>
 <div id="mNotes"></div>
 <section id="mConn" hidden aria-label="Settings"><div class="sheet"><header><button class="ib" id="mConnX" title="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b>Settings</b></header>
