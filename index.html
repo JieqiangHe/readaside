@@ -424,7 +424,8 @@ NS.addEventListener('wheel',e=>{const a=e.target.closest('.a,.ce,textarea');if(a
 V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSelection().isCollapsed)return;
   const b=p.getBoundingClientRect(),n=+p.dataset.n,x=(e.clientX-b.left)/scale,y=(e.clientY-b.top)/scale,
     o=N.find(o=>o.rs?.some(r=>r[0]===n&&x>=r[1]&&x<=r[1]+r[3]&&y>=r[2]&&y<=r[2]+r[4]));o&&o!==nAct&&act(o)});
-ro.observe(V);ro.observe(NS);addEventListener('resize',()=>{const w0=NS.clientWidth;col();NS.clientWidth!==w0&&N.length&&fit();sched()});
+ro.observe(V);ro.observe(NS);let rzT=0;
+addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{col();pdf&&fit();sched()},120)});
 
 // ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>, the old miniread prefix); Save writes <name>.ocrp.json to keep beside the PDF ----------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
@@ -529,7 +530,7 @@ async function openPdf(buf,name,h){
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
   const doc=pdf,a0={n:0};(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)a0.n+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length;doc===pdf&&(annN=a0.n)})().catch(()=>{});
-  msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));SC.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});tabUI();
+  msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));SC.scrollTop=0;fit();requestAnimationFrame(()=>pdf===doc&&fit());TH()&&buildThumbs().catch(()=>{});tabUI();
   const ab=buf instanceof ArrayBuffer?buf.slice(0):buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength);recPut(fpr(),name,ab,h);return true
 }
 function layout(){
@@ -555,7 +556,8 @@ function zoom(f){if(!pdf)return msg('Open a PDF first');
   const y=SC.scrollTop/Math.max(1,SC.scrollHeight);scale=ns;
   layout().then(()=>SC.scrollTop=y*SC.scrollHeight)}
 function fit(){if(!pdf)return msg('Open a PDF first');
-  pdf.getPage(1).then(p=>{const s=(SC.clientWidth-(TH()?$('mThumb').offsetWidth:0)-(N.length?NS.clientWidth:0)-34)/p.getViewport({scale:1}).width;zoom(s/scale)}).catch(()=>{})}
+  N.length&&col();  // the column width always follows the current viewport before the page is fitted around it
+  pdf.getPage(1).then(p=>{const s=(SC.clientWidth-(TH()?$('mThumb').offsetWidth:0)-(N.length?noteW()+32:0)-34)/p.getViewport({scale:1}).width;zoom(s/scale)}).catch(()=>{})}
 function cur(){let n=0;
   for(const p of V.querySelectorAll('.page')){if(p.offsetTop-SC.scrollTop<=SC.clientHeight*.4)n=+p.dataset.n;else break}
   n&&n!==curN&&(curN=n,mark())}
