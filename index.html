@@ -701,9 +701,9 @@ document.addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,select,button,a,[contenteditable]'))return;
   if(k==='Enter')hintOff();
   else if(k==='?'||(c==='Slash'&&e.shiftKey))hintOn();
-  else if(k==='f'||c==='KeyF')fOpen();
+  else if(k==='f'||c==='KeyF'){e.preventDefault();fOpen()}
   else if(k==='['||c==='BracketLeft')tabGo((TI-1+TABS.length)%TABS.length);else if(k===']'||c==='BracketRight')tabGo((TI+1)%TABS.length);
-  else if((k===','||c==='Comma')&&!e.shiftKey)cfg($('mConn').hidden);
+  else if((k===','||c==='Comma')&&!e.shiftKey){e.preventDefault();cfg($('mConn').hidden)}
   else if(k==='o'||c==='KeyO'){hintOff();A.open()}
   else if(k==='t'||c==='KeyT')A.theme();else if(k==='h'||c==='KeyH')A.thumbs();
   else if(k==='+'||k==='='||c==='Equal'||c==='NumpadAdd')zoom(1.2);else if(k==='-'||c==='Minus'||c==='NumpadSubtract')zoom(1/1.2);else if(k==='0'||c==='Digit0'||c==='Numpad0')fit();
