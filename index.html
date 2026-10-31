@@ -339,7 +339,7 @@ const ovClose=()=>{OV.hidden=true},
     OVH.textContent=N.length+(N.length>1?' notes':' note');
     OVL.replaceChildren();
     for(const o of srt){const r=el('div','row');
-      r.append(el('em',0,o.rs?.length?'p.'+o.rs[0][0]:'—'),el('s',0,String(o.out||'').slice(0,90)||'(no text)'));
+      r.append(el('em',0,o.rs?.length?'p.'+o.rs[0][0]:'—'),el('s',0,String(o.out||'').slice(0,90)||(o.img?'(picture)':'(no text)')));
       r.title=(o.t||'').slice(0,300);r.onclick=()=>ovJump(o);OVL.append(r)}};
 
 document.addEventListener('mousedown',e=>{OV.hidden||e.target.closest('#mOv')||ovClose()});
@@ -429,7 +429,7 @@ async function translate(t,rs,sv){
 // comment(t,rs,sv): a note of your own on the selection; an empty one goes away when it loses focus
 // a pasted picture in a comment: shrink it, keep it in the note, show it under the text
 function pasteShot(o,e,refresh){
-  const f=[...(e.clipboardData?.files||[])].find(x=>/^image\//.test(x.type));if(!f)return;
+  const cd=e.clipboardData,f=[...(cd?.files||[])].find(x=>/^image\//.test(x.type))||[...(cd?.items||[])].map(i=>i.kind==='file'&&i.getAsFile()).find(x=>x&&/^image\//.test(x.type));if(!f)return;
   e.preventDefault();
   const r=new FileReader();
   r.onload=()=>{const im=new Image();
