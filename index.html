@@ -173,6 +173,21 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mK>div>p{margin:0;padding:8px 14px;border-top:1px solid var(--line);color:var(--h4);font-size:11px}
 #mK>div>p kbd{margin:0 3px 0 10px}#mK>div>p kbd:first-child{margin-left:0}
 @media (prefers-reduced-motion:reduce){#mKl .kc,#mKl .kc img{transition:none}#mKl .kc.on{transform:none}}
+/* ---------- the notes dot: one small terracotta dot above the cards, opening an overview of them ---------- */
+#mDot{position:fixed;top:13px;right:15px;z-index:35;width:12px;height:12px;padding:0;border:0;border-radius:50%;background:var(--onb);box-shadow:0 0 0 3px #c964421f;cursor:pointer;transition:box-shadow .16s,transform .16s}
+#mDot:hover{box-shadow:0 0 0 5px #c9644233;transform:scale(1.1)}
+#mDot[hidden]{display:none}
+#mOv{position:fixed;top:32px;right:15px;z-index:36;width:min(380px,calc(100vw - 30px));max-height:min(64vh,520px);display:flex;flex-direction:column;border-radius:10px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 24px 60px -20px #0006;overflow:hidden}
+#mOv[hidden]{display:none}
+#mOv b{padding:10px 12px 4px;font-size:12px;font-weight:600;color:var(--h4)}
+#mOv .map{position:relative;height:30px;margin:2px 12px 6px;border-radius:6px;background:var(--side)}
+#mOv .map i{position:absolute;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--onb);opacity:.66;cursor:pointer;transition:opacity .12s,transform .12s}
+#mOv .map i:hover{opacity:1;transform:scale(1.5)}
+#mOv .list{overflow:auto;padding:0 8px 10px;scrollbar-width:thin}
+#mOv .row{display:flex;gap:8px;align-items:baseline;padding:6px;border-radius:6px;cursor:pointer}
+#mOv .row:hover{background:var(--btnh)}
+#mOv .row em{flex:none;font-style:normal;color:var(--t3);font-size:10.5px;min-width:26px}
+#mOv .row s{text-decoration:none;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;color:var(--fg)}
 /* ---------- find ---------- */
 #mFind{position:fixed;top:46px;left:50%;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}
 #mFind[hidden]{display:none}
@@ -230,6 +245,8 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
 <div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>← →</kbd>Move<kbd data-k="ret">↵</kbd>Open<kbd>Esc</kbd>Close</p></div></div>
+<button id="mDot" hidden title="Notes in this paper" aria-label="Notes overview"></button>
+<div id="mOv" hidden><b id="mOvH"></b><div class="map" id="mOvM"></div><div class="list" id="mOvL"></div></div>
 <div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
 <script>
 'use strict';
@@ -320,6 +337,24 @@ const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(
   fade=e=>{e.classList.add('out');setTimeout(()=>e.remove(),RM.matches?0:180)},
   kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();fade(o.el);N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);!N.length&&pdf&&(col(),fit());nsave()},
   clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();fade(o.el)});N.length=0;hlAll();act(null);pdf&&(col(),fit())};
+// ---------- the notes dot: a small terracotta dot above the cards, opening an overview of every card in the paper ----------
+const OV=$('mOv'),OVM=$('mOvM'),OVL=$('mOvL'),OVH=$('mOvH');
+const ovClose=()=>{OV.hidden=true},
+  ovOpen=()=>{if(!N.length)return;OV.hidden=false;ovRender()},
+  ovJump=o=>{act(o);const w=want(o);w!=null&&(SC.scrollTop=Math.max(0,w-SC.clientHeight*.32));ovClose()},
+  ovRender=()=>{const tot=pdf?.numPages||1,srt=N.slice().sort((a,b)=>(a.rs?.[0]?.[0]??1e9)-(b.rs?.[0]?.[0]??1e9)||(a.rs?.[0]?.[2]??a.fy*1e3)-(b.rs?.[0]?.[2]??b.fy*1e3));
+    OVH.textContent=N.length+(N.length>1?' notes':' note');
+    OVM.replaceChildren();
+    for(const o of srt){const pg=o.rs?.[0]?.[0]||1,d=el('i');d.style.left=(6+Math.min(1,(pg-1)/Math.max(1,tot-1))*88)+'%';
+      d.title='Page '+pg+(o.rs?.length?' · '+o.rs.length+(o.rs.length>1?' passages':' passage'):'');
+      d.onclick=()=>ovJump(o);OVM.append(d)}
+    OVL.replaceChildren();
+    for(const o of srt){const r=el('div','row');
+      r.append(el('em',0,o.rs?.length?'p.'+o.rs[0][0]:'—'),el('s',0,String(o.out||'').slice(0,90)||'(no text)'));
+      r.title=(o.t||'').slice(0,300);r.onclick=()=>ovJump(o);OVL.append(r)}};
+$('mDot').onclick=()=>OV.hidden?ovOpen():ovClose();
+document.addEventListener('mousedown',e=>{OV.hidden||e.target.closest('#mOv,#mDot')||ovClose()});
+
 // rects(range): the selection's line boxes per page, merged, in PDF units, top first
 function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n,p.getBoundingClientRect()]),R=[];
   for(const c of rg.getClientRects()){const h=c.height/scale;if(c.width<1||h<1||h>40)continue;
@@ -330,6 +365,7 @@ function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n
   return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
 function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based); o.y stays in content coordinates, the painted top is viewport ones
   if(N.length&&!NS.clientWidth)col();  // self-heal: cards exist but the column never took its width
+  {const dn=$('mDot'),has=N.length>0;if(dn.hidden===has){dn.hidden=!has;has||($('mOv').hidden=true)}}
   const w=Math.max(0,NS.clientWidth-32)||noteW(),vs=[];
   for(const o of N){o.w=want(o);o.el.style.left='16px';o.el.style.width=w+'px';
     o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
@@ -556,7 +592,7 @@ async function openPdf(buf,name,h){
   catch(e){msg('Cannot open '+name+': '+e.message);tabBack();pdf||($('mHint').hidden=false);return false}
   TN=0;
   selHide();
-  clr();pdfName=name;pdfH=h||null;jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');setTh(false);  // every open starts without the sidebarfc.clear();fClose();hintOff();let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  clr();pdfName=name;pdfH=h||null;jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');setTh(false);  // every open starts without the sidebarfc.clear();fClose();hintOff();$('mOv').hidden=true;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
   let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT||x.filename===AT0||x.filename===AT1)}catch(_){}
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
@@ -759,7 +795,7 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 // one key handler for the whole app: physical key codes (e.code) so a Chinese IME with full-width
 // punctuation cannot break it, and no shortcut fires while the IME is composing
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){$('mK').hidden||kClose();document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
+  if(e.key==='Escape'){$('mOv').hidden||ovClose();$('mK').hidden||kClose();document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
   if(mod){if(k==='s'){e.preventDefault();nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
   if(e.isComposing||e.keyCode===229)return;
