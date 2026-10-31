@@ -144,24 +144,28 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mConn .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 10px;align-items:center}#mConn .kv>span{color:var(--h4);font-size:11.5px}
 #mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
 #mConn .gr{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
-/* ---------- palette (Cmd/Ctrl+K): a horizontal strip of big page previews ---------- */
+/* ---------- palette (Cmd/Ctrl+K): a strip of page previews that lift out of the shelf ---------- */
 #mK{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:#14141366}
 #mK[hidden]{display:none}
 #mK>div{width:min(1040px,calc(100vw - 48px));border-radius:14px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 40px 90px -24px #0007;overflow:hidden}
 #mKq{display:block;width:100%;padding:10px 14px;font-size:13.5px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;outline:none}
-#mKl{display:flex;align-items:flex-start;gap:14px;overflow-x:auto;overflow-y:hidden;padding:16px;scrollbar-width:thin}
-#mKl .kc{flex:none;width:132px;padding:0;border:0;background:none;text-align:left;cursor:pointer;opacity:.5;transition:opacity .12s}
-#mKl .kc.on{opacity:1}
-#mKl .kc img{display:block;width:132px;height:185px;object-fit:cover;object-position:top;border-radius:6px;background:#fff;box-shadow:0 0 0 1px var(--line),0 10px 24px -12px #0005}
+#mKl{display:flex;align-items:flex-end;gap:14px;overflow-x:auto;overflow-y:hidden;padding:34px 16px 20px;scrollbar-width:thin;
+  background:linear-gradient(to top,#00000010,transparent 42%)}
+#mKl .kc{flex:none;width:132px;padding:0;border:0;background:none;text-align:left;cursor:pointer;opacity:.42;
+  transform-origin:50% 100%;transform:translateY(3px) scale(.985);transition:transform .17s cubic-bezier(.2,.8,.2,1),opacity .17s ease}
+#mKl .kc.on{opacity:1;transform:translateY(-12px) scale(1.02)}
+#mKl .kc img{display:block;width:132px;height:185px;object-fit:cover;object-position:top;border-radius:6px;background:#fff;
+  box-shadow:0 0 0 1px var(--line),0 8px 16px -10px #0004;transition:box-shadow .17s ease}
 #mKl .kc img.mt{visibility:hidden}
-#mKl .kc.on img{box-shadow:0 0 0 2px var(--onb),0 12px 28px -12px #0006}
+#mKl .kc.on img{box-shadow:0 0 0 2px var(--onb),0 26px 44px -18px #0007}
 #mKl .kc b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:7px;font-size:11.5px;font-weight:500;line-height:1.32;color:var(--fg)}
 #mKl .kc small{display:block;margin-top:3px;font-size:10.5px;color:var(--h4)}
-#mKl .kc.rc{opacity:.32}#mKl .kc.rc.on{opacity:.85}
+#mKl .kc.rc{opacity:.26}#mKl .kc.rc.on{opacity:.8}
 #mKl .sp{flex:none;width:1px;align-self:stretch;margin:2px 2px 0;background:var(--line)}
 #mKl p{margin:8px;color:var(--h4)}
 #mK>div>p{margin:0;padding:8px 14px;border-top:1px solid var(--line);color:var(--h4);font-size:11px}
 #mK>div>p kbd{margin:0 3px 0 10px}#mK>div>p kbd:first-child{margin-left:0}
+@media (prefers-reduced-motion:reduce){#mKl .kc,#mKl .kc img{transition:none}#mKl .kc.on{transform:none}}
 /* ---------- find ---------- */
 #mFind{position:fixed;top:46px;left:50%;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}
 #mFind[hidden]{display:none}
