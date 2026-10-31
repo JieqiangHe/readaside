@@ -72,8 +72,8 @@ body.thumbs #mThumb{display:block}
 #mSrc{display:block;width:100%;min-height:44px;height:72px;padding:1px 2px;border:0;border-radius:0;background:transparent;resize:vertical}
 #mOps{display:flex;align-items:center;gap:3px;margin-top:4px}
 #mOps label{display:flex;align-items:center;gap:4px;color:var(--h4);font-size:11.5px}
-#mClr{flex:none;padding:0 6px;border-color:transparent;background:transparent;color:var(--h4);font-size:11px}
-#mClr:hover{background:var(--btnh);color:var(--fg)}
+#mClr,#mSave{flex:none;padding:0 6px;border-color:transparent;background:transparent;color:var(--h4);font-size:11px}
+#mClr:hover,#mSave:hover{background:var(--btnh);color:var(--fg)}
 #mGo{flex:none;padding:2px 12px;border-color:transparent;border-radius:6px;background:var(--fg);color:var(--side)}
 #mGo:hover{background:var(--fg);opacity:.85}
 #mCnt{margin-left:auto;color:var(--t3);font-size:11px;white-space:nowrap}
@@ -117,8 +117,8 @@ body.thumbs #mThumb{display:block}
 <body>
 <div id="mBar">
 <button data-a="thumbs" title="Show or hide page thumbnails">Pages</button>
-<button data-a="open" title="Open a PDF (or drop one on the viewer)">Open…</button>
-<input type="file" id="mFile" accept="application/pdf,.pdf" hidden>
+<button data-a="open" title="Open a PDF, with its .miniread.json notes if you have them (or drop them on the viewer)">Open…</button>
+<input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
 <i></i>
 <button data-a="first" title="First page">«</button><button data-a="prev" title="Previous page">‹</button>
 <input id="mPgN" type="number" min="1" value="1" title="Page number; Enter to go">
@@ -153,6 +153,7 @@ body.thumbs #mThumb{display:block}
 <div id="mOps">
 <label title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto">Auto</label>
 <button id="mClr" title="Remove all translations and highlights">Clear</button>
+<button id="mSave" title="Save the notes as a .miniread.json file to keep beside the PDF (⌘/Ctrl+S); open it with the PDF to bring them back">Save</button>
 <span id="mCnt"></span>
 <button id="mGo" title="⌘/Ctrl+Enter">Translate</button>
 </div>
@@ -256,7 +257,7 @@ const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(
       h.style.cssText=`left:${c(r[1])};top:${c(r[2])};width:${c(r[3])};height:${c(r[4])}`;d.append(h)}},
   hlAll=()=>V.querySelectorAll('.page').forEach(hl),
   act=o=>{nAct=o;N.forEach(x=>x.el.classList.toggle('on',x===o));V.querySelectorAll('.hl').forEach(h=>h.classList.toggle('on',h.o===o));sched()},
-  kill=o=>{o.ac.abort();o.el.remove();N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct)},
+  kill=o=>{o.ac.abort();o.el.remove();N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);nsave()},
   clr=()=>{N.forEach(o=>{o.ac.abort();o.el.remove()});N.length=0;hlAll();act(null)};
 // rects(range): the selection's line boxes per page, merged, in PDF units, top first
 function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n,p.getBoundingClientRect()]),R=[];
@@ -285,16 +286,17 @@ function frame(){nRaf=0;
     s+=`<g${o===nAct?' class="on"':''}><circle cx="${x1}" cy="${y1}" r="2.5"/><path d="M${x1} ${y1}H${xe}C${xe+c} ${y1} ${x2-c} ${y2} ${x2} ${y2}"/></g>`}
   LK.innerHTML=s}
 // translate(t,rs): t defaults to the box; rs to the PDF selection the box text came from. Requests run side by side, one per note
-async function translate(t,rs){
+// sv: a saved note ({out,m,fy}) shown again without a request
+async function translate(t,rs,sv){
   t=t??$('mSrc').value.trim();const key=$('mKey').value.trim();
   if(!t)return msg('Select text in the PDF, or paste it into the box');
-  if(!key){$('mCfg').open=true;return msg('Enter an API key first (AI settings)')}
+  if(!sv&&!key){$('mCfg').open=true;return msg('Enter an API key first (AI settings)')}
   rs===undefined&&(rs=selA?.t===t?selA.rs:null);
-  const t0=performance.now(),srcN=t.length,model=$('mModel').value,
+  const t0=performance.now(),srcN=t.length,model=sv?.m||$('mModel').value,
     it=el('div','item'),a=el('div','a'),tx=el('span','tx'),
     wt=el('div','wt'),wl=el('span','sh','Translating'),wm=el('span','wm',model),tm=el('span','tm','0 s'),
     sb=btn('Stop','Stop this translation'),cp=btn('Copy','Copy the translation'),rt=btn('Retry','Translate this again'),rm=btn('×','Remove'),
-    o={rs,fy:rs?0:(V.scrollTop+8)/(docH()||1),el:it,ac:new AbortController()},ok=()=>nLast===o;
+    o={t,rs,m:model,fy:rs?0:sv?sv.fy:(V.scrollTop+8)/(docH()||1),el:it,ac:new AbortController()},ok=()=>nLast===o;
   for(const b of[sb,cp,rt,rm])b.className='rtb';
   wt.innerHTML=MARK;wt.append(wl,wm,tm,sb);a.append(wt,tx);rs||it.append(el('div','u',t));it.append(a);
   NS.append(it);N.push(o);nLast=o;ro.observe(it);hlAll();act(o);
@@ -306,8 +308,8 @@ async function translate(t,rs){
   it.onclick=e=>{if(e.target.closest('button,summary')||o===nAct)return;V.scrollTop+=(o.w??0)-parseFloat(it.style.top||0);act(o)};
   sb.onclick=()=>o.ac.abort();rm.onclick=()=>kill(o);rt.onclick=()=>{kill(o);translate(t,rs)};
   cp.onclick=()=>navigator.clipboard.writeText(acc).then(()=>{msg('Translation copied');cp.textContent='Copied';setTimeout(()=>cp.textContent='Copy',1200)},()=>msg('Copy failed — the browser blocked clipboard access'));
-  msg('Translating with '+model+'…');
-  try{
+  sv||msg('Translating with '+model+'…');
+  try{if(sv){show(sv.out);return}
     let msgs=[{role:'system',content:$('mPrompt').value.replaceAll('{lang}',$('mLang').value)},{role:'user',content:t}];
     for(let round=0;;round++){
       const r=await ask(model,msgs,o.ac,{think,text:show});
@@ -323,12 +325,13 @@ async function translate(t,rs){
     else{a.classList.add('er');tx.textContent='✖ '+e.message;ok()&&msg('Translation failed')}
   }finally{
     clearInterval(iv);wt.hidden=true;if(th){th.classList.add('ok');tsm.textContent='Thought for '+Math.max(1,Math.round(((t2||performance.now())-t1)/1e3))+' s'}
-    const mt=el('div','mt');mt.append(el('span',0,model+' · '+((performance.now()-t0)/1e3).toFixed(1)+' s'+(acc?' · '+nl(srcN)+'→'+nl(acc.length):'')));
+    const mt=el('div','mt');o.out=acc;sv||nsave();mt.append(el('span',0,sv?model+' · saved':model+' · '+((performance.now()-t0)/1e3).toFixed(1)+' s'+(acc?' · '+nl(srcN)+'→'+nl(acc.length):'')));
     acc&&mt.append(cp);bad&&mt.append(rt);mt.append(rm);it.append(mt);
   }
 }
 $('mGo').onclick=()=>translate();
-$('mClr').onclick=()=>{clr();msg('Translations cleared')};
+$('mClr').onclick=()=>{clr();nsave();msg('Translations cleared')};
+$('mSave').onclick=()=>nfile();
 $('mSrc').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();translate()}});
 $('mSrc').addEventListener('input',cnt);cnt();
 $('mLane').addEventListener('wheel',e=>{const a=e.target.closest('.a');if(a&&a.scrollHeight>a.clientHeight||e.ctrlKey)return;e.preventDefault();V.scrollTop+=e.deltaMode?e.deltaY*16:e.deltaY},{passive:false});
@@ -337,16 +340,44 @@ V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSele
     o=N.find(o=>o.rs?.some(r=>r[0]===n&&x>=r[1]&&x<=r[1]+r[3]&&y>=r[2]&&y<=r[2]+r[4]));o&&o!==nAct&&act(o)});
 ro.observe(V);ro.observe($('mLane'));addEventListener('resize',sched);
 
+// ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>); Save writes <name>.miniread.json to keep beside the PDF ----------
+let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
+const fpr=()=>pdf?.fingerprints?.[0]||'',
+  ndata=()=>({miniread:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out).map(o=>({t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m}))}),
+  nsave=()=>{const f=fpr(),d=ndata();if(!f)return;try{d.notes.length?localStorage['mrdN:'+f]=JSON.stringify(d):localStorage.removeItem('mrdN:'+f)}catch(_){}},
+  nload=d=>{clr();for(const n of d?.notes||[])n?.t&&n.out&&translate(n.t,n.rs||null,n);act(null);return N.length};
+async function nfile(){
+  if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No translations to save');
+  const nm=pdfName.replace(/\.pdf$/i,'')+'.miniread.json',b=new Blob([JSON.stringify(d,null,1)],{type:'application/json'});
+  if(window.showSaveFilePicker)try{
+    jsH||=await showSaveFilePicker({suggestedName:nm,startIn:pdfH||'documents',types:[{description:'miniread notes',accept:{'application/json':['.json']}}]});
+    const w=await jsH.createWritable();await w.write(b);await w.close();return msg('Saved '+jsH.name+' — open it with the PDF to bring the notes back')}
+  catch(e){if(e.name==='AbortError')return;jsH=null;return msg('Could not save: '+e.message)}
+  const a=el('a');a.href=URL.createObjectURL(b);a.download=nm;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3);
+  msg('Downloaded '+nm+' — move it next to the PDF; open it with the PDF to bring the notes back')}
+// openFiles(files,handles): a PDF and/or its .miniread.json, from Open…, the file picker or a drop
+async function openFiles(fs,hs=[]){
+  const i=fs.findIndex(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name)),j=fs.findIndex(f=>/\.json$/i.test(f.name));
+  if(i<0&&j<0)return msg('Not a PDF: '+fs[0].name);
+  if(i>=0&&!await open(fs[i]))return;i>=0&&(pdfH=hs[i]||null);
+  if(j<0)return;let d;
+  try{d=JSON.parse(await fs[j].text())}catch(e){return msg('Cannot read '+fs[j].name+': '+e.message)}
+  if(!d?.miniread)return msg(fs[j].name+' is not a miniread notes file');
+  if(!pdf)return msg('Open '+(d.pdf||'the PDF')+' first, then its notes');
+  jsH=hs[j]||null;const n=nload(d);nsave();
+  msg('Restored '+n+' notes from '+fs[j].name+(d.fp&&d.fp!==fpr()?' — they were saved for '+(d.pdf||'another PDF')+', so positions may be off':''))}
+
 // ---------- PDF ----------
 window.pdfjsLib&&(pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
 let pdf=null,scale=1,gen=0,obs,layP=Promise.resolve();
-const open=f=>f.arrayBuffer().then(b=>openPdf(b,f.name)).catch(e=>msg('Cannot read '+f.name+': '+e.message));
+const open=f=>f.arrayBuffer().then(b=>openPdf(b,f.name)).catch(e=>msg('Cannot read '+f.name+': '+e.message));  // resolves true once open
 async function openPdf(buf,name){
   if(!window.pdfjsLib)return msg('PDF engine failed to load — check the connection to cdnjs');
   try{const np=await pdfjsLib.getDocument({data:buf}).promise;pdf&&pdf.destroy().catch(()=>{});pdf=np}
-  catch(e){return msg('Cannot open '+name+': '+e.message)}
+  catch(e){msg('Cannot open '+name+': '+e.message);return false}
   $('mHint').hidden=true;$('mPgT').textContent=pdf.numPages;$('mPgN').value=1;$('mPgN').max=pdf.numPages;
-  clr();document.title='miniread — '+name;msg(name+' · '+pdf.numPages+' pages');V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});
+  clr();pdfName=name;pdfH=jsH=null;document.title='miniread — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});return true
 }
 function layout(){
   const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();$('mZoomB').textContent=Math.round(scale*100)+'%';
@@ -423,10 +454,11 @@ document.addEventListener('mouseup',()=>{
 });
 
 // ---------- files, keys, actions ----------
-$('mFile').onchange=e=>{const f=e.target.files[0];f&&open(f);e.target.value=''};
+$('mFile').onchange=e=>{const fs=[...e.target.files];fs.length&&openFiles(fs);e.target.value=''};
 document.addEventListener('dragover',e=>[...e.dataTransfer?.types||[]].includes('Files')&&e.preventDefault());
-document.addEventListener('drop',e=>{const f=e.dataTransfer?.files?.[0];if(!f)return;e.preventDefault();
-  f.type==='application/pdf'||/\.pdf$/i.test(f.name)?open(f):msg('Not a PDF: '+f.name)});
+document.addEventListener('drop',e=>{const fs=[...e.dataTransfer?.files||[]];if(!fs.length)return;e.preventDefault();
+  Promise.all([...e.dataTransfer.items].filter(x=>x.kind==='file').map(x=>x.getAsFileSystemHandle?.())).then(hs=>openFiles(fs,hs),()=>openFiles(fs))});
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){e.preventDefault();nfile()}});
 let wzT=0;
 V.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clearTimeout(wzT);
   wzT=setTimeout(()=>zoom(e.deltaY<0?1.2:1/1.2),60)}},{passive:false});
@@ -441,7 +473,7 @@ document.addEventListener('keydown',e=>{
     if(k==='ArrowDown')d=.2;else if(k==='ArrowUp')d=-.2;
     else if(k==='PageDown'||(k===' '&&!e.shiftKey))d=.9;else if(k==='PageUp'||(k===' '&&e.shiftKey))d=-.9;
     d&&(e.preventDefault(),V.scrollBy(0,d*V.clientHeight))}});
-const A={open:()=>$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(+$('mPgN').value-1),next:()=>goto(+$('mPgN').value+1),
+const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,types:[{description:'PDF or miniread notes',accept:{'application/pdf':['.pdf'],'application/json':['.json']}}]}).then(async hs=>openFiles(await Promise.all(hs.map(h=>h.getFile())),hs),e=>e.name!=='AbortError'&&msg(e.message)):$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(+$('mPgN').value-1),next:()=>goto(+$('mPgN').value+1),
   last:()=>goto(pdf?.numPages||1),out:()=>zoom(1/1.2),'in':()=>zoom(1.2),fit,help:()=>$('mHelp').showModal(),
   theme:()=>{const d=document.documentElement.dataset.theme!=='dark';setTheme(d);ls('mrdTheme',d?'dark':'light')}};
 function setTheme(d){document.documentElement.dataset.theme=d?'dark':'light';const b=qa('theme');
