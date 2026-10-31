@@ -8,8 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 /* ---------- basics (svguest's palette and controls) ---------- */
-:root{--fg:#262626;--bar:#e9e9e9;--line:#0000001a;--btn:#fafafa;--btnb:#00000021;--btnh:#00000012;--bfg:#262626;--on:#1a73e81f;--onb:#1a73e8;--onfg:#1f1f1f;--view:#d4d4d4;--side:#f2f2f2;--h4:#595959;--h4b:#00000014;--pageb:#00000038;--t3:#6e6e6e;--ok:#2f8f55;--er:#cc4136;--erb:#cc41360f;--sh:0 1px 2px #0000001f;--shm:0 0 0 1px #0000001a,0 8px 24px -6px #0000004d;--nt:#d99a00;--cm:#1a73e8}
-[data-theme=dark]{color-scheme:dark;--fg:#e3e3e3;--bar:#1f1f1f;--line:#ffffff1a;--btn:#303030;--btnb:#ffffff1f;--btnh:#ffffff14;--bfg:#e3e3e3;--on:#4c8df633;--onb:#4c8df6;--onfg:#f5f5f5;--view:#383838;--side:#262626;--h4:#a6a6a6;--h4b:#ffffff14;--pageb:#00000066;--t3:#8c8c8c;--ok:#4fc27e;--er:#f07a70;--erb:#f07a7014;--sh:0 1px 2px #0009;--shm:0 0 0 1px #ffffff1f,0 8px 24px -6px #000c;--nt:#e8b030;--cm:#4c8df6}
+:root{--fg:#262626;--bar:#e9e9e9;--line:#0000001a;--btn:#fafafa;--btnb:#00000021;--btnh:#00000012;--bfg:#262626;--on:#1a73e81f;--onb:#1a73e8;--onfg:#1f1f1f;--view:#d6d5d2;--side:#f3f3f1;--h4:#595959;--h4b:#00000014;--pageb:#00000038;--t3:#6e6e6e;--ok:#2f8f55;--er:#cc4136;--erb:#cc41360f;--sh:0 1px 2px #0000001f;--shm:0 0 0 1px #0000001a,0 8px 24px -6px #0000004d;--nt:#d99a00;--cm:#1a73e8}
+[data-theme=dark]{color-scheme:dark;--fg:#dcdcdc;--bar:#1f1f1f;--line:#ffffff1a;--btn:#303030;--btnb:#ffffff1f;--btnh:#ffffff14;--bfg:#e3e3e3;--on:#4c8df633;--onb:#4c8df6;--onfg:#f5f5f5;--view:#2c2c2c;--side:#232323;--h4:#a6a6a6;--h4b:#ffffff14;--pageb:#00000066;--t3:#8c8c8c;--ok:#4fc27e;--er:#f07a70;--erb:#f07a7014;--sh:0 1px 2px #0009;--shm:0 0 0 1px #ffffff1f,0 8px 24px -6px #000c;--nt:#e8b030;--cm:#4c8df6}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden;font:12px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--fg);-webkit-font-smoothing:antialiased}
 body{display:flex;flex-direction:column;background:var(--bar)}
@@ -26,6 +26,23 @@ kbd{display:inline-block;min-width:1.6em;padding:0 5px;border-radius:4px;backgro
 .menu button{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;padding:3px 8px;text-align:left;white-space:nowrap;border-color:transparent;background:transparent}.menu button:hover{background:var(--btnh)}
 .menu kbd{min-width:0;padding:0;box-shadow:none;background:none;font:inherit;opacity:.6}
 .seg{display:flex;gap:2px;min-width:0;padding:2px;border-radius:7px;background:var(--btnh)}.seg button{flex:1;height:20px;padding:0 6px;border:0;border-radius:5px;background:none;color:var(--h4);white-space:nowrap}.seg button:hover{background:none;color:var(--fg)}.seg button.on{background:var(--btn);color:var(--fg);box-shadow:var(--sh)}
+/* ---------- motion (all of it off with reduced motion) ---------- */
+button,.seg button,#mComp,.item,.hl,.tp,#mSplit,.ci,#mMd{transition:background-color .16s,color .16s,box-shadow .2s,opacity .16s,outline-color .16s}
+.item{animation:mIn .32s cubic-bezier(.2,.8,.2,1)}.item.out{opacity:0;transform:translateX(10px) scale(.98);transition:opacity .18s,transform .18s;pointer-events:none}
+@keyframes mIn{from{opacity:0;transform:translateX(12px) scale(.98)}}
+.dd.open>.menu,#mSelT:not([hidden]){animation:mPop .16s cubic-bezier(.2,.8,.2,1)}@keyframes mPop{from{opacity:0;transform:translateY(-4px) scale(.98)}}
+#mConn:not([hidden]){animation:mSheet .24s cubic-bezier(.2,.8,.2,1)}@keyframes mSheet{from{opacity:0;transform:translateX(16px)}}
+#mHelp[open]{animation:mPop .2s cubic-bezier(.2,.8,.2,1)}
+.page canvas,.tp canvas{animation:mFade .25s ease-out}@keyframes mFade{from{opacity:0}}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.4s;animation-timing-function:ease-in-out}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+/* ---------- reading comfort: dark pages (light text on dark paper) and softer highlights in dark mode ---------- */
+[data-theme=dark] body.dkpg .page{background:#1b1b1b}
+[data-theme=dark] body.dkpg :is(.page,.tp) canvas{filter:invert(.9) hue-rotate(180deg) contrast(.92)}
+[data-theme=dark] body.dkpg .tp .ph{background:#1b1b1b}
+[data-theme=dark] body.dkpg .hl{mix-blend-mode:screen;background:#d9a40038}[data-theme=dark] body.dkpg .hl.on{background:#e8b03070}
+[data-theme=dark] body.dkpg .hl.c{background:#4c8df630}[data-theme=dark] body.dkpg .hl.c.on{background:#4c8df666}
+[data-theme=dark] .textLayer ::selection{background:#4c8df666}
 /* ---------- toolbar ---------- */
 #mBar{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:4px;background:var(--bar);border-bottom:1px solid var(--line)}
 #mBar>button{border-color:transparent;background:transparent;padding:2px 8px}#mBar>.ib{width:28px;height:26px;padding:0;font-size:15px;color:var(--h4)}#mBar>.ib:hover{color:var(--fg)}#mBar>.ib.on{color:var(--onb)}#mBar>button:hover{background:var(--btnh)}#mBar>button.on{background:var(--on);color:var(--onfg)}
@@ -82,7 +99,7 @@ body.thumbs #mThumb{display:block}
 .item .ia{margin-left:auto;display:flex;gap:1px;opacity:0;transition:opacity .12s}.item:hover .ia,.item.on .ia,.item .ia.run{opacity:1}
 .item .ia button{width:22px;height:20px;padding:0;display:grid;place-items:center;border:0;border-radius:5px;background:none;color:var(--t3)}.item .ia button:hover{background:var(--btnh);color:var(--fg)}.item .ia .chg{width:13px;height:13px}
 .item .u{padding-left:7px;border-left:2px solid var(--line);color:var(--h4);font-size:11.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.item .a{max-height:45vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;scrollbar-width:thin}
+.item .a{max-height:45vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.65;scrollbar-width:thin}
 .item .dim{color:var(--h4)}.item .er{color:var(--er)}
 .item .a.er{padding:6px 9px;border-radius:8px;background:var(--erb);box-shadow:inset 0 0 0 1px var(--btnb)}
 .item .wt{display:flex;align-items:center;gap:6px;color:var(--h4)}
@@ -93,11 +110,11 @@ body.thumbs #mThumb{display:block}
 .item details summary{cursor:pointer;color:var(--h4);font-size:12px}
 .item details.ok>summary::before{content:'✓ ';color:var(--ok)}
 .item .th{max-height:180px;overflow:auto;margin-top:3px;padding-left:8px;border-left:2px solid var(--line);font-size:11px;color:var(--h4);white-space:pre-wrap;overflow-wrap:anywhere}
-.item .ce{display:block;width:100%;min-height:36px;padding:0;border:0;border-radius:0;background:transparent;resize:none;line-height:1.55;overflow:hidden}
+.item .ce{display:block;width:100%;min-height:36px;padding:0;border:0;border-radius:0;background:transparent;resize:none;font-size:13px;line-height:1.65;overflow:hidden}
 .item .cv{display:flex;flex-direction:column;gap:6px;margin-top:4px;padding-top:7px;border-top:1px solid var(--h4b)}
 .item:not(.on) .cv:not(:has(.q)){display:none}.item:not(.on) .ci{display:none}
 .item .q{align-self:flex-end;max-width:88%;padding:4px 9px;border-radius:8px;background:var(--side);box-shadow:inset 0 0 0 1px var(--h4b);white-space:pre-wrap;overflow-wrap:anywhere}
-.item .r{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.item .r{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12.5px;line-height:1.65}
 .item .ci{display:flex;align-items:flex-end;gap:4px;padding:3px 3px 3px 8px;border-radius:8px;background:var(--side);box-shadow:inset 0 0 0 1px var(--btnb)}.item .ci:focus-within{box-shadow:inset 0 0 0 1px var(--onb)}
 .item .ci textarea{flex:1;min-width:0;height:22px;max-height:120px;padding:2px 0;border:0;border-radius:0;background:transparent;resize:none;line-height:1.5}
 .item .ci button{flex:none;width:22px;height:22px;padding:0;display:grid;place-items:center;border:0;border-radius:6px;background:var(--fg);color:var(--side)}.item .ci button:hover{background:var(--fg);opacity:.85}.item .ci .chg{width:13px;height:13px;stroke-width:1.8}
@@ -181,6 +198,7 @@ body.thumbs #mThumb{display:block}
 </div>
 <label class="gr" id="mRlyL"><input type="checkbox" id="mRly"><span>Use svguest's Cloudflare relay — GLM blocks browser requests from this site; your key and text pass through it, nothing is stored</span></label>
 <p>Keys stay in this browser.</p></div>
+<div class="card"><b>Reading</b><label class="gr"><input type="checkbox" id="mDkPg"><span>Dark pages in dark mode — the PDF is shown light-on-dark (pictures are inverted too)</span></label></div>
 <div class="card"><b>Language</b><div class="kv"><span>Into</span><div><select id="mLang"></select></div></div><textarea id="mPrompt" hidden></textarea>
 <p>Translations and answers in the chat under each translation use this language.</p></div>
 </div></section>
@@ -242,6 +260,8 @@ $('mPrompt').value=ls('mrdPrompt')||PROMPT0;
 $('mLang').onchange=()=>ls('mrdLang',$('mLang').value);seg('mLang');
 $('mPrompt').onchange=()=>ls('mrdPrompt',$('mPrompt').value);
 $('mAuto').onchange=()=>ls('mrdAuto',$('mAuto').checked?'1':'0');
+const dkPg=()=>document.body.classList.toggle('dkpg',$('mDkPg').checked);
+$('mDkPg').checked=ls('mrdDkPg')!=='0';$('mDkPg').onchange=()=>{ls('mrdDkPg',$('mDkPg').checked?'1':'0');dkPg()};dkPg();
 
 // ---------- requests ----------
 const cnt=()=>$('mCnt').textContent=$('mSrc').value?nl($('mSrc').value.length)+' chars':'';
@@ -288,7 +308,7 @@ async function ask(model,msgs,myAc,ui){
 // ---------- notes: translations (k:'t') and comments (k:'c') as cards in the right lane, linked by a line to their highlight ----------
 // o={k,t,rs:[[page,x,y,w,h]] in PDF units (null: pasted text),fy,out,m,chat:[[q,a]],el,ac}; nAct is aligned to its anchor,
 // the others are pushed up/down so no two cards overlap
-const N=[],NS=$('mNotes'),LK=$('mLink');let nAct=null,nLast=null,nRaf=0,selA=null;
+const N=[],NS=$('mNotes'),LK=$('mLink'),RM=matchMedia('(prefers-reduced-motion: reduce)');let nAct=null,nLast=null,nRaf=0,nT=0,selA=null;
 const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(sched),
   pgOf=n=>V.querySelector(`.page[data-n="${n}"]`),
   docH=()=>{const p=V.lastElementChild;return p?p.offsetTop+p.offsetHeight:0},
@@ -299,8 +319,9 @@ const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(
   hlAll=()=>V.querySelectorAll('.page').forEach(hl),
   act=o=>{nAct=o;N.forEach(x=>x.el.classList.toggle('on',x===o));V.querySelectorAll('.hl').forEach(h=>h.classList.toggle('on',h.o===o));sched()},
   pick=o=>{if(o===nAct)return;V.scrollTop+=(o.w??0)-parseFloat(o.el.style.top||0);act(o)},  // activate, keeping the card where it is
-  kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();o.el.remove();N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);nsave()},
-  clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();o.el.remove()});N.length=0;hlAll();act(null)};
+  fade=e=>{e.classList.add('out');setTimeout(()=>e.remove(),RM.matches?0:180)},
+  kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();fade(o.el);N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);nsave()},
+  clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();fade(o.el)});N.length=0;hlAll();act(null)};
 // rects(range): the selection's line boxes per page, merged, in PDF units, top first
 function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n,p.getBoundingClientRect()]),R=[];
   for(const c of rg.getClientRects()){const h=c.height/scale;if(c.width<1||h<1||h>40)continue;
@@ -309,7 +330,7 @@ function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n
       m=R.find(q=>q[0]===r[0]&&Math.min(q[2]+q[4],r[2]+r[4])-Math.max(q[2],r[2])>Math.min(q[4],r[4])/2&&r[1]<=q[1]+q[3]+q[4]*1.5&&q[1]<=r[1]+r[3]+r[4]*1.5);
     if(m){const x=Math.min(m[1],r[1]),y=Math.min(m[2],r[2]);m[3]=Math.max(m[1]+m[3],r[1]+r[3])-x;m[4]=Math.max(m[2]+m[4],r[2]+r[4])-y;m[1]=x;m[2]=y}else R.push(r)}
   return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
-function frame(){nRaf=0;
+function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based)
   const M=$('mMain').getBoundingClientRect(),VR=V.getBoundingClientRect(),L=$('mLane').getBoundingClientRect(),W=$('mViewWrap').getBoundingClientRect(),vs=[];
   $('mNc').textContent=N.length||'';
   for(const o of N){o.w=want(o);o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
@@ -319,7 +340,7 @@ function frame(){nRaf=0;
     for(let i=k+1;i<vs.length;i++)y[i]=Math.max(vs[i].w,y[i-1]+h[i-1]+G);
     for(let i=k-1;i>=0;i--)y[i]=Math.min(vs[i].w,y[i+1]-h[i]-G);
     for(let i=0;i<vs.length;i++)y[i]=Math.max(y[i],i?y[i-1]+h[i-1]+G:8);
-    vs.forEach((o,i)=>o.el.style.top=y[i]+'px')}
+    vs.forEach((o,i)=>{const t=y[i];if(o.y==null||RM.matches)o.y=t;else{o.y+=(t-o.y)*ea;Math.abs(t-o.y)<.4?o.y=t:more=1}o.el.style.top=o.y+'px'})}
   V.style.paddingBottom=Math.max(16,(vs.length?y.at(-1)+h.at(-1):0)-docH()+16)+'px';
   NS.style.transform=`translateY(${W.top-L.top-V.scrollTop}px)`;
   let s='';
@@ -327,7 +348,7 @@ function frame(){nRaf=0;
     vr=VR.right-M.left-14,x1=Math.min(vr,p.left+(r[1]+r[3])*scale-M.left),y1=p.top+(r[2]+r[4])*scale+1-M.top,xe=Math.min(vr,Math.max(x1,p.right-M.left)),x2=b.left-M.left,y2=b.top+14-M.top,c=Math.max(16,(x2-xe)/2);
     if(y2<L.top-M.top||y2>L.bottom-M.top)continue;
     s+=`<g class="${o.k}${o===nAct?' on':''}"><circle cx="${x1}" cy="${y1}" r="2.5"/><path d="M${x1} ${y1}H${xe}C${xe+c} ${y1} ${x2-c} ${y2} ${x2} ${y2}"/></g>`}
-  LK.innerHTML=s}
+  LK.innerHTML=s;more?sched():nT=0}
 // shell(o,label): the card frame — header (dot, kind, model/date, actions .ia), placed and activated
 function shell(o,label){const it=el('div','item '+o.k),ih=el('div','ih');o.ia=el('div','ia');o.md=el('span','md');
   ih.append(el('i'),el('b',0,label),o.md,o.ia);it.append(ih);o.el=it;o.chat||=[];
@@ -598,7 +619,8 @@ document.addEventListener('keydown',e=>{
     d&&(e.preventDefault(),V.scrollBy(0,d*V.clientHeight))}});
 const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,types:[{description:'PDF or miniread notes',accept:{'application/pdf':['.pdf'],'application/json':['.json']}}]}).then(async hs=>openFiles(await Promise.all(hs.map(h=>h.getFile())),hs),e=>e.name!=='AbortError'&&msg(e.message)):$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(+$('mPgN').value-1),next:()=>goto(+$('mPgN').value+1),
   last:()=>goto(pdf?.numPages||1),out:()=>zoom(1/1.2),'in':()=>zoom(1.2),fit,help:()=>$('mHelp').showModal(),
-  theme:()=>{const d=document.documentElement.dataset.theme!=='dark';setTheme(d);ls('mrdTheme',d?'dark':'light')}};
+  theme:()=>{const d=document.documentElement.dataset.theme!=='dark',f=()=>{setTheme(d);sched()};ls('mrdTheme',d?'dark':'light');
+    document.startViewTransition&&!RM.matches?document.startViewTransition(f):f()}};
 function setTheme(d){document.documentElement.dataset.theme=d?'dark':'light';qa('theme').title=d?'Switch to light interface':'Switch to dark interface'}
 setTheme(document.documentElement.dataset.theme==='dark');
 document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]());
