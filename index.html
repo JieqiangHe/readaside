@@ -37,6 +37,8 @@ button,.seg button,.item,.hl,.tp,.ci{transition:background-color .16s,color .16s
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.4s;animation-timing-function:ease-in-out}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 /* ---------- undo (the only floating chrome: 10 s after a clear) ---------- */
+#mWarn{position:fixed;left:50%;bottom:58px;transform:translateX(-50%);z-index:56;max-width:min(560px,calc(100vw - 32px));padding:9px 14px;border-radius:8px;background:var(--fg);color:var(--btn);font:12px/1.5 inherit;box-shadow:0 12px 32px -14px #0007;cursor:pointer}
+#mWarn[hidden]{display:none}
 #mUndo{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:50;height:28px;padding:0 14px;border:0;border-radius:7px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 8px 24px -10px #0005;color:var(--onb);font:500 12px/1 inherit}#mUndo[hidden]{display:none}#mUndo:hover{background:var(--btnh)}
 /* ---------- viewer ---------- */
 #mMain{flex:1;display:flex;align-items:flex-start;min-height:0;overflow:auto;background:var(--view);scrollbar-width:thin}
@@ -195,6 +197,7 @@ ismiss on an empty window */
 </head>
 <body>
 <input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
+<div id="mWarn" hidden></div>
 <button id="mUndo" hidden>Undo</button>
 <div id="mMain">
 <div id="mViewWrap"><div id="mThumb"></div><div id="mView"></div>
@@ -483,6 +486,8 @@ V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSele
 ro.observe(V);ro.observe(NS);let rzT=0;
 addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{col();pdf&&fit();sched()},120)});
 
+let warnN=0,warnT=0;
+const warn=t=>{if(warnN)return;warnN=1;const w=$('mWarn');w.textContent=t;w.hidden=false;clearTimeout(warnT);warnT=setTimeout(()=>w.hidden=true,9e3);w.onclick=()=>w.hidden=true};
 // ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>); N writes <name>.notes.md, P writes a PDF that carries the notes --------------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
 const fpr=()=>pdf?.fingerprints?.[0]||'',
@@ -490,7 +495,8 @@ const fpr=()=>pdf?.fingerprints?.[0]||'',
   ndata=()=>({ocrp:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out?.trim()||o.img).map(nmap)}),
   nsaveTab=(nm,fp,ns)=>{if(!fp)return;const k=ns.filter(o=>o.out?.trim()||o.img);
     const dump=drop=>JSON.stringify({ocrp:1,pdf:nm,fp,notes:k.map(o=>drop&&o.img?{...nmap(o),img:void 0}:nmap(o))});
-    try{if(!k.length)localStorage.removeItem('mrdN:'+fp);else{let s=dump(0);s.length>35e5&&(s=dump(1));localStorage['mrdN:'+fp]=s}}catch(_){}},
+    try{if(!k.length)localStorage.removeItem('mrdN:'+fp);else{let s=dump(0);if(s.length>35e5){s=dump(1);k.some(o=>o.img)&&warn('Close to the browser storage limit, so the notes were saved without their pictures. N writes everything out. Start a fresh copy in D to free space.')}localStorage['mrdN:'+fp]=s}}
+    catch(err){warn('This browser is out of storage, so the notes are not saved here any more. N writes them to Markdown. Start a fresh copy or close documents in D to free space.')}},
   nsave=()=>nsaveTab(pdfName,fpr(),N),
   nload=d=>{clr();for(const n of d?.notes||[])n?.t&&(n.out||n.img)&&(n.k==='c'?comment(n.t,n.rs||null,n):translate(n.t,n.rs||null,n));act(null);return N.length};
 // keep(blob,name,mime,ext,re): Chrome/Edge save dialog in the PDF's folder (re: remember the handle, so Save rewrites the same file), else a download
