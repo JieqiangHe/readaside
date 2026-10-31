@@ -45,7 +45,7 @@ button,.seg button,.item,.hl,.tp,.ci{transition:background-color .16s,color .16s
 body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 .tp{width:78px;margin:0 auto 10px;cursor:pointer;border-radius:3px}
 .tp .ph{background:#fff;box-shadow:0 0 0 1px var(--pageb)}
-.tp canvas{display:block;width:100%;height:auto;box-shadow:0 0 0 1px var(--pageb)}
+.tp canvas,.tp img{display:block;width:100%;height:auto;box-shadow:0 0 0 1px var(--pageb)}
 .tp b{display:block;text-align:center;font-weight:normal;font-size:10px;color:var(--t3);margin-top:3px}
 .tp.cur{outline:2px solid var(--onb);outline-offset:3px}.tp.cur b{color:var(--onb)}
 .tp:hover .ph,.tp:hover canvas{box-shadow:0 0 0 1px var(--onb)}
@@ -568,7 +568,7 @@ function goto(n){if(!pdf)return msg('Open a PDF first');
   n!==curN&&(curN=n,mark())}
 
 // ---------- thumbnails ----------
-let ts=1,tobs=null,tgen=0,curN=0;
+let ts=1,tobs=null,tgen=0,curN=0;const tc=new Map();  // rendered thumbnails, by fingerprint and page
 const TH=()=>document.body.classList.contains('thumbs');
 function setTh(on){document.body.classList.toggle('thumbs',on);ls('mrdThumbs',on?'1':'0');on&&pdf&&buildThumbs().catch(()=>{})}
 async function buildThumbs(){
@@ -583,11 +583,14 @@ async function buildThumbs(){
   g===tgen&&mark()}
 async function tdraw(d){
   tobs.unobserve(d);
-  try{const ph=d.firstChild,n=+d.dataset.n,p=await pdf.getPage(n),vp=p.getViewport({scale:ts}),
+  try{const ph=d.firstChild,n=+d.dataset.n,k=fpr()+'|'+n,hit=tc.get(k);
+    if(hit){const im=el('img');im.src=hit;ph.replaceWith(im);return}
+    const p=await pdf.getPage(n),vp=p.getViewport({scale:ts}),
     r=Math.min(2,devicePixelRatio||1),c=el('canvas');
   c.width=vp.width*r;c.height=vp.height*r;
   await p.render({canvasContext:c.getContext('2d'),viewport:vp,transform:[r,0,0,r,0,0],annotationMode:annOff?pdfjsLib.AnnotationMode.DISABLE:pdfjsLib.AnnotationMode.ENABLE}).promise;
-  ph.replaceWith(c)}catch(_){}}
+  ph.replaceWith(c);try{tc.set(k,c.toDataURL('image/jpeg',.7))}catch(_){}
+  }catch(_){}}
 function mark(){const T=$('mThumb'),t=T.querySelector(`.tp[data-n="${curN}"]`);
   t&&(T.querySelectorAll('.tp.cur').forEach(x=>x.classList.remove('cur')),t.classList.add('cur'),t.scrollIntoView({block:'nearest'}))}
 $('mThumb').onclick=e=>{const t=e.target.closest('.tp');t&&goto(+t.dataset.n)};
