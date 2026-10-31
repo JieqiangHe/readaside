@@ -510,7 +510,7 @@ function tabClose(i){const nm=i===TI?pdfName:TABS[i].pdfName||'',ns=i===TI?N.sli
   if(TABS.length<2){N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
     pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=1;scale=1;document.title='ocrp';document.body.classList.remove('pdf');col();LK.innerHTML='';
     selHide();$('mUndo').hidden=true;undoD=null;
-    TABS[0]={};TI=0;tabUI();sched();return msg('Closed')}
+    TABS[0]={};TI=0;tabUI();sched();$('mHint').hidden=false;return msg('Closed')}
   if(i===TI){tabHold();TABS.splice(i,1);tabShow(Math.min(i,TABS.length-1))}
   else{TABS.splice(i,1);i<TI&&TI--}
   tabUI();msg('Closed '+nm)}
@@ -593,7 +593,7 @@ async function tdraw(d){
     r=Math.min(2,devicePixelRatio||1),c=el('canvas');
   c.width=vp.width*r;c.height=vp.height*r;
   await p.render({canvasContext:c.getContext('2d'),viewport:vp,transform:[r,0,0,r,0,0],annotationMode:annOff?pdfjsLib.AnnotationMode.DISABLE:pdfjsLib.AnnotationMode.ENABLE}).promise;
-  ph.replaceWith(c);try{tc.set(k,c.toDataURL('image/jpeg',.7))}catch(_){}
+  ph.replaceWith(c);try{tc.set(k,c.toDataURL('image/jpeg',.7));tc.size>400&&tc.delete(tc.keys().next().value)}catch(_){}
   }catch(_){}}
 function mark(){const T=$('mThumb'),t=T.querySelector(`.tp[data-n="${curN}"]`);
   t&&(T.querySelectorAll('.tp.cur').forEach(x=>x.classList.remove('cur')),t.classList.add('cur'),t.scrollIntoView({block:'nearest'}))}
@@ -615,6 +615,7 @@ const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',2);
     const put=(meta,bytes)=>new Promise(ok=>{const tx=d.transaction(['recent','blob'],'readwrite');tx.oncomplete=()=>ok(1);tx.onerror=()=>ok(0);tx.onabort=()=>ok(0);
       tx.objectStore('recent').put(meta);bytes&&tx.objectStore('blob').put({fp,buf:bytes})});
     const meta={fp,name,t:Date.now(),thumb:old&&old.thumb};handle&&(meta.handle=handle);
+    buf&&buf.byteLength>4e7&&(buf=null);  // a 40 MB+ PDF stays out of the recent store: the name and preview are enough
     if(!await put(meta,buf)&&handle){delete meta.handle;await put(meta,buf)}
     const a=await recAll();a.slice(8).forEach(x=>{const tx=d.transaction(['recent','blob'],'readwrite');tx.objectStore('recent').delete(x.fp);tx.objectStore('blob').delete(x.fp)})}catch(_){}},
   recThumb=async(fp,t)=>{const d=await db();if(!d||!fp||!t)return;try{const q=ist(d,'recent').get(fp);q.onsuccess=()=>{const r=q.result;r&&(r.thumb=t,ist(d,'recent','readwrite').put(r))}}catch(_){}};
@@ -660,7 +661,7 @@ const kClose=()=>{$('mK').hidden=true;KQ.value=''},
       if(p!=='granted')p=hd.requestPermission?await hd.requestPermission({mode:'read'}):'denied';
       if(p==='granted'){const f=await hd.getFile();return openPdf(await f.arrayBuffer(),r.name,hd)}}catch(_){}
     openPdf(await recBuf(r.fp)||r.buf,r.name).catch(()=>{})};
-KQ.addEventListener('input',kBuild);
+let kFT=0;KQ.addEventListener('input',()=>{clearTimeout(kFT);kFT=setTimeout(kBuild,90)});
 KQ.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp'){
     e.preventDefault();if(!kHits.length)return;
