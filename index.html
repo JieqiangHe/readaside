@@ -481,7 +481,7 @@ V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSele
 ro.observe(V);ro.observe(NS);let rzT=0;
 addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{col();pdf&&fit();sched()},120)});
 
-// ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>, the old miniread prefix); Save writes <name>.ocrp.json to keep beside the PDF ----------
+// ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>); N writes <name>.notes.md, P writes a PDF that carries the notes --------------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
 const fpr=()=>pdf?.fingerprints?.[0]||'',
   nmap=o=>({k:o.k,t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m,d:o.d,...(o.img&&{img:o.img}),...(o.chat.length&&{chat:o.chat})}),
