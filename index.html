@@ -41,6 +41,7 @@ button,.seg button,.item,.hl,.tp,.ci{transition:background-color .16s,color .16s
 #mMain{flex:1;display:flex;align-items:flex-start;min-height:0;overflow:auto;background:var(--view);scrollbar-width:thin}
 #mViewWrap{display:flex;align-items:flex-start;min-height:100%;position:relative;min-width:0}
 #mView{flex:1;min-width:max-content;padding:16px}
+#mView .page,#mView .textLayer,#mView .textLayer span{cursor:zoom-in}
 #mThumb{display:none;width:94px;flex:none;position:sticky;top:0;left:0;align-self:flex-start;height:100vh;overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:8px 5px 12px;scrollbar-width:thin}
 body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 .tp{width:78px;margin:0 auto 10px;cursor:pointer;border-radius:3px}
@@ -625,12 +626,13 @@ const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map(),knodes=[
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   kRows=()=>{const q=KQ.value.trim().toLowerCase(),
     tabs=TABS.map((t,i)=>({k:'tab',i,n:tabNm(i),cur:i===TI})).filter(x=>x.n),  // empty slots (no PDF open yet) are not documents
-    recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name.replace(/\.pdf$/i,''))).map(r=>({k:'rec',r,n:r.name,t:r.t})),
+    recs=kRec.filter(r=>r&&r.name&&!tabs.some(t=>t.n===r.name.replace(/\.pdf$/i,''))).map(r=>({k:'rec',r,n:r.name,t:r.t})),
     f=x=>!q||x.n.toLowerCase().includes(q);
     kHits=[...tabs.filter(f),...recs.filter(f)]},
   kSel=i=>{kOn=Math.max(0,Math.min(i,kHits.length-1));knodes.forEach((n,j)=>n.classList.toggle('on',j===kOn));  // arrows only move the ring: no DOM rebuild per key
     knodes[kOn]?.scrollIntoView({block:'nearest',inline:'center'})},
-  kPaint=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));imgs=new Map();knodes=[];KL.replaceChildren();
+  kPaint=()=>{try{kDraw()}catch(e){KL.replaceChildren(el('p',0,'The document list failed: '+(e.message||e)))}},
+  kDraw=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));imgs=new Map();knodes=[];KL.replaceChildren();
     if(!kHits.length){KL.append(el('p',0,'Nothing yet — press O to open a PDF'));return}
     let last='';
     kHits.forEach((x,i)=>{
