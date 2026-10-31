@@ -72,8 +72,8 @@ body.thumbs #mThumb{display:block}
 #mSrc{display:block;width:100%;min-height:44px;height:72px;padding:1px 2px;border:0;border-radius:0;background:transparent;resize:vertical}
 #mOps{display:flex;align-items:center;gap:3px;margin-top:4px}
 #mOps label{display:flex;align-items:center;gap:4px;color:var(--h4);font-size:11.5px}
-#mClr,#mSave{flex:none;padding:0 6px;border-color:transparent;background:transparent;color:var(--h4);font-size:11px}
-#mClr:hover,#mSave:hover{background:var(--btnh);color:var(--fg)}
+#mClr,#mSave,#mPdf{flex:none;padding:0 6px;border-color:transparent;background:transparent;color:var(--h4);font-size:11px}
+#mClr:hover,#mSave:hover,#mPdf:hover{background:var(--btnh);color:var(--fg)}
 #mGo{flex:none;padding:2px 12px;border-color:transparent;border-radius:6px;background:var(--fg);color:var(--side)}
 #mGo:hover{background:var(--fg);opacity:.85}
 #mCnt{margin-left:auto;color:var(--t3);font-size:11px;white-space:nowrap}
@@ -154,6 +154,7 @@ body.thumbs #mThumb{display:block}
 <label title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto">Auto</label>
 <button id="mClr" title="Remove all translations and highlights">Clear</button>
 <button id="mSave" title="Save the notes as a .miniread.json file to keep beside the PDF (⌘/Ctrl+S); open it with the PDF to bring them back">Save</button>
+<button id="mPdf" title="Save a copy of the PDF with the highlights and translations as comments (Preview, Acrobat); open that copy in miniread to bring the notes back">Save PDF</button>
 <span id="mCnt"></span>
 <button id="mGo" title="⌘/Ctrl+Enter">Translate</button>
 </div>
@@ -331,7 +332,7 @@ async function translate(t,rs,sv){
 }
 $('mGo').onclick=()=>translate();
 $('mClr').onclick=()=>{clr();nsave();msg('Translations cleared')};
-$('mSave').onclick=()=>nfile();
+$('mSave').onclick=()=>nfile();$('mPdf').onclick=()=>npdf();
 $('mSrc').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();translate()}});
 $('mSrc').addEventListener('input',cnt);cnt();
 $('mLane').addEventListener('wheel',e=>{const a=e.target.closest('.a');if(a&&a.scrollHeight>a.clientHeight||e.ctrlKey)return;e.preventDefault();V.scrollTop+=e.deltaMode?e.deltaY*16:e.deltaY},{passive:false});
@@ -346,15 +347,33 @@ const fpr=()=>pdf?.fingerprints?.[0]||'',
   ndata=()=>({miniread:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out).map(o=>({t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m}))}),
   nsave=()=>{const f=fpr(),d=ndata();if(!f)return;try{d.notes.length?localStorage['mrdN:'+f]=JSON.stringify(d):localStorage.removeItem('mrdN:'+f)}catch(_){}},
   nload=d=>{clr();for(const n of d?.notes||[])n?.t&&n.out&&translate(n.t,n.rs||null,n);act(null);return N.length};
-async function nfile(){
-  if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No translations to save');
-  const nm=pdfName.replace(/\.pdf$/i,'')+'.miniread.json',b=new Blob([JSON.stringify(d,null,1)],{type:'application/json'});
-  if(window.showSaveFilePicker)try{
-    jsH||=await showSaveFilePicker({suggestedName:nm,startIn:pdfH||'documents',types:[{description:'miniread notes',accept:{'application/json':['.json']}}]});
-    const w=await jsH.createWritable();await w.write(b);await w.close();return msg('Saved '+jsH.name+' — open it with the PDF to bring the notes back')}
-  catch(e){if(e.name==='AbortError')return;jsH=null;return msg('Could not save: '+e.message)}
+// keep(blob,name,mime,ext,re): Chrome/Edge save dialog in the PDF's folder (re: remember the handle, so Save rewrites the same file), else a download
+async function keep(b,nm,mime,ext,re){
+  if(window.showSaveFilePicker)try{let h=re&&jsH;h||=await showSaveFilePicker({suggestedName:nm,startIn:pdfH||'documents',types:[{description:nm,accept:{[mime]:[ext]}}]});re&&(jsH=h);
+    const w=await h.createWritable();await w.write(b);await w.close();return msg('Saved '+h.name+' — open it in miniread to bring the notes back')}
+  catch(e){re&&(jsH=null);return msg(e.name==='AbortError'?'':'Could not save: '+e.message)}
   const a=el('a');a.href=URL.createObjectURL(b);a.download=nm;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3);
-  msg('Downloaded '+nm+' — move it next to the PDF; open it with the PDF to bring the notes back')}
+  msg('Downloaded '+nm+' — keep it beside the PDF; open it in miniread to bring the notes back')}
+function nfile(){if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No translations to save');
+  keep(new Blob([JSON.stringify(d,null,1)],{type:'application/json'}),pdfName.replace(/\.pdf$/i,'')+'.miniread.json','application/json','.json',1)}
+// npdf(): a copy of the PDF with one Highlight annotation per note and page (its translation as the comment) and the notes JSON
+// attached as ATT, which openPdf reads back. pdf-lib loads from cdnjs on first use only
+const PLIB='https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js',ATT='miniread-notes.json',
+  plib=()=>window.PDFLib?Promise.resolve():new Promise((ok,no)=>{const x=el('script');x.src=PLIB;x.onload=ok;x.onerror=()=>no(Error('pdf-lib failed to load — check the connection to cdnjs'));document.head.append(x)});
+async function npdf(){
+  if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No translations to save');
+  msg('Building the PDF…');
+  try{await plib();const{PDFDocument,PDFHexString,PDFName}=PDFLib,doc=await PDFDocument.load(await pdf.getData(),{ignoreEncryption:true}),P=doc.getPages(),T=x=>PDFHexString.fromText(x);
+    for(const g of P){const A=g.node.Annots();if(A)for(let i=A.size()-1;i>=0;i--)A.lookup(i)?.get?.(PDFName.of('T'))?.decodeText?.()==='miniread'&&A.remove(i)}  // an earlier export's highlights
+    for(const o of d.notes)for(const n of new Set((o.rs||[]).map(r=>r[0]))){
+      const vp=(await pdf.getPage(n)).getViewport({scale:1}),q=[];
+      for(const r of o.rs)r[0]===n&&[[r[1],r[2]],[r[1]+r[3],r[2]],[r[1],r[2]+r[4]],[r[1]+r[3],r[2]+r[4]]].forEach(([x,y])=>q.push(...vp.convertToPdfPoint(x,y)));
+      const xs=q.filter((_,i)=>!(i%2)),ys=q.filter((_,i)=>i%2);
+      P[n-1].node.addAnnot(doc.context.register(doc.context.obj({Type:'Annot',Subtype:'Highlight',F:4,Rect:[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)],
+        QuadPoints:q,C:[1,.84,.29],CA:.6,T:T('miniread'),Contents:T(o.out)})))}
+    await doc.attach(new TextEncoder().encode(JSON.stringify(d)),ATT,{mimeType:'application/json',description:'miniread notes'});
+    await keep(new Blob([await doc.save()],{type:'application/pdf'}),pdfName.replace(/\.pdf$/i,'')+'.miniread.pdf','application/pdf','.pdf')
+  }catch(e){msg('Could not build the PDF: '+e.message)}}
 // openFiles(files,handles): a PDF and/or its .miniread.json, from Open…, the file picker or a drop
 async function openFiles(fs,hs=[]){
   const i=fs.findIndex(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name)),j=fs.findIndex(f=>/\.json$/i.test(f.name));
@@ -377,6 +396,7 @@ async function openPdf(buf,name){
   catch(e){msg('Cannot open '+name+': '+e.message);return false}
   $('mHint').hidden=true;$('mPgT').textContent=pdf.numPages;$('mPgN').value=1;$('mPgN').max=pdf.numPages;
   clr();pdfName=name;pdfH=jsH=null;document.title='miniread — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  if(!k)try{const f=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT);f&&(k=nload(JSON.parse(new TextDecoder().decode(f.content))))}catch(_){}
   msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});return true
 }
 function layout(){
