@@ -76,6 +76,7 @@ body.pdf #mHint{display:none}
 #mHint .wb{padding:18px 22px 4px}
 #mHint .wb h3{margin:0 0 16px;font-size:20px;font-weight:600;letter-spacing:-.02em;color:var(--fg)}
 #mHint .wb h3 span{margin-left:4px;font-size:13px;font-weight:400;letter-spacing:0;color:var(--t3)}
+#mHint .wb .bn{margin:8px 0 14px;font-size:11.5px;line-height:1.45;color:var(--t3)}
 #mHint .wb p{margin:4px 0 15px;font-size:12.5px;line-height:1.5;color:var(--h4)}
 #mHint ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
 #mHint li{display:flex;align-items:center;gap:10px;height:30px}
@@ -152,6 +153,12 @@ body.pdf #mHint{display:none}
 #mConn .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 10px;align-items:center}#mConn .kv>span{color:var(--h4);font-size:11.5px}
 #mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
 #mConn .gr{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
+/* ---------- find ---------- */
+#mFind{position:fixed;top:46px;left:50%;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}
+#mFind[hidden]{display:none}
+#mFind input{width:220px;height:24px;padding:0 2px;border:0;border-radius:0;background:none;font-size:12.5px}
+#mFind span{font-size:11px;color:var(--t3);min-width:56px;text-align:right;white-space:nowrap}
+.textLayer mark.fnd{background:#f5a50066;color:transparent;border-radius:2px}.textLayer mark.fnd.on{background:#f5a500cc}
 /* ---------- help ---------- */
 #mHelp{padding:0;width:min(420px,96vw)}
 #mHelp form{padding:16px 18px 14px;font-size:12.5px;line-height:1.45}
@@ -164,11 +171,6 @@ body.pdf #mHint{display:none}
 <body>
 <div id="mBar">
 <input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
-<div class="dd"><button class="lnk ddb">Notes</button><div class="menu">
-<button id="mSave" title="A .ocrp.json file to keep beside the PDF; open it with the PDF to bring the notes back">Save notes (.json)<kbd>⌘S</kbd></button>
-<button id="mPdf" title="A copy of the PDF with the highlights and notes as comments (Preview, Acrobat); open it in ocrp to bring the notes back">Save PDF with comments</button>
-<hr><button id="mClr" title="Clear all notes, highlights and the PDF's own annotations (Undo for 10 s)">Clear all</button>
-</div></div>
 <div id="mTabs" role="tablist" aria-label="Open PDFs"></div>
 <button class="lnk" id="mUndo" style="margin-left:auto" hidden>Undo</button>
 </div>
@@ -183,12 +185,14 @@ body.pdf #mHint{display:none}
 <div class="wp"><div class="mp"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div><div class="mc"><b></b><i></i><i></i><i></i></div></div>
 </div>
 <div class="wb"><h3>ocrp <span>old, clean, read, paper</span></h3>
+<p class="bn">The top bar is hidden — move the pointer to the top edge to bring it back.</p>
 <ul>
 <li><svg viewBox="0 0 16 16"><path d="M4 2.5h6l2 2v9H4z"/><path d="M6 6.5h4M6 9h4"/></svg><b>Open a PDF</b><span><kbd>O</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save notes</b><span><kbd>⌘</kbd><kbd>S</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><b>Save PDF</b><span><kbd>⌘</kbd><kbd>⇧</kbd><kbd>S</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M2.5 8h11M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg><b>Pages</b><span><kbd>←</kbd><kbd>→</kbd></span></li>
-<li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Zoom</b><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="M7 5v4M5 7h4"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Zoom</b><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Find</b><span><kbd>/</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5a5.5 5.5 0 0 0 0 11z" fill="currentColor" stroke="none"/></svg><b>Theme</b><span><kbd>T</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M6 3v10"/></svg><b>Thumbnails</b><span><kbd>H</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M3 5h6M12 5h1M3 11h1M7 11h6"/><circle cx="10.5" cy="5" r="1.5"/><circle cx="5.5" cy="11" r="1.5"/></svg><b>Settings</b><span><kbd>,</kbd></span></li>
@@ -214,6 +218,7 @@ body.pdf #mHint{display:none}
 <svg id="mLink"></svg>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
+<div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
 <dialog id="mHelp"><form method="dialog"><h3>Shortcuts</h3><dl>
 <dt>Reading</dt><dd>The bar hides itself; move the pointer to the top edge to bring it back</dd>
 <dt>Tabs</dt><dd>Every PDF opens in its own tab, with its own notes; middle-click or × closes it</dd>
@@ -224,6 +229,9 @@ body.pdf #mHint{display:none}
 <dt><kbd>,</kbd></dt><dd>Settings: model, API key, language</dd>
 <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Step pages (<kbd>Home</kbd>/<kbd>End</kbd>: first/last)</dd>
 <dt><kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd></dt><dd>Zoom (<kbd>Ctrl</kbd>+wheel too)</dd>
+<dt><kbd>/</kbd></dt><dd>Find in the PDF (<kbd>Enter</kbd> next, <kbd>⇧</kbd>+<kbd>Enter</kbd> back, <kbd>Esc</kbd> closes)</dd>
+<dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Previous / next tab</dd>
+<dt><kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>X</kbd></dt><dd>Clear all notes, highlights and the PDF annotations</dd>
 <dt><kbd>T</kbd> <kbd>H</kbd></dt><dd>Light/dark theme · thumbnails</dd>
 </dl><p class="ft"><button value="">Close</button></p></form></dialog>
 <script>
@@ -475,7 +483,6 @@ function clrAll(){const d=ndata();if(!d.notes.length&&!N.length&&(annOff||!annN)
   undoD={d,a:annOff};const n=N.length,h=!annOff&&annN;clr();annHide(1);nsave();
   msg('Cleared '+n+' notes'+(h?' and '+h+' PDF annotations':'')+(h?' — Save PDF writes a copy without them':''));$('mUndo').hidden=false;clearTimeout(undoT);undoT=setTimeout(()=>$('mUndo').hidden=true,1e4)}
 $('mUndo').onclick=()=>{if(!undoD)return;nload(undoD.d);nsave();annHide(undoD.a);undoD=null;$('mUndo').hidden=true;msg('Restored')};
-$('mClr').onclick=clrAll;$('mSave').onclick=()=>nfile();$('mPdf').onclick=()=>npdf();
 // openFiles(files,handles): a PDF and/or its .ocrp.json, from Open…, the file picker or a drop
 async function openFiles(fs,hs=[]){
   const i=fs.findIndex(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name)),j=fs.findIndex(f=>/\.json$/i.test(f.name));
@@ -499,7 +506,7 @@ function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,a
   N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el),o.y=null;
   col();
   document.title=pdf?'ocrp — '+pdfName:'ocrp';document.body.classList.toggle('pdf',!!pdf);
-  selHide();  pdf?(layout().then(()=>SC.scrollTop=Math.min(t.st||0,SC.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
+  selHide();  fClose();pdf?(layout().then(()=>SC.scrollTop=Math.min(t.st||0,SC.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
   tabUI();sched()}
 function tabFresh(){if(!pdf)return true;
   if(TABS.length>=TMAX)return msg(TMAX+' tabs are open, the most ocrp keeps; close one to open another'),false;
@@ -536,7 +543,7 @@ async function openPdf(buf,name){
   catch(e){msg('Cannot open '+name+': '+e.message);tabBack();return false}
   TN=0;
   selHide();
-  clr();pdfName=name;pdfH=jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  clr();pdfName=name;pdfH=jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');fc.clear();fClose();let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
   let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT||x.filename===AT0||x.filename===AT1)}catch(_){}
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
@@ -603,6 +610,24 @@ function mark(){const T=$('mThumb'),t=T.querySelector(`.tp[data-n="${curN}"]`);
 $('mThumb').onclick=e=>{const t=e.target.closest('.tp');t&&goto(+t.dataset.n)};
 setTh(ls('mrdThumbs')!=='0');
 
+// ---------- find (/) ----------
+const FQ=$('mFindQ'),FS=$('mFindS');let fpages=[],fi=-1,fc=new Map(),fTm=0;
+const fOpen=()=>{if(!pdf)return;$('mFind').hidden=false;FQ.focus();FQ.select()},
+  fUnmark=()=>document.querySelectorAll('#mView mark.fnd').forEach(m=>{const p=m.parentNode;p.replaceChild(document.createTextNode(m.textContent),m);p.normalize()}),
+  fClose=()=>{$('mFind').hidden=true;FQ.value='';fpages=[];fi=-1;fUnmark();FS.textContent=''},
+  fText=async n=>{const c=fc.get(n);if(c!=null)return c;const t=await (await pdf.getPage(n)).getTextContent(),s=t.items.map(i=>i.str).join('');fc.set(n,s);return s},
+  fScan=async()=>{fUnmark();fpages=[];fi=-1;FS.textContent='';const q=FQ.value.trim().toLowerCase();if(!q||!pdf)return;
+    for(let n=1;n<=pdf.numPages;n++){const t=await fText(n);if(t.includes(q))fpages.push(n)}
+    FS.textContent=fpages.length?(fpages.length>1?fpages.length+' pages':'1 page'):'no match'},
+  fGo=async d=>{if(!fpages.length)return;fi=(fi+d+fpages.length)%fpages.length;const n=fpages[fi];goto(n);FS.textContent=(fi+1)+'/'+fpages.length;
+    for(let i=0;i<25;i++){await new Promise(r=>setTimeout(r,80));const tl=V.querySelector(`.page[data-n="${n}"] .textLayer`);
+      if(tl&&tl.querySelector('span')){fMark(tl);return}}},
+  fMark=tl=>{fUnmark();const q=FQ.value.trim();if(!q)return;const lq=q.toLowerCase();let first=1;
+    for(const sp of tl.querySelectorAll('span')){const t=sp.textContent,i=t.toLowerCase().indexOf(lq);if(i<0)continue;
+      const m=el('mark','fnd'+(first?' on':''));m.textContent=t.slice(i,i+q.length);
+      sp.textContent='';sp.append(document.createTextNode(t.slice(0,i)),m,document.createTextNode(t.slice(i+q.length)));first=0}};
+FQ.addEventListener('input',()=>{clearTimeout(fTm);fTm=setTimeout(fScan,180)});
+FQ.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();fGo(e.shiftKey?-1:1)}else if(e.key==='Escape'){e.preventDefault();fClose()}});
 // ---------- selection: Translate / Comment bar under the selection ----------
 let lastSel='';
 const selT=$('mSelT'),selHide=()=>selT.hidden=true;
@@ -638,13 +663,15 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 // one key handler for the whole app: physical key codes (e.code) so a Chinese IME with full-width
 // punctuation cannot break it, and no shortcut fires while the IME is composing
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
+  if(e.key==='Escape'){$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
-  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}return}
+  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
   if(e.isComposing||e.keyCode===229)return;
   if(e.target.closest('input,textarea,select,button,a,[contenteditable]'))return;
   if(k==='Enter')hintOff();
-  else if(k==='?'||k==='/'||(c==='Slash'&&e.shiftKey))$('mHelp').showModal();
+  else if(k==='?'||(c==='Slash'&&e.shiftKey))$('mHelp').showModal();
+  else if(k==='/'||c==='Slash')fOpen();
+  else if(k==='['||c==='BracketLeft')tabGo((TI-1+TABS.length)%TABS.length);else if(k===']'||c==='BracketRight')tabGo((TI+1)%TABS.length);
   else if((k===','||c==='Comma')&&!e.shiftKey)cfg($('mConn').hidden);
   else if(k==='o'||c==='KeyO'){hintOff();A.open()}
   else if(k==='t'||c==='KeyT')A.theme();else if(k==='h'||c==='KeyH')A.thumbs();
