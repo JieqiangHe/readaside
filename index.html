@@ -495,7 +495,7 @@ const fpr=()=>pdf?.fingerprints?.[0]||'',
     const dump=drop=>JSON.stringify({ocrp:1,pdf:nm,fp,notes:k.map(o=>drop&&o.img?{...nmap(o),img:void 0}:nmap(o))});
     try{if(!k.length)localStorage.removeItem('mrdN:'+fp);else{let s=dump(0);s.length>35e5&&(s=dump(1));localStorage['mrdN:'+fp]=s}}catch(_){}},
   nsave=()=>nsaveTab(pdfName,fpr(),N),
-  nload=d=>{clr();for(const n of d?.notes||[])n?.t&&n.out&&(n.k==='c'?comment(n.t,n.rs||null,n):translate(n.t,n.rs||null,n));act(null);return N.length};
+  nload=d=>{clr();for(const n of d?.notes||[])n?.t&&(n.out||n.img)&&(n.k==='c'?comment(n.t,n.rs||null,n):translate(n.t,n.rs||null,n));act(null);return N.length};
 // keep(blob,name,mime,ext,re): Chrome/Edge save dialog in the PDF's folder (re: remember the handle, so Save rewrites the same file), else a download
 async function keep(b,nm,mime,ext,re){
   if(window.showSaveFilePicker)try{let h=re&&jsH;h||=await showSaveFilePicker({suggestedName:nm,startIn:pdfH||'documents',types:[{description:nm,accept:{[mime]:[ext]}}]});re&&(jsH=h);
