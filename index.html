@@ -147,15 +147,15 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 /* ---------- palette (Cmd/Ctrl+K) ---------- */
 #mK{position:fixed;inset:0;z-index:60;background:#14141333}
 #mK[hidden]{display:none}
-#mK>div{position:absolute;left:50%;top:15vh;transform:translateX(-50%);width:min(520px,calc(100vw - 32px));padding:4px;border-radius:10px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 30px 70px -20px #0005}
+#mK>div{position:absolute;left:50%;top:12vh;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));padding:4px;border-radius:10px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 30px 70px -20px #0005}
 #mKq{display:block;width:100%;padding:7px 8px;font-size:13.5px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;outline:none}
-#mKl{max-height:min(52vh,380px);overflow:auto;padding:3px 0}
+#mKl{max-height:min(62vh,480px);overflow:auto;padding:3px 0}
 #mKl h4{margin:8px 8px 3px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)}
 #mKl h4:not(:first-child){margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
 #mKl div.rc span{color:var(--h4)}
-#mKl div{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;white-space:nowrap;cursor:pointer;font-size:12.5px}
+#mKl div{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:7px;white-space:nowrap;cursor:pointer;font-size:12.5px}
 #mKl div.on{background:var(--btnh)}
-#mKl div img.pt{flex:none;width:28px;height:36px;object-fit:cover;object-position:top;border-radius:3px;background:var(--side);box-shadow:0 0 0 1px var(--line)}
+#mKl div img.pt{flex:none;width:44px;height:60px;object-fit:cover;object-position:top;border-radius:3px;background:var(--side);box-shadow:0 0 0 1px var(--line)}
 #mKl div img.pt.mt{visibility:hidden}
 #mKl div.rc img.pt{opacity:.55}
 #mKl div span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -601,7 +601,7 @@ const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',1);r.o
   recPut=async(fp,name,buf,handle)=>{const d=await db();if(!d||!fp)return;try{const put=r=>new Promise(ok=>{const tx=d.transaction('recent','readwrite');tx.oncomplete=()=>ok(1);tx.onerror=()=>ok(0);tx.onabort=()=>ok(0);tx.objectStore('recent').put(r)});let r={fp,name,t:Date.now(),buf};handle&&(r.handle=handle);if(!await put(r)){delete r.handle;await put(r)}
     const a=await recAll();a.slice(8).forEach(x=>d.transaction('recent','readwrite').objectStore('recent').delete(x.fp))}catch(_){}};
 const kTh=new Map();
-const mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({scale:1}),c=el('canvas'),g=72/vp.width,v2=p.getViewport({scale:g});
+const mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({scale:1}),c=el('canvas'),g=140/vp.width,v2=p.getViewport({scale:g});
   c.width=Math.round(v2.width);c.height=Math.round(v2.height);
   await p.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;return c.toDataURL('image/jpeg',.72)}catch(_){return ''}};
 // ---------- palette (Cmd/Ctrl+K): the open documents, then the recent ones, filtered as you type ----------
