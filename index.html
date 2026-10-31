@@ -48,10 +48,10 @@ button,.seg button,.item,.hl,.tp,.ci,#mTabs .tab{transition:background-color .16
 #mTabs .tab span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 #mTabs .tab button{flex:none;display:grid;place-items:center;width:17px;height:17px;padding:0;border:0;border-radius:5px;background:none;color:var(--t3);visibility:hidden}#mTabs .tab:hover button,#mTabs .tab.on button{visibility:visible}#mTabs .tab button:hover{background:var(--btnh);color:var(--fg)}#mTabs .tab button svg{width:9px;height:9px;fill:none;stroke:currentColor;stroke-width:1.6}
 /* ---------- viewer ---------- */
-#mMain{flex:1;display:flex;min-height:0;position:relative}
-#mViewWrap{flex:1;position:relative;display:flex;min-width:0}
-#mView{flex:1;overflow:auto;background:var(--view);padding:16px;scrollbar-width:thin}
-#mThumb{display:none;width:94px;flex:none;overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:8px 5px 12px;scrollbar-width:thin}
+#mMain{flex:1;display:flex;min-height:0;overflow:auto;background:var(--view);scrollbar-width:thin}
+#mViewWrap{display:flex;align-items:flex-start;min-height:100%;position:relative;min-width:0}
+#mView{flex:1;min-width:max-content;padding:16px}
+#mThumb{display:none;width:94px;flex:none;position:sticky;top:0;left:0;align-self:flex-start;height:100vh;overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:8px 5px 12px;scrollbar-width:thin}
 body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 .tp{width:78px;margin:0 auto 10px;cursor:pointer;border-radius:3px}
 .tp .ph{background:#fff;box-shadow:0 0 0 1px var(--pageb)}
@@ -79,11 +79,11 @@ body.pdf #mHint{display:none}
 .hl{position:absolute;z-index:1;pointer-events:none;border-radius:2px;background:#f5a50040;mix-blend-mode:multiply}.hl.on{background:#f5a50091}
 .hl.c{background:#1a73e826}.hl.c.on{background:#1a73e85c}
 .textLayer ::selection{background:#c9644252}
-#mSelT{position:absolute;z-index:9;display:flex;gap:2px;padding:3px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}#mSelT[hidden],#mSelT [hidden]{display:none}
+#mSelT{position:fixed;z-index:9;display:flex;gap:2px;padding:3px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}#mSelT[hidden],#mSelT [hidden]{display:none}
 #mSelT button{display:flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border:0;border-radius:6px;background:none;color:var(--fg)}#mSelT button:hover{background:var(--btnh)}#mSelT .chg{width:14px;height:14px;color:var(--h4)}
 /* ---------- notes: a borderless right column beside the page, linked to their highlight by a line ---------- */
-#mNotes{flex:none;width:0;height:100%;position:relative;z-index:6;overflow:hidden;pointer-events:none}
-#mLink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#mNotes{flex:none;width:0;height:100vh;position:sticky;top:0;align-self:flex-start;z-index:6;overflow:hidden;pointer-events:none}
+#mLink{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
 #mLink path{fill:none;stroke:var(--nt);stroke-width:1.2;opacity:.5}#mLink circle{fill:var(--nt);opacity:.8}
 #mLink .c path{stroke:var(--cm)}#mLink .c circle{fill:var(--cm)}
 #mLink .on path{stroke-width:2;opacity:.9}#mLink .on circle{opacity:1}
@@ -120,7 +120,7 @@ body.pdf #mHint{display:none}
 @keyframes mShim{from{background-position:100% 0}to{background-position:0 0}}
 @media(prefers-reduced-motion:reduce){.item .wt svg,.item .sh{animation:none}}
 /* ---------- settings: a floating sheet over a dim backdrop ---------- */
-#mConn{position:absolute;inset:0;z-index:8;display:grid;place-items:center;padding:24px;background:#14141340}
+#mConn{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:24px;background:#14141340}
 #mConn[hidden]{display:none}
 #mConn .sheet{display:flex;flex-direction:column;width:min(520px,92vw);max-height:min(86vh,880px);border-radius:10px;background:var(--bar);box-shadow:var(--shm),0 24px 60px -20px #00000066;overflow:hidden;animation:mSheet .22s cubic-bezier(.2,.8,.2,1)}
 #mConn .sheet>header{flex:none;display:flex;align-items:center;gap:6px;padding:14px 16px 6px}#mConn .sheet>header b{font-size:14px;font-weight:600}
@@ -196,7 +196,7 @@ body.pdf #mHint{display:none}
 </dl><p class="ft"><button value="">Close</button></p></form></dialog>
 <script>
 'use strict';
-const $=i=>document.getElementById(i),V=$('mView'),ls=(k,v)=>{try{return v==null?localStorage[k]:localStorage[k]=v}catch(_){}};
+const $=i=>document.getElementById(i),V=$('mView'),SC=$('mMain'),ls=(k,v)=>{try{return v==null?localStorage[k]:localStorage[k]=v}catch(_){}};
 const el=(t,c,x)=>{const e=document.createElement(t);c&&(e.className=c);x!=null&&(e.textContent=x);return e},
   btn=(t,ti)=>{const e=el('button',0,t);ti&&(e.title=ti);return e},msg=t=>$('mMsg').textContent=t||'';
 const nl=n=>n.toLocaleString('en');
@@ -267,7 +267,7 @@ const N=[],NS=$('mNotes'),LK=$('mLink'),RM=matchMedia('(prefers-reduced-motion: 
 const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(sched),
   pgOf=n=>V.querySelector(`.page[data-n="${n}"]`),
   docH=()=>{const p=V.lastElementChild;return p?p.offsetTop+p.offsetHeight:0},
-  noteW=()=>Math.min(420,Math.max(280,Math.round($('mViewWrap').clientWidth*.42))),  // the card column, from the wrap width so it does not shrink itself
+  noteW=()=>Math.min(420,Math.max(280,Math.round(SC.clientWidth*.42))),  // the card column, from the wrap width so it does not shrink itself
   col=()=>{const w=N.length?noteW()+32:0;NS.style.width=w?w+'px':'0';return w},
   want=o=>{if(!o.rs)return o.fy*(docH()||1);const pg=o.rs[0][0],p=pgOf(pg);if(!p)return null;
     let t=Infinity;for(const r of o.rs)r[0]===pg&&(t=Math.min(t,r[2]));return p.offsetTop+t*scale-4},  // the top of the note's passage; cards float down the right side
@@ -276,7 +276,7 @@ const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(
       h.style.cssText=`left:${c(r[1])};top:${c(r[2])};width:${c(r[3])};height:${c(r[4])}`;d.append(h)}},
   hlAll=()=>V.querySelectorAll('.page').forEach(hl),
   act=o=>{nAct=o;N.forEach(x=>x.el.classList.toggle('on',x===o));V.querySelectorAll('.hl').forEach(h=>h.classList.toggle('on',h.o===o));sched()},
-  pick=o=>{if(o===nAct)return;act(o);(o.w<V.scrollTop+40||o.w>V.scrollTop+V.clientHeight-140)&&(V.scrollTop=Math.max(0,o.w-V.clientHeight*.35))},  // activate; scroll the passage into view when off-screen
+  pick=o=>{if(o===nAct)return;act(o);(o.w<SC.scrollTop+40||o.w>SC.scrollTop+SC.clientHeight-140)&&(SC.scrollTop=Math.max(0,o.w-SC.clientHeight*.35))},  // activate; scroll the passage into view when off-screen
   fade=e=>{e.classList.add('out');setTimeout(()=>e.remove(),RM.matches?0:180)},
   kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();fade(o.el);N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);!N.length&&pdf&&(col(),fit());nsave()},
   clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();fade(o.el)});N.length=0;hlAll();act(null);pdf&&(col(),fit())};
@@ -289,7 +289,7 @@ function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n
     if(m){const x=Math.min(m[1],r[1]),y=Math.min(m[2],r[2]);m[3]=Math.max(m[1]+m[3],r[1]+r[3])-x;m[4]=Math.max(m[2]+m[4],r[2]+r[4])-y;m[1]=x;m[2]=y}else R.push(r)}
   return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
 function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based), in content coordinates
-  const M=$('mMain').getBoundingClientRect(),w=Math.max(0,NS.clientWidth-32)||noteW(),vs=[];
+  const w=Math.max(0,NS.clientWidth-32)||noteW(),vs=[];
   for(const o of N){o.w=want(o);o.el.style.left='16px';o.el.style.width=w+'px';
     o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
   vs.sort((a,b)=>a.w-b.w);
@@ -300,14 +300,14 @@ function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT
     for(let i=0;i<vs.length;i++)y[i]=Math.max(y[i],i?y[i-1]+h[i-1]+G:8);
     vs.forEach((o,i)=>{const t=y[i];if(o.y==null||RM.matches)o.y=t;else{o.y+=(t-o.y)*ea;Math.abs(t-o.y)<.4?o.y=t:more=1}o.el.style.top=o.y+'px'})}
   V.style.paddingBottom=Math.max(16,(vs.length?y.at(-1)+h.at(-1):0)-docH()+16)+'px';
-  NS.style.transform=`translateY(${-V.scrollTop}px)`;
-  let s='';  // the line: from the highlight's right edge to the card's header
+  NS.style.transform=`translateY(${-SC.scrollTop}px)`;
+  let s='';  // the line: from the highlight's right edge to the card's header (both in viewport coordinates)
   for(const o of vs){if(!o.rs)continue;const r=o.rs[0],p=pgOf(r[0]);if(!p)continue;
     const pr=p.getBoundingClientRect(),b=o.el.getBoundingClientRect(),
-      x1=pr.left-M.left+(r[1]+r[3])*scale,y1=pr.top-M.top+(r[2]+r[4])*scale,
-      x2=b.left-M.left,y2=b.top-M.top+14;
-    if(x1<0||x1>M.width||y1<0||y1>M.height||y2<0||y2>M.height)continue;
-    const xe=Math.max(x1+6,pr.right-M.left),c=Math.max(10,(x2-xe)/2);
+      x1=pr.left+(r[1]+r[3])*scale,y1=pr.top+(r[2]+r[4])*scale,
+      x2=b.left,y2=b.top+14;
+    if(x1<0||x1>innerWidth||y1<0||y1>innerHeight||y2<0||y2>innerHeight)continue;
+    const xe=Math.max(x1+6,pr.right),c=Math.max(10,(x2-xe)/2);
     s+=`<g class="${o.k}${o===nAct?' on':''}"><circle cx="${x1}" cy="${y1}" r="2.5"/><path d="M${x1} ${y1}H${xe}C${xe+c} ${y1} ${x2-c} ${y2} ${x2} ${y2}"/></g>`}
   LK.innerHTML=s;more?sched():nT=0}
 // shell(o,label): the card frame — header (dot, kind, model/date, actions .ia), placed and activated
@@ -325,7 +325,7 @@ async function translate(t,rs,sv){
   if(!sv&&!$('mKey').value.trim()){cfg(1);return msg('Add an API key first')}
   rs===undefined&&(rs=selA?.t===t?selA.rs:null);
   const t0=performance.now(),model=sv?.m||$('mModel').value,
-    o={k:'t',t,rs,m:model,fy:rs?0:sv?sv.fy:(V.scrollTop+8)/(docH()||1),ac:new AbortController()},ok=()=>nLast===o,
+    o={k:'t',t,rs,m:model,fy:rs?0:sv?sv.fy:(SC.scrollTop+8)/(docH()||1),ac:new AbortController()},ok=()=>nLast===o,
     it=shell(o,'Translation'),a=el('div','a'),tx=el('span','tx'),
     wt=el('div','wt'),tm=el('span','tm','0 s'),sb=ibtn('stop','Stop',()=>o.ac.abort());
   o.md.textContent=model;wt.innerHTML=MARK;wt.append(el('span','sh','Translating'),tm);a.append(wt,tx);rs||it.insertBefore(el('div','u',t),null);it.append(a);
@@ -390,7 +390,7 @@ async function chat(o,s,go){
   try{await ask(model,msgs,o.qc,{think:()=>{},text:x=>{acc=x;wt.hidden=true;tx.textContent=x}});if(!acc)throw Error('Empty reply')}
   catch(e){wt.hidden=true;if(e.name==='AbortError'){acc||(r.classList.add('dim'),tx.textContent='Stopped')}else{r.classList.add('er');tx.textContent='✖ '+e.message;acc=''}}
   finally{o.qc=null;go.innerHTML=svg('up');go.title='Ask (Enter)';acc&&(o.chat.push([s,acc]),nsave())}}
-NS.addEventListener('wheel',e=>{const a=e.target.closest('.a,.ce,textarea');if(a&&a.scrollHeight>a.clientHeight||e.ctrlKey)return;e.preventDefault();V.scrollTop+=e.deltaMode?e.deltaY*16:e.deltaY},{passive:false});
+NS.addEventListener('wheel',e=>{const a=e.target.closest('.a,.ce,textarea');if(a&&a.scrollHeight>a.clientHeight||e.ctrlKey)return;e.preventDefault();SC.scrollTop+=e.deltaMode?e.deltaY*16:e.deltaY},{passive:false});
 V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSelection().isCollapsed)return;
   const b=p.getBoundingClientRect(),n=+p.dataset.n,x=(e.clientX-b.left)/scale,y=(e.clientY-b.top)/scale,
     o=N.find(o=>o.rs?.some(r=>r[0]===n&&x>=r[1]&&x<=r[1]+r[3]&&y>=r[2]&&y<=r[2]+r[4]));o&&o!==nAct&&act(o)});
@@ -457,7 +457,7 @@ async function openFiles(fs,hs=[]){
 // ---------- document tabs (svguest-style): the active pdf lives in the globals, background tabs hold snapshots; the strip shows from two ----------
 const TMAX=10,TABS=[{}];let TI=0,TN=0,TP=0;  // TN: this slot was pushed empty for an open that may still fail; TP: the tab to fall back to
 const fprOf=p=>p?.fingerprints?.[0]||'',tabNm=i=>(i===TI?pdfName:TABS[i].pdfName)||'';
-function tabHold(){TABS[TI]={pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN,st:V.scrollTop,notes:N.slice()};
+function tabHold(){TABS[TI]={pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN,st:SC.scrollTop,notes:N.slice()};
   obs?.disconnect();tobs?.disconnect();N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();LK.innerHTML='';
   $('mUndo').hidden=true;undoD=null;clearTimeout(undoT);selHide();nLast=null}
 function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN}=t);
@@ -465,7 +465,7 @@ function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,a
   N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el),o.y=null;
   col();
   document.title=pdf?'ocrp — '+pdfName:'ocrp';document.body.classList.toggle('pdf',!!pdf);
-  selHide();  pdf?(layout().then(()=>V.scrollTop=Math.min(t.st||0,V.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
+  selHide();  pdf?(layout().then(()=>SC.scrollTop=Math.min(t.st||0,SC.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
   tabUI();sched()}
 function tabFresh(){if(!pdf)return true;
   if(TABS.length>=TMAX)return msg(TMAX+' tabs are open, the most ocrp keeps; close one to open another'),false;
@@ -493,7 +493,7 @@ function tabUI(){const w=$('mTabs');document.body.classList.toggle('multi',TABS.
 // ---------- PDF ----------
 window.pdfjsLib&&(pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
 let pdf=null,scale=1,gen=0,obs,layP=Promise.resolve(),annOff=false,annN=0;  // annOff: draw the PDF's own annotations or not; annN: how many markup ones it has
-const annHide=v=>{if(annOff===!!v)return;annOff=!!v;if(!pdf)return;const y=V.scrollTop;layout().then(()=>V.scrollTop=y);TH()&&buildThumbs().catch(()=>{})};
+const annHide=v=>{if(annOff===!!v)return;annOff=!!v;if(!pdf)return;const y=SC.scrollTop;layout().then(()=>SC.scrollTop=y);TH()&&buildThumbs().catch(()=>{})};
 const open=f=>f.arrayBuffer().then(b=>openPdf(b,f.name)).catch(e=>msg('Cannot read '+f.name+': '+e.message));  // resolves true once open
 async function openPdf(buf,name){
   if(!window.pdfjsLib)return msg('PDF engine failed to load — check the connection to cdnjs');
@@ -507,7 +507,7 @@ async function openPdf(buf,name){
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
   const doc=pdf,a0={n:0};(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)a0.n+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length;doc===pdf&&(annN=a0.n)})().catch(()=>{});
-  msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});tabUI();return true
+  msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));SC.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});tabUI();return true
 }
 function layout(){
   const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();
@@ -529,18 +529,18 @@ async function draw(d){
 }
 function zoom(f){if(!pdf)return msg('Open a PDF first');
   const ns=Math.min(8,Math.max(.1,scale*f));if(ns===scale)return;
-  const y=V.scrollTop/Math.max(1,V.scrollHeight);scale=ns;
-  layout().then(()=>V.scrollTop=y*V.scrollHeight)}
+  const y=SC.scrollTop/Math.max(1,SC.scrollHeight);scale=ns;
+  layout().then(()=>SC.scrollTop=y*SC.scrollHeight)}
 function fit(){if(!pdf)return msg('Open a PDF first');
-  pdf.getPage(1).then(p=>{const s=(V.clientWidth-34)/p.getViewport({scale:1}).width;zoom(s/scale)}).catch(()=>{})}
+  pdf.getPage(1).then(p=>{const s=(SC.clientWidth-(TH()?$('mThumb').offsetWidth:0)-(N.length?NS.clientWidth:0)-34)/p.getViewport({scale:1}).width;zoom(s/scale)}).catch(()=>{})}
 function cur(){let n=0;
-  for(const p of V.querySelectorAll('.page')){if(p.offsetTop-V.scrollTop<=V.clientHeight*.4)n=+p.dataset.n;else break}
+  for(const p of V.querySelectorAll('.page')){if(p.offsetTop-SC.scrollTop<=SC.clientHeight*.4)n=+p.dataset.n;else break}
   n&&n!==curN&&(curN=n,mark())}
-V.addEventListener('scroll',()=>{requestAnimationFrame(cur);sched()},{passive:true});
+SC.addEventListener('scroll',()=>{requestAnimationFrame(cur);sched()},{passive:true});
 function goto(n){if(!pdf)return msg('Open a PDF first');
   n=Math.min(Math.max(1,n||1),pdf.numPages);
   const p=V.querySelector(`.page[data-n="${n}"]`);
-  if(p)V.scrollTop=p.offsetTop-8;else layP.then(()=>V.querySelector(`.page[data-n="${n}"]`)?.scrollIntoView());
+  if(p)SC.scrollTop=p.offsetTop-8;else layP.then(()=>V.querySelector(`.page[data-n="${n}"]`)?.scrollIntoView());
   n!==curN&&(curN=n,mark())}
 
 // ---------- thumbnails ----------
@@ -584,12 +584,12 @@ document.addEventListener('mouseup',e=>{
   const rg=s.getRangeAt(0);
   const auto=$('mAuto').checked&&txt!==lastSel;
   selA={t:txt,rs:rects(rg)};lastSel=txt;auto&&translate(txt);
-  const c=[...rg.getClientRects()].filter(r=>r.width>1&&r.height>1&&r.height<60*scale).at(-1),M=$('mMain').getBoundingClientRect(),VR=V.getBoundingClientRect();
+  const c=[...rg.getClientRects()].filter(r=>r.width>1&&r.height>1&&r.height<60*scale).at(-1),VR=V.getBoundingClientRect();
   if(!c)return;selT.querySelector('[data-s=t]').hidden=auto;selT.hidden=false;
-  const x=Math.min(Math.max(c.right-M.left-selT.offsetWidth,VR.left-M.left+6),VR.right-M.left-selT.offsetWidth-18),
-    y=c.bottom-M.top+6+selT.offsetHeight>VR.bottom-M.top?c.top-M.top-selT.offsetHeight-6:c.bottom-M.top+6;
+  const x=Math.min(Math.max(c.right-selT.offsetWidth,VR.left+6),VR.right-selT.offsetWidth-18),
+    y=c.bottom+6+selT.offsetHeight>innerHeight?c.top-selT.offsetHeight-6:c.bottom+6;
   selT.style.left=x+'px';selT.style.top=y+'px'});
-V.addEventListener('scroll',selHide,{passive:true});
+SC.addEventListener('scroll',selHide,{passive:true});
 
 // ---------- files, keys, actions ----------
 $('mFile').onchange=e=>{const fs=[...e.target.files];fs.length&&openFiles(fs);e.target.value=''};
@@ -599,7 +599,7 @@ document.addEventListener('drop',e=>{const fs=[...e.dataTransfer?.files||[]];if(
 document.addEventListener('click',e=>{const d=e.target.closest('.dd');document.querySelectorAll('.dd.open').forEach(x=>x!==d&&x.classList.remove('open'));
   d&&(e.target.closest('.ddb')?d.classList.toggle('open'):e.target.closest('.menu button')&&d.classList.remove('open'))});
 let wzT=0;
-V.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clearTimeout(wzT);
+SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clearTimeout(wzT);
   wzT=setTimeout(()=>zoom(e.deltaY<0?1.2:1/1.2),60)}},{passive:false});
 // one key handler for the whole app: physical key codes (e.code) so a Chinese IME with full-width
 // punctuation cannot break it, and no shortcut fires while the IME is composing
@@ -619,7 +619,7 @@ document.addEventListener('keydown',e=>{
   else{let d=0;
     if(k==='ArrowDown')d=.2;else if(k==='ArrowUp')d=-.2;
     else if(k==='PageDown'||((k===' '||c==='Space')&&!e.shiftKey))d=.9;else if(k==='PageUp'||((k===' '||c==='Space')&&e.shiftKey))d=-.9;
-    d&&(e.preventDefault(),V.scrollBy(0,d*V.clientHeight))}});
+    d&&(e.preventDefault(),SC.scrollBy(0,d*SC.clientHeight))}});
 const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,types:[{description:'PDF or ocrp notes',accept:{'application/pdf':['.pdf'],'application/json':['.json']}}]}).then(async hs=>openFiles(await Promise.all(hs.map(h=>h.getFile())),hs),e=>e.name!=='AbortError'&&msg(e.message)):$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(curN-1),next:()=>goto(curN+1),
   last:()=>goto(pdf?.numPages||1),out:()=>zoom(1/1.2),'in':()=>zoom(1.2),fit,help:()=>$('mHelp').showModal(),
   theme:()=>{const d=document.documentElement.dataset.theme!=='dark',f=()=>{setTheme(d);sched()};ls('mrdTheme',d?'dark':'light');
@@ -630,7 +630,7 @@ document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]())
 // reading: the bar slides away; a pointer near the top edge brings it back — nothing but the paper on screen
 const barOn=()=>document.body.classList.remove('read'),barOff=()=>pdf&&document.body.classList.add('read');
 addEventListener('mousemove',e=>{document.body.classList.contains('read')?e.clientY<14&&barOn():e.clientY>40&&e.target.closest('#mView,#mThumb,#mNotes')&&barOff()});
-V.addEventListener('wheel',barOff,{passive:true});
+SC.addEventListener('wheel',barOff,{passive:true});
 </script>
 <!-- pdf-lib 1.17.1 (MIT, https://github.com/Hopding/pdf-lib), minified; kept as text and run by plib() on the first Save PDF -->
 <script type="text/plain" id="mPlib">!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t=t||self).PDFLib={})}(this,(function(t){"use strict";
