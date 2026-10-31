@@ -263,7 +263,7 @@ aiLoad();
 $('mConnX').onclick=()=>cfg(0);$('mConn').onclick=e=>{e.target===$('mConn')&&cfg(0)};
 // first run: type the key once; the empty viewer lists the important shortcuts
 const keySave=()=>{const v=$('mKey0').value.trim();if(!v)return $('mKey0').focus();ls('mrdDsKey',v);$('mKey').value=v;$('mKeyFirst').hidden=true;msg('Key saved')};
-const hintOff=()=>{document.body.classList.remove('ask');$('mHint').hidden=true},  // Enter or O clears the start screen
+const hintOff=()=>{document.body.classList.remove('ask');pdf||($('mHint').hidden=false);pdf&&($('mHint').hidden=true)},  // the card is the empty state: only a PDF can put it away
   hintOn=()=>{document.body.classList.add('ask');$('mHint').hidden=false};  // ? brings it back
 $('mKeySave').onclick=()=>{hintOff();keySave()};$('mHintOk').onclick=()=>hintOff();$('mHint').addEventListener('wheel',()=>{pdf&&hintOff()},{passive:true});$('mKey0').onkeydown=e=>{e.key==='Enter'&&(hintOff(),keySave())};
 $('mKey').value||($('mKeyFirst').hidden=false);
@@ -553,7 +553,7 @@ async function openPdf(buf,name,h){
   if(!window.pdfjsLib)return msg('PDF engine failed to load — check the connection to cdnjs');
   if(!tabFresh())return false;
   try{const np=await pdfjsLib.getDocument({data:buf}).promise;pdf=np}
-  catch(e){msg('Cannot open '+name+': '+e.message);tabBack();return false}
+  catch(e){msg('Cannot open '+name+': '+e.message);tabBack();pdf||($('mHint').hidden=false);return false}
   TN=0;
   selHide();
   clr();pdfName=name;pdfH=h||null;jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');setTh(false);  // every open starts without the sidebarfc.clear();fClose();hintOff();let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
@@ -705,6 +705,7 @@ KQ.addEventListener('keydown',e=>{
   else if(e.key==='Enter'){e.preventDefault();kGo(kOn)}
   else if(e.key==='Escape'){e.preventDefault();kClose()}});
 $('mK').addEventListener('mousedown',e=>{e.target===$('mK')&&kClose()});
+addEventListener('focus',()=>{pdf||($('mHint').hidden=false)});  // the picker closed with nothing opened: back comes the card
 // ---------- find (F) ----------
 const FQ=$('mFindQ'),FS=$('mFindS');let fpages=[],fi=-1,fc=new Map(),fTm=0;
 const fOpen=()=>{if(!pdf)return;$('mFind').hidden=false;FQ.focus();FQ.select()},
