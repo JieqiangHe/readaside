@@ -59,6 +59,16 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 .tp b{display:block;text-align:center;font-weight:normal;font-size:10px;color:var(--t3);margin-top:3px}
 .tp.cur{outline:2px solid var(--onb);outline-offset:3px}.tp.cur b{color:var(--onb)}
 .tp:hover .ph,.tp:hover canvas{box-shadow:0 0 0 1px var(--onb)}
+/* ---------- empty viewer: the one-time key and the shortcuts ---------- */
+#mHint{position:absolute;inset:0;display:grid;place-items:center;padding:24px;pointer-events:none}
+body.pdf #mHint{display:none}
+#mHint .hint{display:flex;flex-direction:column;align-items:center;gap:18px;color:var(--h4)}
+#mHint .keys{display:grid;grid-template-columns:max-content max-content;gap:6px 16px;margin:0;font-size:12px}
+#mHint .keys dt{text-align:right}#mHint .keys dd{margin:0;display:flex;gap:3px;color:var(--t3)}
+#mKeyFirst{pointer-events:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb)}
+#mKeyFirst b{flex-basis:100%;text-align:center;font-size:12px;color:var(--fg)}
+#mKeyFirst input{width:230px}
+#mKeyFirst p{flex-basis:100%;margin:0;text-align:center;color:var(--t3);font-size:11px}
 .page{position:relative;margin:0 auto 14px;background:#fff;box-shadow:0 0 0 1px var(--pageb),0 3px 12px -4px #00000040}
 .page canvas{display:block;width:100%;height:100%}
 .textLayer{position:absolute;inset:0;overflow:hidden;line-height:1;text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;z-index:2}
@@ -127,19 +137,29 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 </head>
 <body>
 <div id="mBar">
-<button class="lnk" data-a="open" title="Open a PDF, with its .ocrp.json notes if you have them (or drop them on the viewer)">Open</button>
 <input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
 <div class="dd"><button class="lnk ddb">Notes</button><div class="menu">
 <button id="mSave" title="A .ocrp.json file to keep beside the PDF; open it with the PDF to bring the notes back">Save notes (.json)<kbd>⌘S</kbd></button>
 <button id="mPdf" title="A copy of the PDF with the highlights and notes as comments (Preview, Acrobat); open it in ocrp to bring the notes back">Save PDF with comments</button>
 <hr><button id="mClr" title="Clear all notes, highlights and the PDF's own annotations (Undo for 10 s)">Clear all</button>
 </div></div>
-<button class="lnk" id="mCfgB" title="Model, key, language, view">Settings</button>
 <div id="mTabs" role="tablist" aria-label="Open PDFs"></div>
 <span id="mMsg"></span><button class="lnk" id="mUndo" hidden>Undo</button>
 </div>
 <div id="mMain">
 <div id="mViewWrap"><div id="mThumb"></div><div id="mView"></div>
+<div id="mHint"><div class="hint">
+<div id="mKeyFirst" hidden><b>DeepSeek API key</b>
+<input id="mKey0" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false"><button class="lnk" id="mKeySave">Save</button>
+<p>Stored in this browser; change it later in Settings (,).</p></div>
+<dl class="keys">
+<dt>Open a PDF</dt><dd><kbd>⌘</kbd><kbd>O</kbd></dd>
+<dt>Save notes</dt><dd><kbd>⌘</kbd><kbd>S</kbd></dd>
+<dt>Save PDF with comments</dt><dd><kbd>⌘</kbd><kbd>⇧</kbd><kbd>S</kbd></dd>
+<dt>Pages · zoom</dt><dd><kbd>←</kbd><kbd>→</kbd><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></dd>
+<dt>Theme · thumbnails</dt><dd><kbd>T</kbd><kbd>H</kbd></dd>
+<dt>Settings · all shortcuts</dt><dd><kbd>,</kbd><kbd>?</kbd></dd>
+</dl></div></div>
 <div id="mNotes"></div>
 <section id="mConn" hidden aria-label="Settings"><div class="sheet"><header><button class="ib" id="mConnX" title="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b>Settings</b></header>
 <div id="mConnB">
@@ -162,7 +182,9 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 <dt>Tabs</dt><dd>Every PDF opens in its own tab, with its own notes; middle-click or × closes it</dd>
 <dt>Select text</dt><dd>Translate or Comment from the bar that appears (Auto translates at once)</dd>
 <dt>Under a translation</dt><dd>Ask the AI about the passage</dd>
-<dt><kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>S</kbd></dt><dd>Save the notes (.ocrp.json)</dd>
+<dt><kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>O</kbd></dt><dd>Open a PDF (or drop it on the viewer)</dd>
+<dt><kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>S</kbd></dt><dd>Save the notes (.ocrp.json); <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd> saves a PDF with the comments</dd>
+<dt><kbd>,</kbd></dt><dd>Settings: model, API key, language</dd>
 <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Step pages (<kbd>Home</kbd>/<kbd>End</kbd>: first/last)</dd>
 <dt><kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd></dt><dd>Zoom (<kbd>Ctrl</kbd>+wheel too)</dd>
 <dt><kbd>T</kbd> <kbd>H</kbd></dt><dd>Light/dark theme · thumbnails</dd>
@@ -195,7 +217,11 @@ const URL0='https://api.deepseek.com/chat/completions',MODELS=['deepseek-v4-pro'
 {const e=$('mThink'),v=ls('mrdThink');v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>ls('mrdThink',e.value);seg('mThink')}
 for(const[i,k]of aiF)$(i).onchange=()=>ls('mrdDs'+k,$(i).value.trim());
 aiLoad();
-$('mCfgB').onclick=()=>cfg($('mConn').hidden);$('mConnX').onclick=()=>cfg(0);$('mConn').onclick=e=>{e.target===$('mConn')&&cfg(0)};
+$('mConnX').onclick=()=>cfg(0);$('mConn').onclick=e=>{e.target===$('mConn')&&cfg(0)};
+// first run: type the key once; the empty viewer lists the important shortcuts
+const keySave=()=>{const v=$('mKey0').value.trim();if(!v)return $('mKey0').focus();ls('mrdDsKey',v);$('mKey').value=v;$('mKeyFirst').hidden=true;msg('Key saved')};
+$('mKeySave').onclick=keySave;$('mKey0').onkeydown=e=>{e.key==='Enter'&&keySave()};
+$('mKey').value||($('mKeyFirst').hidden=false);
 
 // ---------- language, prompt ----------
 const LANGS=['Simplified Chinese','English'],
@@ -420,7 +446,7 @@ function tabHold(){TABS[TI]={pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN,st:V.sc
 function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN}=t);
   pdf=pdf||null;pdfName=pdfName||'';scale=scale||1;annOff=!!annOff;annN=annN||0;curN=curN||1;TABS[i]={};
   N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el),o.y=null;
-  document.title=pdf?'ocrp — '+pdfName:'ocrp';
+  document.title=pdf?'ocrp — '+pdfName:'ocrp';document.body.classList.toggle('pdf',!!pdf);
   selHide();  pdf?(layout().then(()=>V.scrollTop=Math.min(t.st||0,V.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
   tabUI();sched()}
 function tabFresh(){if(!pdf)return true;
@@ -431,7 +457,7 @@ function tabGo(i){if(i===TI||!TABS[i])return;tabHold();tabShow(i)}
 function tabClose(i){const nm=i===TI?pdfName:TABS[i].pdfName||'',ns=i===TI?N.slice():TABS[i].notes||[],dp=i===TI?pdf:TABS[i].pdf;
   nsaveTab(nm,fprOf(dp),ns);ns.forEach(o=>{o.ac.abort();o.qc?.abort()});dp?.destroy().catch(()=>{});
   if(TABS.length<2){N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
-    pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=1;scale=1;document.title='ocrp';
+    pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=1;scale=1;document.title='ocrp';document.body.classList.remove('pdf');
     selHide();$('mUndo').hidden=true;undoD=null;
     TABS[0]={};TI=0;tabUI();sched();return msg('Closed')}
   if(i===TI){tabHold();TABS.splice(i,1);tabShow(Math.min(i,TABS.length-1))}
@@ -458,7 +484,7 @@ async function openPdf(buf,name){
   catch(e){msg('Cannot open '+name+': '+e.message);tabBack();return false}
   TN=0;
   selHide();
-  clr();pdfName=name;pdfH=jsH=null;curN=1;document.title='ocrp — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  clr();pdfName=name;pdfH=jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
   let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT||x.filename===AT0||x.filename===AT1)}catch(_){}
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
@@ -552,7 +578,9 @@ $('mFile').onchange=e=>{const fs=[...e.target.files];fs.length&&openFiles(fs);e.
 document.addEventListener('dragover',e=>[...e.dataTransfer?.types||[]].includes('Files')&&e.preventDefault());
 document.addEventListener('drop',e=>{const fs=[...e.dataTransfer?.files||[]];if(!fs.length)return;e.preventDefault();
   Promise.all([...e.dataTransfer.items].filter(x=>x.kind==='file').map(x=>x.getAsFileSystemHandle?.())).then(hs=>openFiles(fs,hs),()=>openFiles(fs))});
-document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){e.preventDefault();nfile()}
+document.addEventListener('keydown',e=>{const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase();
+  if(mod&&k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}
+  else if(mod&&k==='o'){e.preventDefault();A.open()}
   else if(e.key==='Escape'){selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0)}});
 document.addEventListener('click',e=>{const d=e.target.closest('.dd');document.querySelectorAll('.dd.open').forEach(x=>x!==d&&x.classList.remove('open'));
   d&&(e.target.closest('.ddb')?d.classList.toggle('open'):e.target.closest('.menu button')&&d.classList.remove('open'))});
@@ -563,6 +591,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,select,button,a,[contenteditable]'))return;
   const k=e.key;
   if(k==='?')$('mHelp').showModal();
+  else if(k===',')cfg($('mConn').hidden);
   else if(k.toLowerCase()==='t')A.theme();else if(k.toLowerCase()==='h')A.thumbs();
   else if(k==='+'||k==='=')zoom(1.2);else if(k==='-')zoom(1/1.2);else if(k==='0')fit();
   else if(k==='ArrowLeft')goto(curN-1);else if(k==='ArrowRight')goto(curN+1);
