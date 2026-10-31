@@ -183,14 +183,12 @@ body.thumbs #mThumb{display:block}
 </div>
 <section id="mConn" hidden aria-label="Settings"><header><button class="ib" id="mConnX" title="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b>Settings</b></header>
 <div id="mConnB">
-<div class="card"><b>Model</b><div class="kv">
-<span>Provider</span><div><select id="mProv"><option value="Glm">GLM</option><option value="Ds">DeepSeek</option></select></div>
+<div class="card"><b>DeepSeek</b><div class="kv">
 <span>Model</span><select id="mModel"></select>
 <span>Think</span><div title="Reasoning effort: how hard the model thinks before answering"><select id="mThink"><option value="low">Low</option><option value="high">High</option><option value="max">Max</option></select></div>
 <span>Key</span><input id="mKey" type="password" autocomplete="off" placeholder="API key" spellcheck="false">
 <span>URL</span><input id="mEp" spellcheck="false">
 </div>
-<label class="gr" id="mRlyL"><input type="checkbox" id="mRly"><span>Use svguest's Cloudflare relay — GLM blocks browser requests from this site; your key and text pass through it, nothing is stored</span></label>
 <p>Keys stay in this browser.</p></div>
 <div class="card"><b>Language</b><div class="kv"><span>Into</span><div><select id="mLang"></select></div></div><textarea id="mPrompt" hidden></textarea>
 <p>Translations and answers in the chat under each translation use this language.</p></div>
@@ -224,22 +222,18 @@ function seg(id){const s=$(id),g=el('div','seg'),up=()=>[...g.children].forEach(
   for(const o of s.options){const b=btn(o.text);b.type='button';b.dataset.v=o.value;b.onclick=()=>{s.value=o.value;s.onchange?.();up()};g.append(b)}
   s.hidden=true;s.after(g);up()}
 
-// ---------- AI settings (GLM / DeepSeek), shown in the Settings sheet ----------
-const AI={Glm:['https://open.bigmodel.cn/api/paas/v4/chat/completions','glm-5.3','glm-5.3-flash'],Ds:['https://api.deepseek.com/chat/completions','deepseek-v4-pro','deepseek-flash']},
+// ---------- AI settings (DeepSeek), shown in the Settings sheet; stored as mrdDs<Key|Model|Ep> ----------
+const URL0='https://api.deepseek.com/chat/completions',MODELS=['deepseek-v4-pro','deepseek-flash'],
   aiF=[['mKey','Key'],['mModel','Model'],['mEp','Ep']],
-  // GLM relay (same Worker as svguest): only on GitHub Pages, only the two official GLM URLs; on by default ('0' = off)
-  RLY='https://svguest-glm.jieqiang-he-dawn.workers.dev',RLYR={'https://open.bigmodel.cn/api/paas/v4/chat/completions':'standard','https://open.bigmodel.cn/api/coding/paas/v4/chat/completions':'coding'},
-  rlyOk=()=>location.origin==='https://jieqianghe.github.io'&&$('mProv').value==='Glm',
   mdUI=()=>{$('mMdN').textContent=$('mModel').value;$('mMd').classList.toggle('need',!$('mKey').value.trim());$('mMd').title=$('mKey').value.trim()?'Model and key':'Add an API key'},
-  aiLoad=()=>{const p=$('mProv').value,[u,...ms]=AI[p],m=ls('mrd'+p+'Model');
-    $('mModel').replaceChildren(...ms.map(x=>new Option(x,x)));
-    $('mModel').value=ms.includes(m)?m:ms[0];
-    $('mKey').value=ls('mrd'+p+'Key')||'';$('mEp').value=ls('mrd'+p+'Ep')||u;$('mRlyL').hidden=!rlyOk();mdUI()},
+  aiLoad=()=>{const m=ls('mrdDsModel');
+    $('mModel').replaceChildren(...MODELS.map(x=>new Option(x,x)));
+    $('mModel').value=MODELS.includes(m)?m:MODELS[0];
+    $('mKey').value=ls('mrdDsKey')||'';$('mEp').value=ls('mrdDsEp')||URL0;mdUI()},
   cfg=on=>{$('mConn').hidden=!on;on&&!$('mKey').value&&setTimeout(()=>$('mKey').focus())};
-for(const[i,k]of[['mProv','mrdAi'],['mThink','mrdThink']]){const e=$(i),v=ls(k);v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>{ls(k,e.value);i==='mProv'&&aiLoad()};seg(i)}
-for(const[i,k]of aiF)$(i).onchange=()=>{ls('mrd'+$('mProv').value+k,$(i).value.trim());mdUI()};
+{const e=$('mThink'),v=ls('mrdThink');v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>ls('mrdThink',e.value);seg('mThink')}
+for(const[i,k]of aiF)$(i).onchange=()=>{ls('mrdDs'+k,$(i).value.trim());mdUI()};
 $('mKey').oninput=mdUI;
-$('mRly').checked=ls('mrdGlmRelay')!=='0';$('mRly').onchange=()=>ls('mrdGlmRelay',$('mRly').checked?'1':'0');
 aiLoad();
 $('mCfgB').onclick=$('mMd').onclick=()=>cfg($('mConn').hidden);$('mConnX').onclick=()=>cfg(0);
 
@@ -256,35 +250,15 @@ $('mAuto').onchange=()=>ls('mrdAuto',$('mAuto').checked?'1':'0');
 
 // ---------- requests ----------
 const cnt=()=>$('mCnt').textContent=$('mSrc').value?nl($('mSrc').value.length)+' chars':'';
-const glmJ={},  // GLM endpoints that answered with plain JSON instead of a stream: asked without stream next time
-  MARK='<svg viewBox="6 4.75 228 228"><path d="M29 85.86L113 36.14M127 36.14L211 85.86" stroke-width="20"/><path d="M15 83h14v14H15zM113 25h14v14h-14zM211 83h14v14h-14z" stroke-width="14"/><path d="M98 111V101Q98 95 104 95H136Q142 95 142 101V111" stroke-width="16"/><rect x="44" y="111" width="152" height="100" rx="5" stroke-width="16"/></svg>',
+const MARK='<svg viewBox="6 4.75 228 228"><path d="M29 85.86L113 36.14M127 36.14L211 85.86" stroke-width="20"/><path d="M15 83h14v14H15zM113 25h14v14h-14zM211 83h14v14h-14z" stroke-width="14"/><path d="M98 111V101Q98 95 104 95H136Q142 95 142 101V111" stroke-width="16"/><rect x="44" y="111" width="152" height="100" rx="5" stroke-width="16"/></svg>',
   apiMsg=t=>{try{const j=JSON.parse(t),e=j.error||j;return(e.code?'['+e.code+'] ':'')+(e.message||t)}catch(_){return t}};
-// ask(): one streamed request, like svguest's call() — GLM falls back to a single JSON reply when the endpoint
-// will not stream; finish_reason:'length' comes back as cut
+// ask(): one streamed request (svguest's call() without the GLM routes); finish_reason:'length' comes back as cut
 async function ask(model,msgs,myAc,ui){
-  const p=$('mProv').value,u=$('mEp').value.trim(),key=$('mKey').value.trim(),rly=rlyOk()&&$('mRly').checked;
-  if(rly&&!RLYR[u])throw Error('The relay only forwards the official GLM URL (standard or Coding Plan)');
-  const post=b=>fetch(rly?RLY+'/glm/'+RLYR[u]:u,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},signal:myAc.signal,...(rly&&{credentials:'omit',redirect:'error'}),body:JSON.stringify(b)}),
-    body={model,messages:msgs,stream:true,max_tokens:32768,thinking:{type:'enabled'},reasoning_effort:$('mThink').value};
-  p==='Glm'&&glmJ[u]&&(body.stream=false);
-  let r;
-  try{r=await post(body)}
-  catch(e){
-    if(e.name!=='TypeError'||myAc.signal.aborted)throw e;
-    if(rly)throw Error('The GLM relay could not be reached. Check the network, or turn the relay off in Settings. '+e.message);
-    if(p!=='Glm'||!body.stream)throw Error('The API could not be reached. Check the network and the URL'+(p==='Glm'&&rlyOk()?' — or turn on the relay in Settings':'')+'. '+e.message);
-    msg('GLM streaming could not open; waiting for a single reply…');glmJ[u]=1;body.stream=false;
-    try{r=await post(body)}catch(x){if(x.name==='TypeError'&&!myAc.signal.aborted)throw Error('GLM could not be reached. Check the network and the URL. '+x.message);throw x}
-  }
+  const u=$('mEp').value.trim(),key=$('mKey').value.trim();let r;
+  try{r=await fetch(u,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},signal:myAc.signal,
+    body:JSON.stringify({model,messages:msgs,stream:true,max_tokens:32768,thinking:{type:'enabled'},reasoning_effort:$('mThink').value})})}
+  catch(e){if(e.name!=='TypeError'||myAc.signal.aborted)throw e;throw Error('The API could not be reached. Check the network and the URL. '+e.message)}
   if(!r.ok)throw Error(`${r.status} ${apiMsg(await r.text())}`.slice(0,300));
-  if(p==='Glm'&&!/text\/event-stream/i.test(r.headers.get('Content-Type')||'')){
-    const t=await r.text();let j;try{j=JSON.parse(t)}catch(_){}
-    if(j?.error)throw Error(apiMsg(t));
-    glmJ[u]=1;const ch=j?.choices?.[0],c=ch?.message;
-    if(!c)throw Error('GLM sent an unexpected reply — check the URL and key');
-    c.reasoning_content&&ui.think(c.reasoning_content);c.content&&ui.text(c.content);
-    return{out:c.content||'',cut:ch.finish_reason==='length'?1:0}
-  }
   let out='',cut=0;
   const rd=r.body.pipeThrough(new TextDecoderStream()).getReader();let buf='';
   const on=l=>{const d=l.startsWith('data:')&&l.slice(5).trim();if(!d||d==='[DONE]')return;let j;try{j=JSON.parse(d)}catch{return}
