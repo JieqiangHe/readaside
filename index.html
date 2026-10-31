@@ -62,15 +62,30 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 #mHint{position:fixed;inset:0;z-index:4;display:grid;place-items:center;padding:24px;pointer-events:none}
 body.pdf #mHint{display:none}
 #mHint .hint{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--h4)}
-#mHint .ksheet{pointer-events:none;width:min(430px,92vw);border-radius:16px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 28px 70px -16px #0007}
-#mHint .kh{padding:18px 22px 0}
-#mHint .kh h3{margin:0;font-size:20px;font-weight:600;letter-spacing:-.02em;color:var(--fg)}#mHint .kh h3 small{margin-left:4px;font-size:13px;font-weight:400;letter-spacing:0;color:var(--t3)}
-#mHint .kh p{margin:5px 0 16px;font-size:12.5px;line-height:1.5;color:var(--h4)}
-#mHint ul{list-style:none;margin:0;padding:0 22px 20px;display:grid;grid-template-columns:1fr 1fr;gap:13px 18px}
+#mHint .wcard{pointer-events:auto;width:min(430px,92vw);border-radius:16px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 28px 70px -16px #0007;overflow:hidden}
+#mHint .wh{position:relative;height:150px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,var(--side),var(--btn));border-bottom:1px solid var(--line)}
+#mHint .wchip{position:absolute;left:16px;top:14px;padding:4px 9px;border-radius:999px;background:var(--btn);box-shadow:0 0 0 1px var(--line);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--h4)}
+#mHint .wp{display:flex;gap:8px;width:282px;padding:10px;border-radius:12px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 12px 32px -10px #0004;margin-bottom:-16px}
+#mHint .mp{flex:1;display:flex;flex-direction:column;gap:5px;padding:9px;border-radius:6px;background:#fff;box-shadow:0 0 0 1px #00000014}
+#mHint .mp i,#mHint .mc i{display:block;height:4px;border-radius:2px;background:#0000001a}
+#mHint .mp i:nth-child(2n){width:84%}
+#mHint .mp i.on{height:7px;background:#f5a5004d}
+#mHint .mc{flex:none;width:94px;display:flex;flex-direction:column;gap:4px;padding:9px;border-radius:6px;background:var(--side);box-shadow:0 0 0 1px var(--line)}
+#mHint .mc b{display:block;height:5px;width:42%;border-radius:2px;background:var(--nt);opacity:.55}
+#mHint .mc i:last-child{width:58%}
+#mHint .wb{padding:18px 22px 4px}
+#mHint .wb h3{margin:0;font-size:20px;font-weight:600;letter-spacing:-.02em;color:var(--fg)}
+#mHint .wb h3 span{margin-left:4px;font-size:13px;font-weight:400;letter-spacing:0;color:var(--t3)}
+#mHint .wb p{margin:4px 0 15px;font-size:12.5px;line-height:1.5;color:var(--h4)}
+#mHint ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:13px 18px}
 #mHint li{display:flex;gap:9px;align-items:flex-start;min-width:0}
-#mHint li kbd{flex:none;margin-top:1px}
+#mHint li svg{flex:none;width:16px;height:16px;margin-top:1px;fill:none;stroke:var(--fg);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
 #mHint li b{display:block;font-size:12.5px;font-weight:600;line-height:1.35;color:var(--fg)}
 #mHint li span{display:block;margin-top:2px;font-size:11.5px;line-height:1.45;color:var(--h4)}
+#mHint .wf{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px 20px}
+#mHint .wf span{font-size:12px;color:var(--h4)}
+#mHint .wf button{height:34px;padding:0 20px;border:0;border-radius:9px;background:var(--fg);color:var(--btn);font-weight:600}
+#mHint .wf button:hover{opacity:.88}
 #mKeyFirst{pointer-events:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb)}
 #mKeyFirst b{flex-basis:100%;text-align:center;font-size:12px;color:var(--fg)}
 #mKeyFirst input{width:230px}
@@ -162,19 +177,25 @@ body.pdf #mHint{display:none}
 <div id="mKeyFirst" hidden><b>DeepSeek API key</b>
 <input id="mKey0" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false"><button class="lnk" id="mKeySave">Save</button>
 <p>Stored in this browser; change it later in Settings (,).</p></div>
-<div class="ksheet"><div class="kh"><h3>ocrp <small>old, clean, read, paper</small></h3>
-<p>Press <kbd>O</kbd> to open a PDF, or drop it here.</p></div>
+<div class="wcard">
+<div class="wh"><span class="wchip">shortcuts</span>
+<div class="wp"><div class="mp"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div><div class="mc"><b></b><i></i><i></i><i></i></div></div>
+</div>
+<div class="wb"><h3>ocrp <span>old, clean, read, paper</span></h3>
+<p>Press <kbd>O</kbd> to open a PDF, or drop it here. Everything else is a key away.</p>
 <ul>
-<li><kbd>O</kbd><div><b>Open a PDF</b><span>or drop the file</span></div></li>
-<li><kbd>⌘S</kbd><div><b>Save notes</b><span>an .ocrp.json beside the PDF</span></div></li>
-<li><kbd>⌘⇧S</kbd><div><b>Save PDF</b><span>with the comments in it</span></div></li>
-<li><kbd>← →</kbd><div><b>Pages</b><span>Home and End for first and last</span></div></li>
-<li><kbd>+ − 0</kbd><div><b>Zoom</b><span>0 fits the width</span></div></li>
-<li><kbd>T</kbd><div><b>Theme</b><span>light or dark</span></div></li>
-<li><kbd>H</kbd><div><b>Thumbnails</b><span>show or hide</span></div></li>
-<li><kbd>,</kbd><div><b>Settings</b><span>model, key, language</span></div></li>
-<li><kbd>?</kbd><div><b>All shortcuts</b><span>the full list</span></div></li>
+<li><svg viewBox="0 0 16 16"><path d="M4 2.5h6l2 2v9H4z"/><path d="M6 6.5h4M6 9h4"/></svg><div><b>Open a PDF</b><span>O, or drop the file</span></div></li>
+<li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><div><b>Save notes</b><span>⌘S — an .ocrp.json beside the PDF</span></div></li>
+<li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><div><b>Save PDF</b><span>⌘⇧S — with the comments in it</span></div></li>
+<li><svg viewBox="0 0 16 16"><path d="M2.5 8h11M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg><div><b>Pages</b><span>← →, Home and End</span></div></li>
+<li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="m10.2 10.2 3.3 3.3"/></svg><div><b>Zoom</b><span>+ − 0</span></div></li>
+<li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5a5.5 5.5 0 0 0 0 11z" fill="currentColor" stroke="none"/></svg><div><b>Theme</b><span>T — light or dark</span></div></li>
+<li><svg viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M6 3v10"/></svg><div><b>Thumbnails</b><span>H — show or hide</span></div></li>
+<li><svg viewBox="0 0 16 16"><path d="M3 5h6M12 5h1M3 11h1M7 11h6"/><circle cx="10.5" cy="5" r="1.5"/><circle cx="5.5" cy="11" r="1.5"/></svg><div><b>Settings</b><span>, — model, key, language</span></div></li>
+<li><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M6.4 6.6a1.7 1.7 0 1 1 2.6 1.5c-.6.4-1 .8-1 1.4M8 11.6v.6"/></svg><div><b>All shortcuts</b><span>?</span></div></li>
 </ul></div>
+<div class="wf"><span>Press <kbd>?</kbd> for the full list</span><button id="mHintOk">Got it</button></div>
+</div>
 </div></div>
 <div id="mNotes"></div>
 <section id="mConn" hidden aria-label="Settings"><div class="sheet"><header><button class="ib" id="mConnX" title="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b>Settings</b></header>
@@ -238,7 +259,7 @@ $('mConnX').onclick=()=>cfg(0);$('mConn').onclick=e=>{e.target===$('mConn')&&cfg
 // first run: type the key once; the empty viewer lists the important shortcuts
 const keySave=()=>{const v=$('mKey0').value.trim();if(!v)return $('mKey0').focus();ls('mrdDsKey',v);$('mKey').value=v;$('mKeyFirst').hidden=true;msg('Key saved')};
 let hintGone=0;const hintOff=()=>{hintGone||(hintGone=1,$('mHint').hidden=true)};  // Enter or O clears the start screen
-$('mKeySave').onclick=()=>{hintOff();keySave()};$('mKey0').onkeydown=e=>{e.key==='Enter'&&(hintOff(),keySave())};
+$('mKeySave').onclick=()=>{hintOff();keySave()};$('mHintOk').onclick=()=>hintOff();$('mKey0').onkeydown=e=>{e.key==='Enter'&&(hintOff(),keySave())};
 $('mKey').value||($('mKeyFirst').hidden=false);
 
 // ---------- language, prompt ----------
