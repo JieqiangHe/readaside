@@ -355,6 +355,7 @@ function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n
   return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
 function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based); o.y stays in content coordinates, the painted top is viewport ones
   if(N.length&&!NS.clientWidth)col();  // self-heal: cards exist but the column never took its width
+  N.length||$('mOv').hidden||($('mOv').hidden=true);  // no cards, no map
   const w=Math.max(0,NS.clientWidth-32)||noteW(),vs=[];
   for(const o of N){o.w=want(o);o.el.style.left='16px';o.el.style.width=w+'px';
     o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
