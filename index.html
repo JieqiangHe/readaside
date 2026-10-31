@@ -174,10 +174,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mK>div>p{margin:0;padding:8px 14px;border-top:1px solid var(--line);color:var(--h4);font-size:11px}
 #mK>div>p kbd{margin:0 3px 0 10px}#mK>div>p kbd:first-child{margin-left:0}
 @media (prefers-reduced-motion:reduce){#mKl .kc,#mKl .kc img{transition:none}#mKl .kc.on{transform:none}}
-/* ---------- the notes dot: one small terracotta dot above the cards, opening an overview of them ---------- */
-#mDot{position:fixed;top:13px;right:15px;z-index:35;width:12px;height:12px;padding:0;border:0;border-radius:50%;background:var(--onb);box-shadow:0 0 0 3px #c964421f;cursor:pointer;transition:box-shadow .16s,transform .16s}
-#mDot:hover{box-shadow:0 0 0 5px #c9644233;transform:scale(1.1)}
-#mDot[hidden]{display:none}
+/* ---------- the notes map (M): an overview of every card in the paper ---------- */
 #mOv{position:fixed;top:32px;right:15px;z-index:36;width:min(380px,calc(100vw - 30px));max-height:min(64vh,520px);display:flex;flex-direction:column;border-radius:10px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 24px 60px -20px #0006;overflow:hidden}
 #mOv[hidden]{display:none}
 #mOv b{padding:10px 12px 4px;font-size:12px;font-weight:600;color:var(--h4)}
@@ -213,6 +210,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><b>Save PDF</b><span><kbd>P</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save Markdown</b><span><kbd>N</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><rect x="2.5" y="4.5" width="8" height="9" rx="1"/><path d="M5.5 2.5h7a1 1 0 0 1 1 1v7"/></svg><b>Documents</b><span><kbd>D</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><path d="M2.5 12.5h11"/><circle cx="4.5" cy="6" r="1.6"/><circle cx="9" cy="8" r="1.6"/><circle cx="12.5" cy="4.5" r="1.6"/><path d="M6 6.6l1.2.9M10.4 7.2l.9-.9"/></svg><b>Notes map</b><span><kbd>M</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M2.5 8h11M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg><b>Pages</b><span><kbd>←</kbd><kbd>→</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="M7 5v4M5 7h4"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Zoom</b><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Find</b><span><kbd>F</kbd></span></li>
@@ -242,7 +240,6 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
 <div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>← →</kbd>Move<kbd data-k="ret">↵</kbd>Open<kbd>Esc</kbd>Close</p></div></div>
-<button id="mDot" hidden title="Notes in this paper" aria-label="Notes overview"></button>
 <div id="mOv" hidden><b id="mOvH"></b><div class="list" id="mOvL"></div></div>
 <div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
 <script>
@@ -345,8 +342,8 @@ const ovClose=()=>{OV.hidden=true},
     for(const o of srt){const r=el('div','row');
       r.append(el('em',0,o.rs?.length?'p.'+o.rs[0][0]:'—'),el('s',0,String(o.out||'').slice(0,90)||'(no text)'));
       r.title=(o.t||'').slice(0,300);r.onclick=()=>ovJump(o);OVL.append(r)}};
-$('mDot').onclick=()=>OV.hidden?ovOpen():ovClose();
-document.addEventListener('mousedown',e=>{OV.hidden||e.target.closest('#mOv,#mDot')||ovClose()});
+
+document.addEventListener('mousedown',e=>{OV.hidden||e.target.closest('#mOv')||ovClose()});
 
 // rects(range): the selection's line boxes per page, merged, in PDF units, top first
 function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n,p.getBoundingClientRect()]),R=[];
@@ -358,7 +355,6 @@ function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n
   return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
 function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based); o.y stays in content coordinates, the painted top is viewport ones
   if(N.length&&!NS.clientWidth)col();  // self-heal: cards exist but the column never took its width
-  {const dn=$('mDot'),has=N.length>0;if(dn.hidden===has){dn.hidden=!has;has||($('mOv').hidden=true)}}
   const w=Math.max(0,NS.clientWidth-32)||noteW(),vs=[];
   for(const o of N){o.w=want(o);o.el.style.left='16px';o.el.style.width=w+'px';
     o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
@@ -820,6 +816,7 @@ document.addEventListener('keydown',e=>{
   else if(k==='d'||c==='KeyD'){e.preventDefault();kOpen()}
   else if(k==='p'||c==='KeyP'){e.preventDefault();npdf()}
   else if(k==='n'||c==='KeyN'){e.preventDefault();nmd()}
+  else if(k==='m'||c==='KeyM'){e.preventDefault();OV.hidden?ovOpen():ovClose()}
   else if(k==='['||c==='BracketLeft')tabGo((TI-1+TABS.length)%TABS.length);else if(k===']'||c==='BracketRight')tabGo((TI+1)%TABS.length);
   else if((k===','||c==='Comma')&&!e.shiftKey){e.preventDefault();cfg($('mConn').hidden)}
   else if(k==='o'||c==='KeyO'){hintOff();A.open()}
