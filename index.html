@@ -60,7 +60,7 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 .tp:hover .ph,.tp:hover canvas{box-shadow:0 0 0 1px var(--onb)}
 /* ---------- empty viewer: the one-time key and the shortcuts ---------- */
 #mHint{position:fixed;inset:0;z-index:4;display:grid;place-items:center;padding:24px;pointer-events:none}
-body.pdf #mHint{display:none}
+body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mHint .hint{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--h4)}
 #mHint .wcard{pointer-events:auto;width:min(430px,92vw);border-radius:16px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 28px 70px -16px #0007;overflow:hidden}
 #mHint .wh{position:relative;height:150px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,var(--side),var(--btn));border-bottom:1px solid var(--line)}
@@ -159,13 +159,6 @@ body.pdf #mHint{display:none}
 #mFind input{width:220px;height:24px;padding:0 2px;border:0;border-radius:0;background:none;font-size:12.5px}
 #mFind span{font-size:11px;color:var(--t3);min-width:56px;text-align:right;white-space:nowrap}
 .textLayer mark.fnd{background:#f5a50066;color:transparent;border-radius:2px}.textLayer mark.fnd.on{background:#f5a500cc}
-/* ---------- help ---------- */
-#mHelp{padding:0;width:min(420px,96vw)}
-#mHelp form{padding:16px 18px 14px;font-size:12.5px;line-height:1.45}
-#mHelp h3{margin:0 0 8px;font-size:15px}
-#mHelp dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0}
-#mHelp dt{color:var(--h4)}#mHelp dd{margin:0}
-#mHelp .ft{display:flex;margin:12px 0 0}#mHelp .ft button{margin-left:auto;padding:2px 12px}
 </style>
 </head>
 <body>
@@ -197,7 +190,7 @@ body.pdf #mHint{display:none}
 <li><svg viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M6 3v10"/></svg><b>Thumbnails</b><span><kbd>H</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M3 5h6M12 5h1M3 11h1M7 11h6"/><circle cx="10.5" cy="5" r="1.5"/><circle cx="5.5" cy="11" r="1.5"/></svg><b>Settings</b><span><kbd>,</kbd></span></li>
 </ul></div>
-<div class="wf"><span>Press <kbd>?</kbd> for the full list · <a href="https://github.com/JieqiangHe" target="_blank" rel="noopener">GitHub ↗</a></span><button id="mHintOk">Got it</button></div>
+<div class="wf"><span>Press <kbd>?</kbd> to bring this card back · <a href="https://github.com/JieqiangHe" target="_blank" rel="noopener">GitHub ↗</a></span><button id="mHintOk">Got it</button></div>
 </div>
 </div></div>
 <div id="mNotes"></div>
@@ -219,21 +212,6 @@ body.pdf #mHint{display:none}
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
 <div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
-<dialog id="mHelp"><form method="dialog"><h3>Shortcuts</h3><dl>
-<dt>Reading</dt><dd>The bar hides itself; move the pointer to the top edge to bring it back</dd>
-<dt>Tabs</dt><dd>Every PDF opens in its own tab, with its own notes; middle-click or × closes it</dd>
-<dt>Select text</dt><dd>Translate or Comment from the bar that appears (Auto translates at once)</dd>
-<dt>Under a translation</dt><dd>Ask the AI about the passage</dd>
-<dt><kbd>O</kbd></dt><dd>Open a PDF (also <kbd>⌘</kbd>+<kbd>O</kbd>, or drop it on the viewer)</dd>
-<dt><kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>S</kbd></dt><dd>Save the notes (.ocrp.json); <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd> saves a PDF with the comments</dd>
-<dt><kbd>,</kbd></dt><dd>Settings: model, API key, language</dd>
-<dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Step pages (<kbd>Home</kbd>/<kbd>End</kbd>: first/last)</dd>
-<dt><kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd></dt><dd>Zoom (<kbd>Ctrl</kbd>+wheel too)</dd>
-<dt><kbd>/</kbd></dt><dd>Find in the PDF (<kbd>Enter</kbd> next, <kbd>⇧</kbd>+<kbd>Enter</kbd> back, <kbd>Esc</kbd> closes)</dd>
-<dt><kbd>[</kbd> <kbd>]</kbd></dt><dd>Previous / next tab</dd>
-<dt><kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>X</kbd></dt><dd>Clear all notes, highlights and the PDF annotations</dd>
-<dt><kbd>T</kbd> <kbd>H</kbd></dt><dd>Light/dark theme · thumbnails</dd>
-</dl><p class="ft"><button value="">Close</button></p></form></dialog>
 <script>
 'use strict';
 const $=i=>document.getElementById(i),V=$('mView'),SC=$('mMain'),ls=(k,v)=>{try{return v==null?localStorage[k]:localStorage[k]=v}catch(_){}};
@@ -265,7 +243,8 @@ aiLoad();
 $('mConnX').onclick=()=>cfg(0);$('mConn').onclick=e=>{e.target===$('mConn')&&cfg(0)};
 // first run: type the key once; the empty viewer lists the important shortcuts
 const keySave=()=>{const v=$('mKey0').value.trim();if(!v)return $('mKey0').focus();ls('mrdDsKey',v);$('mKey').value=v;$('mKeyFirst').hidden=true;msg('Key saved')};
-let hintGone=0;const hintOff=()=>{hintGone||(hintGone=1,$('mHint').hidden=true)};  // Enter or O clears the start screen
+const hintOff=()=>{document.body.classList.remove('ask');$('mHint').hidden=true},  // Enter or O clears the start screen
+  hintOn=()=>{document.body.classList.add('ask');$('mHint').hidden=false};  // ? brings it back
 $('mKeySave').onclick=()=>{hintOff();keySave()};$('mHintOk').onclick=()=>hintOff();$('mKey0').onkeydown=e=>{e.key==='Enter'&&(hintOff(),keySave())};
 $('mKey').value||($('mKeyFirst').hidden=false);
 
@@ -663,13 +642,13 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 // one key handler for the whole app: physical key codes (e.code) so a Chinese IME with full-width
 // punctuation cannot break it, and no shortcut fires while the IME is composing
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
+  if(e.key==='Escape'){document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
   if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
   if(e.isComposing||e.keyCode===229)return;
   if(e.target.closest('input,textarea,select,button,a,[contenteditable]'))return;
   if(k==='Enter')hintOff();
-  else if(k==='?'||(c==='Slash'&&e.shiftKey))$('mHelp').showModal();
+  else if(k==='?'||(c==='Slash'&&e.shiftKey))hintOn();
   else if(k==='/'||c==='Slash')fOpen();
   else if(k==='['||c==='BracketLeft')tabGo((TI-1+TABS.length)%TABS.length);else if(k===']'||c==='BracketRight')tabGo((TI+1)%TABS.length);
   else if((k===','||c==='Comma')&&!e.shiftKey)cfg($('mConn').hidden);
@@ -683,7 +662,7 @@ document.addEventListener('keydown',e=>{
     else if(k==='PageDown'||((k===' '||c==='Space')&&!e.shiftKey))d=.9;else if(k==='PageUp'||((k===' '||c==='Space')&&e.shiftKey))d=-.9;
     d&&(e.preventDefault(),SC.scrollBy(0,d*SC.clientHeight))}});
 const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,types:[{description:'PDF or ocrp notes',accept:{'application/pdf':['.pdf'],'application/json':['.json']}}]}).then(async hs=>openFiles(await Promise.all(hs.map(h=>h.getFile())),hs),e=>e.name!=='AbortError'&&msg(e.message)):$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(curN-1),next:()=>goto(curN+1),
-  last:()=>goto(pdf?.numPages||1),out:()=>zoom(1/1.2),'in':()=>zoom(1.2),fit,help:()=>$('mHelp').showModal(),
+  last:()=>goto(pdf?.numPages||1),out:()=>zoom(1/1.2),'in':()=>zoom(1.2),fit,help:()=>hintOn(),
   theme:()=>{const d=document.documentElement.dataset.theme!=='dark',f=()=>{setTheme(d);sched()};ls('mrdTheme',d?'dark':'light');
     document.startViewTransition&&!RM.matches?document.startViewTransition(f):f()}};
 function setTheme(d){document.documentElement.dataset.theme=d?'dark':'light'}
