@@ -27,7 +27,7 @@ kbd{display:inline-block;min-width:1.6em;padding:0 5px;border-radius:4px;backgro
 .menu kbd{min-width:0;padding:0;box-shadow:none;background:none;font:inherit;opacity:.6}
 .seg{display:flex;gap:2px;min-width:0;padding:2px;border-radius:7px;background:none}.seg button{flex:1;height:20px;padding:0 6px;border:0;border-radius:5px;background:none;color:var(--h4);white-space:nowrap}.seg button:hover{background:none;color:var(--fg)}.seg button.on{background:var(--btnh);color:var(--fg)}
 /* ---------- motion (all of it off with reduced motion) ---------- */
-button,.seg button,.item,.hl,.tp,.ci,#mTabs .tab{transition:background-color .16s,color .16s,box-shadow .2s,opacity .16s,outline-color .16s}
+button,.seg button,.item,.hl,.tp,.ci{transition:background-color .16s,color .16s,box-shadow .2s,opacity .16s,outline-color .16s}
 .item{animation:mIn .32s cubic-bezier(.2,.8,.2,1)}.item.out{opacity:0;transform:translateX(10px) scale(.98);transition:opacity .18s,transform .18s;pointer-events:none}
 @keyframes mIn{from{opacity:0;transform:translateX(12px) scale(.98)}}
 .dd.open>.menu,#mSelT:not([hidden]){animation:mPop .16s cubic-bezier(.2,.8,.2,1)}@keyframes mPop{from{opacity:0;transform:translateY(-4px) scale(.98)}}
@@ -35,17 +35,8 @@ button,.seg button,.item,.hl,.tp,.ci,#mTabs .tab{transition:background-color .16
 .page canvas,.tp canvas{animation:mFade .25s ease-out}@keyframes mFade{from{opacity:0}}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.4s;animation-timing-function:ease-in-out}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-/* ---------- top bar (svguest-style words + the tab strip; fixed overlay that slides away while reading) ---------- */
-#mBar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;gap:2px;height:36px;padding:0 8px;background:var(--bar);border-bottom:1px solid var(--line);transition:transform .22s cubic-bezier(.2,.8,.2,1)}body.read #mBar{transform:translateY(-100%)}
-#mBar .lnk{flex:none;border:0;background:none;padding:3px 8px;border-radius:6px;font-weight:500}
-#mBar .ddb::after{content:'▾';margin-left:4px;font-size:9px;color:var(--t3)}
-#mUndo{flex:none;color:var(--onb)}
-#mBar .menu{left:0;right:auto}
-.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
-#mTabs{flex:1 1 0;min-width:0;display:none;align-items:center;gap:2px;height:27px;overflow-x:auto;scrollbar-width:none}#mTabs::-webkit-scrollbar{display:none}body.multi #mTabs{display:flex}
-#mTabs .tab{flex:0 1 auto;display:flex;align-items:center;gap:5px;max-width:190px;min-width:76px;height:25px;padding:0 3px 0 10px;border-radius:7px;color:var(--h4);cursor:default;user-select:none;white-space:nowrap}#mTabs .tab:hover{background:var(--btnh);color:var(--fg)}#mTabs .tab.on{background:var(--btn);color:var(--fg);box-shadow:var(--sh),inset 0 0 0 1px var(--btnb)}
-#mTabs .tab span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-#mTabs .tab button{flex:none;display:grid;place-items:center;width:17px;height:17px;padding:0;border:0;border-radius:5px;background:none;color:var(--t3);visibility:hidden}#mTabs .tab:hover button,#mTabs .tab.on button{visibility:visible}#mTabs .tab button:hover{background:var(--btnh);color:var(--fg)}#mTabs .tab button svg{width:9px;height:9px;fill:none;stroke:currentColor;stroke-width:1.6}
+/* ---------- undo (the only floating chrome: 10 s after a clear) ---------- */
+#mUndo{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:50;height:28px;padding:0 14px;border:0;border-radius:7px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 8px 24px -10px #0005;color:var(--onb);font:500 12px/1 inherit}#mUndo[hidden]{display:none}#mUndo:hover{background:var(--btnh)}
 /* ---------- viewer ---------- */
 #mMain{flex:1;display:flex;align-items:flex-start;min-height:0;overflow:auto;background:var(--view);scrollbar-width:thin}
 #mViewWrap{display:flex;align-items:flex-start;min-height:100%;position:relative;min-width:0}
@@ -177,11 +168,8 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 </style>
 </head>
 <body>
-<div id="mBar">
 <input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
-<div id="mTabs" role="tablist" aria-label="Open PDFs"></div>
-<button class="lnk" id="mUndo" style="margin-left:auto" hidden>Undo</button>
-</div>
+<button id="mUndo" hidden>Undo</button>
 <div id="mMain">
 <div id="mViewWrap"><div id="mThumb"></div><div id="mView"></div>
 <div id="mHint"><div class="hint">
@@ -193,7 +181,6 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <div class="wp"><div class="mp"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div><div class="mc"><b></b><i></i><i></i><i></i></div></div>
 </div>
 <div class="wb"><h3>ocrp <span>old, clean, read, paper</span></h3>
-<p class="bn">The top bar is hidden — move the pointer to the top edge to bring it back.</p>
 <ul>
 <li><svg viewBox="0 0 16 16"><path d="M4 2.5h6l2 2v9H4z"/><path d="M6 6.5h4M6 9h4"/></svg><b>Open a PDF</b><span><kbd>O</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save notes</b><span><kbd>⌘</kbd><kbd>S</kbd></span></li>
@@ -253,7 +240,7 @@ const URL0='https://api.deepseek.com/chat/completions',MODELS=['deepseek-v4-pro'
     $('mModel').replaceChildren(...MODELS.map(x=>new Option(x,x)));
     $('mModel').value=MODELS.includes(m)?m:MODELS[0];
     $('mKey').value=ls('mrdDsKey')||'';$('mEp').value=ls('mrdDsEp')||URL0},
-  cfg=on=>{$('mConn').hidden=!on;on?(barOff(),selHide(),!$('mKey').value&&setTimeout(()=>$('mKey').focus())):barOn()};
+  cfg=on=>{$('mConn').hidden=!on;on&&selHide();};
 {const e=$('mThink'),v=ls('mrdThink');v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>ls('mrdThink',e.value);seg('mThink')}
 for(const[i,k]of aiF)$(i).onchange=()=>ls('mrdDs'+k,$(i).value.trim());
 aiLoad();
@@ -518,14 +505,7 @@ function tabClose(i){const nm=i===TI?pdfName:TABS[i].pdfName||'',ns=i===TI?N.sli
   if(i===TI){tabHold();TABS.splice(i,1);tabShow(Math.min(i,TABS.length-1))}
   else{TABS.splice(i,1);i<TI&&TI--}
   tabUI();msg('Closed '+nm)}
-function tabUI(){const w=$('mTabs');document.body.classList.toggle('multi',TABS.length>1);
-  const nm=TABS.map((_,i)=>tabNm(i)),key=TI+'|'+nm.join('|');if(w._k===key)return;w._k=key;
-  w.replaceChildren(...TABS.map((_,i)=>{const d=el('div','tab'+(i===TI?' on':'')),x=el('button');
-    x.innerHTML='<svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6"/></svg>';x.title='Close this tab';
-    d.title=nm[i];d.append(el('span',0,nm[i].replace(/\.pdf$/i,'')||'PDF'),x);
-    d.onpointerdown=e=>{e.button===1&&e.preventDefault()};
-    d.onclick=e=>{x.contains(e.target)?tabClose(i):tabGo(i)};d.onauxclick=e=>{e.button===1&&tabClose(i)};return d}));
-  const o=w.querySelector('.on');o&&o.scrollIntoView({block:'nearest',inline:'nearest'})}
+function tabUI(){}  // the strip is gone (2026-11-01): tabs live in the Cmd+K palette and [ ]
 
 // ---------- PDF ----------
 window.pdfjsLib&&(pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
@@ -703,10 +683,6 @@ const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,ty
 function setTheme(d){document.documentElement.dataset.theme=d?'dark':'light'}
 setTheme(document.documentElement.dataset.theme==='dark');
 document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]());
-// reading: the bar slides away; a pointer near the top edge brings it back — nothing but the paper on screen
-const barOn=()=>document.body.classList.remove('read'),barOff=()=>pdf&&document.body.classList.add('read');
-addEventListener('mousemove',e=>{document.body.classList.contains('read')?e.clientY<14&&barOn():e.clientY>40&&e.target.closest('#mView,#mThumb,#mNotes')&&barOff()});
-SC.addEventListener('wheel',barOff,{passive:true});
 </script>
 <!-- pdf-lib 1.17.1 (MIT, https://github.com/Hopding/pdf-lib), minified; kept as text and run by plib() on the first Save PDF -->
 <script type="text/plain" id="mPlib">!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t=t||self).PDFLib={})}(this,(function(t){"use strict";
