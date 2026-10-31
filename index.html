@@ -608,7 +608,7 @@ const mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({sca
 const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map();
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   kRows=()=>{const q=KQ.value.trim().toLowerCase(),
-    tabs=TABS.map((t,i)=>({k:'tab',i,n:tabNm(i)||'PDF',cur:i===TI})),
+    tabs=TABS.map((t,i)=>({k:'tab',i,n:tabNm(i),cur:i===TI})).filter(x=>x.n),  // empty slots (no PDF open yet) are not documents
     recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name.replace(/\.pdf$/i,''))).map(r=>({k:'rec',r,n:r.name})),
     f=x=>!q||x.n.toLowerCase().includes(q);
     kHits=[...tabs.filter(f),...recs.filter(f)]},
