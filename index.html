@@ -841,10 +841,10 @@ FQ.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const d
 // ---------- selection: Translate / Comment bar under the selection ----------
 let lastSel='',autoT=0;
 const selT=$('mSelT'),selHide=()=>selT.hidden=true;
-V.addEventListener('mousedown',e=>{clearTimeout(autoT);e.target.closest('.textLayer')?.classList.add('selecting');selHide()});
+V.addEventListener('mousedown',e=>{clearTimeout(autoT);if(selA?.pend){selA=null;hlAll()}e.target.closest('.textLayer')?.classList.add('selecting');selHide()});
 selT.onmousedown=e=>e.preventDefault();
 selT.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=selA||mqLast;
-  selHide();if(!a)return warn('Nothing is selected — drag over the page again');
+  selHide();if(selA){selA.pend=0;hlAll()}if(!a)return warn('Nothing is selected — drag over the page again');
   getSelection().removeAllRanges();
   try{const p=b.dataset.s==='c'?comment(a.t,a.rs):translate(a.t,a.rs);
     p&&p.catch&&p.catch(err=>warn('Translation stopped: '+(err.message||err)))}
@@ -856,7 +856,7 @@ document.addEventListener('mouseup',e=>{
   const txt=s.toString().replace(/([A-Za-z])-\s*\n\s*(?=[a-z])/g,'$1').replace(/\s+/g,' ').trim();if(!txt)return;
   const rg=s.getRangeAt(0);
   const auto=$('mAuto').checked&&txt!==lastSel&&txt.length>1,rs=rects(rg);
-  selA={t:txt,rs};lastSel=txt;if(auto){const t=txt;clearTimeout(autoT);autoT=setTimeout(()=>translate(t,rs),180)}  // a beat after the mouse, so a second drag cancels it
+  selA={t:txt,rs,pend:1};hlAll();lastSel=txt;if(auto){const t=txt;clearTimeout(autoT);autoT=setTimeout(()=>translate(t,rs),180)}  // a beat after the mouse, so a second drag cancels it
   const c=[...rg.getClientRects()].filter(r=>r.width>1&&r.height>1&&r.height<60*scale).at(-1),VR=V.getBoundingClientRect();
   if(!c)return;selT.querySelector('[data-s=t]').hidden=auto;selT.hidden=false;
   const x=Math.min(Math.max(c.right-selT.offsetWidth,VR.left+6),VR.right-selT.offsetWidth-18),
@@ -910,7 +910,7 @@ document.addEventListener('mouseup',()=>{if(!MQ)return;
     const lft=Math.min(...it.map(i=>i.b.left)),rgt=Math.max(...it.map(i=>i.b.right)),
       top=Math.min(...it.map(i=>i.b.top)),bot=Math.max(...it.map(i=>i.b.bottom));
     return [l.n,(lft-p0.pl)/scale,(top-p0.pt)/scale,(rgt-lft)/scale,(bot-top)/scale]});
-  selA={t:txt,rs};mqLast={t:txt,rs};selT.querySelector('[data-s=t]').hidden=false;selT.hidden=false;
+  selA={t:txt,rs,pend:1};mqLast={t:txt,rs};hlAll();selT.querySelector('[data-s=t]').hidden=false;selT.hidden=false;
   const w=selT.offsetWidth,h=selT.offsetHeight,x=Math.min(Math.max(r.left+r.width/2-w/2,8),innerWidth-w-18);
   selT.style.left=x+'px';selT.style.top=(r.bottom+6+h>innerHeight?r.top-h-6:r.bottom+6)+'px';
 });
@@ -929,7 +929,7 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 // punctuation cannot break it, and no shortcut fires while the IME is composing
 document.addEventListener('keydown',e=>{
   if(!$('mConn').hidden&&e.key!=='Escape'&&e.key!==','&&e.code!=='Comma')return;  // the settings sheet is modal; Esc and , still close it
-  if(e.key==='Escape'){$('mOv').hidden||ovClose();$('mK').hidden||kClose();document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
+  if(e.key==='Escape'){if(selA?.pend){selA=null;selHide();hlAll()};$('mOv').hidden||ovClose();$('mK').hidden||kClose();document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
   if(mod){if(k==='s'){e.preventDefault();nmd()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
   if(e.isComposing||e.keyCode===229)return;
