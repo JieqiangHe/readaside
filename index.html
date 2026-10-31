@@ -575,7 +575,7 @@ function goto(n){if(!pdf)return msg('Open a PDF first');
 // ---------- thumbnails ----------
 let ts=1,tobs=null,tgen=0,curN=0;const tc=new Map();  // rendered thumbnails, by fingerprint and page
 const TH=()=>document.body.classList.contains('thumbs');
-function setTh(on){document.body.classList.toggle('thumbs',on);ls('mrdThumbs',on?'1':'0');on&&pdf&&buildThumbs().catch(()=>{})}
+function setTh(on){document.body.classList.toggle('thumbs',on);on&&pdf&&buildThumbs().catch(()=>{})}  // no remembered state: the strip starts hidden with every load
 async function buildThumbs(){
   if(!pdf||!TH())return;const g=++tgen;tobs?.disconnect();const T=$('mThumb');T.replaceChildren();
   ts=78/(await pdf.getPage(1)).getViewport({scale:1}).width;
@@ -599,7 +599,7 @@ async function tdraw(d){
 function mark(){const T=$('mThumb'),t=T.querySelector(`.tp[data-n="${curN}"]`);
   t&&(T.querySelectorAll('.tp.cur').forEach(x=>x.classList.remove('cur')),t.classList.add('cur'),t.scrollIntoView({block:'nearest'}))}
 $('mThumb').onclick=e=>{const t=e.target.closest('.tp');t&&goto(+t.dataset.n)};
-setTh(ls('mrdThumbs')==='1');  // the thumbnails start hidden; H brings them back
+setTh(false);  // the thumbnails start hidden; H brings them back for this session
 
 // ---------- recent documents: metadata in one store, the PDF bytes in another, so listing never reads megabytes ----------
 let dbP=null;
