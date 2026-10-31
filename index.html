@@ -36,12 +36,6 @@ button,.seg button,#mComp,.item,.hl,.tp,#mSplit,.ci,#mMd{transition:background-c
 .page canvas,.tp canvas{animation:mFade .25s ease-out}@keyframes mFade{from{opacity:0}}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.4s;animation-timing-function:ease-in-out}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-/* ---------- reading comfort: dark pages (light text on dark paper) and softer highlights in dark mode ---------- */
-[data-theme=dark] body.dkpg .page{background:#1b1b1b}
-[data-theme=dark] body.dkpg :is(.page,.tp) canvas{filter:invert(.9) hue-rotate(180deg) contrast(.92)}
-[data-theme=dark] body.dkpg .tp .ph{background:#1b1b1b}
-[data-theme=dark] body.dkpg .hl{mix-blend-mode:screen;background:#d9a40038}[data-theme=dark] body.dkpg .hl.on{background:#e8b03070}
-[data-theme=dark] body.dkpg .hl.c{background:#4c8df630}[data-theme=dark] body.dkpg .hl.c.on{background:#4c8df666}
 [data-theme=dark] .textLayer ::selection{background:#4c8df666}
 /* ---------- toolbar ---------- */
 #mBar{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:4px;background:var(--bar);border-bottom:1px solid var(--line)}
@@ -198,7 +192,6 @@ body.thumbs #mThumb{display:block}
 </div>
 <label class="gr" id="mRlyL"><input type="checkbox" id="mRly"><span>Use svguest's Cloudflare relay — GLM blocks browser requests from this site; your key and text pass through it, nothing is stored</span></label>
 <p>Keys stay in this browser.</p></div>
-<div class="card"><b>Reading</b><label class="gr"><input type="checkbox" id="mDkPg"><span>Dark pages in dark mode — the PDF is shown light-on-dark (pictures are inverted too)</span></label></div>
 <div class="card"><b>Language</b><div class="kv"><span>Into</span><div><select id="mLang"></select></div></div><textarea id="mPrompt" hidden></textarea>
 <p>Translations and answers in the chat under each translation use this language.</p></div>
 </div></section>
@@ -260,8 +253,6 @@ $('mPrompt').value=ls('mrdPrompt')||PROMPT0;
 $('mLang').onchange=()=>ls('mrdLang',$('mLang').value);seg('mLang');
 $('mPrompt').onchange=()=>ls('mrdPrompt',$('mPrompt').value);
 $('mAuto').onchange=()=>ls('mrdAuto',$('mAuto').checked?'1':'0');
-const dkPg=()=>document.body.classList.toggle('dkpg',$('mDkPg').checked);
-$('mDkPg').checked=ls('mrdDkPg')!=='0';$('mDkPg').onchange=()=>{ls('mrdDkPg',$('mDkPg').checked?'1':'0');dkPg()};dkPg();
 
 // ---------- requests ----------
 const cnt=()=>$('mCnt').textContent=$('mSrc').value?nl($('mSrc').value.length)+' chars':'';
