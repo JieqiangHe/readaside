@@ -40,6 +40,6 @@ A single-file PDF reader with side-by-side AI translation (DeepSeek, your own ke
 
 ## Testing
 
-- No test suite. Syntax-check every inline `<script>` block with node (`~/.local/share/mamba/envs/node_26.12.1/bin/node`, `new Function(src)` per block). The `~/.local/bin/node`/`git` micromamba shims were removed at the user's request (2026-10-31: `micromamba run` can't take its `~/.cache/mamba/proc` lock under the DSH sandbox) — call env binaries directly, git too (`~/.local/share/mamba/envs/git_2.56.0/bin/git`; bare `git` is now Apple CLT's). `/usr/bin/python3` and `osascript` are broken Xcode CLT stubs on this machine — don't use them.
+- No test suite. Syntax-check every inline `<script>` block with node (`~/.local/bin/node`, `new Function(src)` per block). `~/.local/bin/node`/`git` are plain symlinks into the mamba envs (replacing `micromamba run` shims, 2026-10-31 — such shims die on the `~/.cache/mamba/proc` lock under the DSH sandbox; don't wrap again, gh/tmux/tree-style links are fine). `/usr/bin/python3` and `osascript` are broken Xcode CLT stubs on this machine — don't use them.
 - Static checks in the same node run: id uniqueness, every `$()` reference has an element, every `data-a` button has an `A` entry.
 - Visual check: `open index.html`, then ⌘R to reload (the user reviews screenshots; `open` alone does not reload an existing tab).
