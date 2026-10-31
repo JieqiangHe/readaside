@@ -153,11 +153,11 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mKl h4{margin:8px 8px 3px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)}
 #mKl h4:not(:first-child){margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
 #mKl div.rc span{color:var(--h4)}
-#mKl div.rc i{background:none;box-shadow:inset 0 0 0 1px var(--line)}
 #mKl div{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;white-space:nowrap;cursor:pointer;font-size:12.5px}
 #mKl div.on{background:var(--btnh)}
-#mKl div i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--line)}
-#mKl div i.cur{background:var(--onb)}
+#mKl div img.pt{flex:none;width:28px;height:36px;object-fit:cover;object-position:top;border-radius:3px;background:var(--side);box-shadow:0 0 0 1px var(--line)}
+#mKl div img.pt.mt{visibility:hidden}
+#mKl div.rc img.pt{opacity:.55}
 #mKl div span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 #mKl div small{flex:none;color:var(--h4);font-size:11px}
 #mKl p{margin:8px;color:var(--h4)}
@@ -531,7 +531,7 @@ async function openPdf(buf,name,h){
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
   const doc=pdf,a0={n:0};(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)a0.n+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length;doc===pdf&&(annN=a0.n)})().catch(()=>{});
   msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));SC.scrollTop=0;fit();requestAnimationFrame(()=>pdf===doc&&fit());TH()&&buildThumbs().catch(()=>{});tabUI();
-  const ab=buf instanceof ArrayBuffer?buf.slice(0):buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength);recPut(fpr(),name,ab,h);return true
+  const ab=buf instanceof ArrayBuffer?buf.slice(0):buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength);recPut(fpr(),name,ab,h);mkThumb(pdf).then(t=>{t&&(kTh.set(fpr(),t),recThumb(fpr(),t))});return true
 }
 function layout(){
   const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();
@@ -600,26 +600,35 @@ const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',1);r.o
   recAll=async()=>{const d=await db();if(!d)return[];return new Promise(ok=>{try{const q=d.transaction('recent').objectStore('recent').getAll();q.onsuccess=()=>ok(q.result.sort((a,b)=>b.t-a.t));q.onerror=()=>ok([])}catch(_){ok([])}})},
   recPut=async(fp,name,buf,handle)=>{const d=await db();if(!d||!fp)return;try{const put=r=>new Promise(ok=>{const tx=d.transaction('recent','readwrite');tx.oncomplete=()=>ok(1);tx.onerror=()=>ok(0);tx.onabort=()=>ok(0);tx.objectStore('recent').put(r)});let r={fp,name,t:Date.now(),buf};handle&&(r.handle=handle);if(!await put(r)){delete r.handle;await put(r)}
     const a=await recAll();a.slice(8).forEach(x=>d.transaction('recent','readwrite').objectStore('recent').delete(x.fp))}catch(_){}};
+const kTh=new Map();
+const mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({scale:1}),c=el('canvas'),g=72/vp.width,v2=p.getViewport({scale:g});
+  c.width=Math.round(v2.width);c.height=Math.round(v2.height);
+  await p.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;return c.toDataURL('image/jpeg',.72)}catch(_){return ''}};
 // ---------- palette (Cmd/Ctrl+K): the open documents, then the recent ones, filtered as you type ----------
-const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[];
+const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map();
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   kRows=()=>{const q=KQ.value.trim().toLowerCase(),
     tabs=TABS.map((t,i)=>({k:'tab',i,n:tabNm(i)||'PDF',cur:i===TI})),
     recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name.replace(/\.pdf$/i,''))).map(r=>({k:'rec',r,n:r.name})),
     f=x=>!q||x.n.toLowerCase().includes(q);
     kHits=[...tabs.filter(f),...recs.filter(f)]},
-  kPaint=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));KL.replaceChildren();
+  kPaint=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));imgs=new Map();KL.replaceChildren();
     if(!kHits.length){KL.append(el('p',0,'Nothing yet — press O to open a PDF'));return}
     let last='';
     kHits.forEach((x,i)=>{if(x.k!==last){last=x.k;KL.append(el('h4',0,x.k==='tab'?'Open':'Recent'))}
-      const d=el('div',(i===kOn?'on ':'')+(x.k==='rec'?'rc':''));d.append(el('i',x.cur?'cur':''),el('span',0,x.n));
+      const d=el('div',(i===kOn?'on ':'')+(x.k==='rec'?'rc':'')),im=el('img','pt');
+      const fp=x.k==='tab'?(x.i===TI?fpr():fprOf(TABS[x.i].pdf)):x.r.fp||'',t=fp&&kTh.get(fp)||x.r&&x.r.thumb;
+      t?im.src=t:im.classList.add('mt');fp&&imgs.set(fp,im);d.append(im,el('span',0,x.n));
       x.cur&&d.append(el('small',0,'current'));
       d.onmouseenter=()=>{kOn=i;KL.querySelectorAll('div').forEach((r,j)=>r.classList.toggle('on',j===i))};
-      d.onmousedown=e=>{e.preventDefault();kGo(i)};KL.append(d)})},
+      d.onmousedown=e=>{e.preventDefault();kGo(i)};KL.append(d)});
+    kHits.forEach(x=>{const fp=x.k==='tab'?(x.i===TI?fpr():fprOf(TABS[x.i].pdf)):(x.r.fp||''),doc=x.k==='tab'?(x.i===TI?pdf:TABS[x.i].pdf):null;
+      if(!fp||!doc||kTh.has(fp))return;mkThumb(doc).then(u=>{if(!u)return;kTh.set(fp,u);const im=imgs.get(fp);im&&(im.src=u,im.classList.remove('mt'))})})},
   kBuild=()=>{kRows();const c=kHits.findIndex(x=>x.cur);kOn=c<0?0:c;kPaint()},
   kOpen=()=>{$('mK').hidden=false;KQ.value='';kBuild();KQ.focus();recLoad()},
   kGo=i=>{const x=kHits[i];if(!x)return;kClose();
     if(x.k==='tab'){x.i!==TI&&tabGo(x.i)}else recOpen(x.r)},
+  recThumb=async(fp,t)=>{const d=await db();if(!d||!fp||!t)return;const r=await new Promise(ok=>{const q=d.transaction('recent').objectStore('recent').get(fp);q.onsuccess=()=>ok(q.result);q.onerror=()=>ok(null)});r&&(r.thumb=t,d.transaction('recent','readwrite').objectStore('recent').put(r))},
   recLoad=async()=>{kRec=await recAll();$('mK').hidden||(kRows(),kPaint())},
   recOpen=async r=>{const hd=r.handle;  // Chrome/Edge keep the real file handle; Safari falls back to the stored bytes
     if(hd)try{let p=hd.queryPermission?await hd.queryPermission({mode:'read'}):'granted';
