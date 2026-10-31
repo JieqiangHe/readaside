@@ -844,7 +844,7 @@ FQ.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const d
 // ---------- selection: Translate / Comment bar under the selection ----------
 let lastSel='',autoT=0;
 const selT=$('mSelT'),selHide=()=>selT.hidden=true;
-V.addEventListener('mousedown',e=>{clearTimeout(autoT);if(selA?.pend){selA=null;hlAll()}e.target.closest('.textLayer')?.classList.add('selecting');selHide()});
+V.addEventListener('mousedown',e=>{clearTimeout(autoT);if(selA?.pend){selA=null;mqParts=[];hlAll()}e.target.closest('.textLayer')?.classList.add('selecting');selHide()});
 selT.onmousedown=e=>e.preventDefault();
 selT.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=selA||mqLast;
   selHide();if(selA){selA.pend=0;hlAll()}if(!a)return warn('Nothing is selected — drag over the page again');
@@ -860,7 +860,7 @@ document.addEventListener('mouseup',e=>{
   const txt=s.toString().replace(/([A-Za-z])-\s*\n\s*(?=[a-z])/g,'$1').replace(/\s+/g,' ').trim();if(!txt)return;
   const rg=s.getRangeAt(0);
   const auto=$('mAuto').checked&&txt!==lastSel&&txt.length>1,rs=rects(rg);
-  selA={t:txt,rs,pend:1};hlAll();lastSel=txt;if(auto){const t=txt;clearTimeout(autoT);autoT=setTimeout(()=>translate(t,rs),180)}  // a beat after the mouse, so a second drag cancels it
+  mqParts=[];selA={t:txt,rs,pend:1};hlAll();lastSel=txt;if(auto){const t=txt;clearTimeout(autoT);autoT=setTimeout(()=>translate(t,rs),180)}  // a beat after the mouse, so a second drag cancels it
   const c=[...rg.getClientRects()].filter(r=>r.width>1&&r.height>1&&r.height<60*scale).at(-1),VR=V.getBoundingClientRect();
   if(!c)return;selT.querySelector('[data-s=t]').hidden=auto;selT.hidden=false;
   const x=Math.min(Math.max(c.right-selT.offsetWidth,VR.left+6),VR.right-selT.offsetWidth-18),
@@ -869,7 +869,7 @@ document.addEventListener('mouseup',e=>{
 SC.addEventListener('scroll',selHide,{passive:true});
 
 // ---------- marquee selection (Option/Alt + drag): the text inside a box, in reading order, because a PDF's own text order is not its visual one
-let MQ=null,mqLast=null;
+let MQ=null,mqLast=null,mqParts=[];
 const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect(),mqLit=new Set();
 addEventListener('blur',()=>{MQ=null;document.body.classList.remove('mq')});
 document.addEventListener('mousedown',e=>{
@@ -891,7 +891,7 @@ document.addEventListener('mousemove',e=>{if(!MQ)return;
   mqLit.forEach(s=>now.has(s)||(s.classList.remove('mq'),mqLit.delete(s)));
   now.forEach(s=>{mqLit.has(s)||(s.classList.add('mq'),mqLit.add(s))});
 });
-document.addEventListener('mouseup',()=>{if(!MQ)return;
+document.addEventListener('mouseup',e=>{if(!MQ)return;
   const r=mqBox(),on=MQ.on;MQ=null;mqEl.hidden=true;document.body.classList.remove('mq');
   mqLit.forEach(s=>s.classList.remove('mq'));mqLit.clear();
   if(!on)return;  // a click, not a drag: leave the native behaviour alone
@@ -902,21 +902,35 @@ document.addEventListener('mouseup',()=>{if(!MQ)return;
     for(const s of p.querySelectorAll('.textLayer span')){
       const b=s.getBoundingClientRect();
       if(!b.width||b.bottom<r.top||b.top>r.bottom||b.right<r.left||b.left>r.right)continue;
-      rows.push({n:+p.dataset.n,pl:pr.left,pt:pr.top,b,t:s.textContent});
+      let t=s.textContent,l=b.left,rt=b.right;
+      if(b.left<r.left||b.right>r.right){  // the box clips this run: keep only the characters it covers, so a word can be picked out of a line
+        const tn=s.firstChild;
+        if(!tn||tn.nodeType!==3)continue;
+        let out='';l=Infinity;rt=-Infinity;
+        for(let i=0;i<tn.length;i++){const rg=document.createRange();rg.setStart(tn,i);rg.setEnd(tn,i+1);
+          const q=rg.getBoundingClientRect();if(!q.width)continue;
+          if(q.right>=r.left&&q.left<=r.right&&q.bottom>=r.top&&q.top<=r.bottom){out+=tn.data[i];l=Math.min(l,q.left);rt=Math.max(rt,q.right)}}
+        t=out.trim();if(!t)continue;
+      }
+      rows.push({n:+p.dataset.n,pl:pr.left,pt:pr.top,b,t,l,rt});
     }
   }
   if(!rows.length)return;
-  rows.sort((a,b)=>a.n-b.n||(a.b.top+a.b.height/2)-(b.b.top+b.b.height/2)||a.b.left-b.b.left);
+  rows.sort((a,b)=>a.n-b.n||(a.b.top+a.b.height/2)-(b.b.top+b.b.height/2)||a.l-b.l);
   const lines=[];
   for(const s of rows){const yc=s.b.top+s.b.height/2,l=lines.find(l=>l.n===s.n&&Math.abs(l.y-yc)<s.b.height*.6);
     l?(l.items.push(s),l.y=(l.y*(l.items.length-1)+yc)/l.items.length):lines.push({n:s.n,y:yc,items:[s]})}
-  const txt=lines.map(l=>l.items.map(i=>i.t).join(' ')).join('\n').replace(/([A-Za-z])-\s*\n\s*(?=[a-z])/g,'$1').replace(/\s+/g,' ').trim();
+  const txt=lines.map(l=>l.items.map(i=>i.t).join(' ')).join(' ').replace(/([A-Za-z])-\s+(?=[a-z])/g,'$1').replace(/\s+/g,' ').trim();
   if(!txt)return;
   const rs=lines.map(l=>{const it=l.items,p0=it[0];
-    const lft=Math.min(...it.map(i=>i.b.left)),rgt=Math.max(...it.map(i=>i.b.right)),
+    const lft=Math.min(...it.map(i=>i.l)),rgt=Math.max(...it.map(i=>i.rt)),
       top=Math.min(...it.map(i=>i.b.top)),bot=Math.max(...it.map(i=>i.b.bottom));
     return [l.n,(lft-p0.pl)/scale,(top-p0.pt)/scale,(rgt-lft)/scale,(bot-top)/scale]});
-  selA={t:txt,rs,pend:1};mqLast={t:txt,rs};hlAll();selT.querySelector('[data-s=t]').hidden=false;selT.hidden=false;
+  if(!e.shiftKey)mqParts=[];  // Shift adds this box to what is already picked, so pieces can be concatenated
+  mqParts.push({t:txt,rs});
+  const t2=mqParts.map(p=>p.t).join(' '),rs2=mqParts.flatMap(p=>p.rs);
+  selA={t:t2,rs:rs2,pend:1};mqLast={t:t2,rs:rs2};hlAll();
+  selT.querySelector('[data-s=t]').hidden=false;selT.hidden=false;
   const w=selT.offsetWidth,h=selT.offsetHeight,x=Math.min(Math.max(r.left+r.width/2-w/2,8),innerWidth-w-18);
   selT.style.left=x+'px';selT.style.top=(r.bottom+6+h>innerHeight?r.top-h-6:r.bottom+6)+'px';
 });
@@ -935,7 +949,7 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 // punctuation cannot break it, and no shortcut fires while the IME is composing
 document.addEventListener('keydown',e=>{
   if(!$('mConn').hidden&&e.key!=='Escape'&&e.key!==','&&e.code!=='Comma')return;  // the settings sheet is modal; Esc and , still close it
-  if(e.key==='Escape'){if(selA?.pend){selA=null;selHide();hlAll()};$('mOv').hidden||ovClose();$('mK').hidden||kClose();document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
+  if(e.key==='Escape'){if(selA?.pend){selA=null;mqParts=[];selHide();hlAll()};$('mOv').hidden||ovClose();$('mK').hidden||kClose();document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
   if(mod){if(k==='s'){e.preventDefault();nmd()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
   if(e.isComposing||e.keyCode===229)return;
