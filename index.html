@@ -602,7 +602,7 @@ const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[];
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   kRows=()=>{const q=KQ.value.trim().toLowerCase(),
     tabs=TABS.map((t,i)=>({k:'tab',i,n:tabNm(i)||'PDF',cur:i===TI})),
-    recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name)).map(r=>({k:'rec',r,n:r.name})),
+    recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name.replace(/\.pdf$/i,''))).map(r=>({k:'rec',r,n:r.name})),
     f=x=>!q||x.n.toLowerCase().includes(q);
     kHits=[...tabs.filter(f),...recs.filter(f)]},
   kPaint=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));KL.replaceChildren();
@@ -620,7 +620,7 @@ const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   recLoad=async()=>{kRec=await recAll();$('mK').hidden||(kRows(),kPaint())};
 KQ.addEventListener('input',kBuild);
 KQ.addEventListener('keydown',e=>{
-  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!kHits.length)return;kOn=(kOn+(e.key==='ArrowDown'?1:-1)+kHits.length)%kHits.length;kPaint();KL.children[kOn]?.scrollIntoView({block:'nearest'})}
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!kHits.length)return;kOn=(kOn+(e.key==='ArrowDown'?1:-1)+kHits.length)%kHits.length;kPaint();[...KL.children].filter(n=>n.tagName==='DIV')[kOn]?.scrollIntoView({block:'nearest'})}
   else if(e.key==='Enter'){e.preventDefault();kGo(kOn)}
   else if(e.key==='Escape'){e.preventDefault();kClose()}});
 $('mK').addEventListener('mousedown',e=>{e.target===$('mK')&&kClose()});
