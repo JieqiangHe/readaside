@@ -519,7 +519,7 @@ function nmd(){
     if(p!==pg){pg=p;L.push(p?'## Page '+p:'## Notes','')}
     if(o.t)String(o.t).trim().split('\n').forEach(t=>L.push('> '+t.trim()));
     if(o.t)L.push('');
-    if(o.img){const nm=base+'.p'+p+'.'+(++ix)+'.png';pics.push([nm,o.img]);L.push('![]('+nm+')','')}
+    if(o.img){const ext=o.img.includes('image/png')?'png':'jpg',nm=base+'.p'+p+'.'+(++ix)+'.'+ext;pics.push([nm,o.img]);L.push('![]('+nm+')','')}
     if(o.k==='c'){o.out.trim()&&L.push(o.out.trim(),'')}
     else{L.push(o.out.trim(),'')
       for(const [q,a] of o.chat||[])L.push('**Q.** '+q.trim(),'',a.trim(),'')}
