@@ -474,7 +474,7 @@ $('mUndo').onclick=()=>{if(!undoD)return;nload(undoD.d);nsave();annHide(undoD.a)
 async function openFiles(fs,hs=[]){
   const i=fs.findIndex(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name)),j=fs.findIndex(f=>/\.json$/i.test(f.name));
   if(i<0&&j<0)return msg('Not a PDF: '+fs[0].name);
-  if(i>=0&&!await open(fs[i]))return;i>=0&&(pdfH=hs[i]||null);
+  if(i>=0&&!await open(fs[i],hs[i]))return;i>=0&&(pdfH=hs[i]||null);
   if(j<0)return;let d;
   try{d=JSON.parse(await fs[j].text())}catch(e){return msg('Cannot read '+fs[j].name+': '+e.message)}
   if(!d?.ocrp&&!d?.readaside&&!d?.miniread)return msg(fs[j].name+' is not an ocrp notes file');
@@ -515,21 +515,21 @@ function tabUI(){}  // the strip is gone (2026-11-01): tabs live in the Cmd+K pa
 window.pdfjsLib&&(pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
 let pdf=null,scale=1,gen=0,obs,layP=Promise.resolve(),annOff=false,annN=0;  // annOff: draw the PDF's own annotations or not; annN: how many markup ones it has
 const annHide=v=>{if(annOff===!!v)return;annOff=!!v;if(!pdf)return;const y=SC.scrollTop;layout().then(()=>SC.scrollTop=y);TH()&&buildThumbs().catch(()=>{})};
-const open=f=>f.arrayBuffer().then(b=>openPdf(b,f.name)).catch(e=>msg('Cannot read '+f.name+': '+e.message));  // resolves true once open
-async function openPdf(buf,name){
+const open=(f,h)=>f.arrayBuffer().then(b=>openPdf(b,f.name,h)).catch(e=>msg('Cannot read '+f.name+': '+e.message));  // resolves true once open
+async function openPdf(buf,name,h){
   if(!window.pdfjsLib)return msg('PDF engine failed to load — check the connection to cdnjs');
   if(!tabFresh())return false;
   try{const np=await pdfjsLib.getDocument({data:buf}).promise;pdf=np}
   catch(e){msg('Cannot open '+name+': '+e.message);tabBack();return false}
   TN=0;
   selHide();
-  clr();pdfName=name;pdfH=jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');fc.clear();fClose();hintOff();let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  clr();pdfName=name;pdfH=h||null;jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');fc.clear();fClose();hintOff();let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
   let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT||x.filename===AT0||x.filename===AT1)}catch(_){}
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
   const doc=pdf,a0={n:0};(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)a0.n+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length;doc===pdf&&(annN=a0.n)})().catch(()=>{});
   msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));SC.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});tabUI();
-  const ab=buf instanceof ArrayBuffer?buf.slice(0):buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength);recPut(fpr(),name,ab);return true
+  const ab=buf instanceof ArrayBuffer?buf.slice(0):buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength);recPut(fpr(),name,ab,h);return true
 }
 function layout(){
   const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();
@@ -595,7 +595,7 @@ setTh(ls('mrdThumbs')!=='0');
 let dbP=null;
 const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',1);r.onupgradeneeded=()=>r.result.createObjectStore('recent',{keyPath:'fp'});r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)}catch(_){ok(null)}})),
   recAll=async()=>{const d=await db();if(!d)return[];return new Promise(ok=>{try{const q=d.transaction('recent').objectStore('recent').getAll();q.onsuccess=()=>ok(q.result.sort((a,b)=>b.t-a.t));q.onerror=()=>ok([])}catch(_){ok([])}})},
-  recPut=async(fp,name,buf)=>{const d=await db();if(!d||!fp)return;try{await new Promise(ok=>{const tx=d.transaction('recent','readwrite');tx.objectStore('recent').put({fp,name,t:Date.now(),buf});tx.oncomplete=ok;tx.onerror=ok});
+  recPut=async(fp,name,buf,handle)=>{const d=await db();if(!d||!fp)return;try{const put=r=>new Promise(ok=>{const tx=d.transaction('recent','readwrite');tx.oncomplete=()=>ok(1);tx.onerror=()=>ok(0);tx.onabort=()=>ok(0);tx.objectStore('recent').put(r)});let r={fp,name,t:Date.now(),buf};handle&&(r.handle=handle);if(!await put(r)){delete r.handle;await put(r)}
     const a=await recAll();a.slice(8).forEach(x=>d.transaction('recent','readwrite').objectStore('recent').delete(x.fp))}catch(_){}};
 // ---------- palette (Cmd/Ctrl+K): the open documents, then the recent ones, filtered as you type ----------
 const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[];
@@ -616,8 +616,13 @@ const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   kBuild=()=>{kRows();const c=kHits.findIndex(x=>x.cur);kOn=c<0?0:c;kPaint()},
   kOpen=()=>{$('mK').hidden=false;KQ.value='';kBuild();KQ.focus();recLoad()},
   kGo=i=>{const x=kHits[i];if(!x)return;kClose();
-    if(x.k==='tab'){x.i!==TI&&tabGo(x.i)}else x.r.buf&&openPdf(x.r.buf,x.r.name).catch(()=>{})},
-  recLoad=async()=>{kRec=await recAll();$('mK').hidden||(kRows(),kPaint())};
+    if(x.k==='tab'){x.i!==TI&&tabGo(x.i)}else recOpen(x.r)},
+  recLoad=async()=>{kRec=await recAll();$('mK').hidden||(kRows(),kPaint())},
+  recOpen=async r=>{const hd=r.handle;  // Chrome/Edge keep the real file handle; Safari falls back to the stored bytes
+    if(hd)try{let p=hd.queryPermission?await hd.queryPermission({mode:'read'}):'granted';
+      if(p!=='granted')p=hd.requestPermission?await hd.requestPermission({mode:'read'}):'denied';
+      if(p==='granted'){const f=await hd.getFile();return openPdf(await f.arrayBuffer(),r.name,hd)}}catch(_){}
+    r.buf&&openPdf(r.buf,r.name).catch(()=>{})};
 KQ.addEventListener('input',kBuild);
 KQ.addEventListener('keydown',e=>{
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!kHits.length)return;kOn=(kOn+(e.key==='ArrowDown'?1:-1)+kHits.length)%kHits.length;kPaint();[...KL.children].filter(n=>n.tagName==='DIV')[kOn]?.scrollIntoView({block:'nearest'})}
