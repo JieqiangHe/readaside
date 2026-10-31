@@ -600,7 +600,7 @@ async function tdraw(d){
 function mark(){const T=$('mThumb'),t=T.querySelector(`.tp[data-n="${curN}"]`);
   t&&(T.querySelectorAll('.tp.cur').forEach(x=>x.classList.remove('cur')),t.classList.add('cur'),t.scrollIntoView({block:'nearest'}))}
 $('mThumb').onclick=e=>{const t=e.target.closest('.tp');t&&goto(+t.dataset.n)};
-setTh(ls('mrdThumbs')!=='0');
+setTh(ls('mrdThumbs')==='1');  // the thumbnails start hidden; H brings them back
 
 // ---------- recent documents: metadata in one store, the PDF bytes in another, so listing never reads megabytes ----------
 let dbP=null;
