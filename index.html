@@ -245,7 +245,7 @@ $('mConnX').onclick=()=>cfg(0);$('mConn').onclick=e=>{e.target===$('mConn')&&cfg
 const keySave=()=>{const v=$('mKey0').value.trim();if(!v)return $('mKey0').focus();ls('mrdDsKey',v);$('mKey').value=v;$('mKeyFirst').hidden=true;msg('Key saved')};
 const hintOff=()=>{document.body.classList.remove('ask');$('mHint').hidden=true},  // Enter or O clears the start screen
   hintOn=()=>{document.body.classList.add('ask');$('mHint').hidden=false};  // ? brings it back
-$('mKeySave').onclick=()=>{hintOff();keySave()};$('mHintOk').onclick=()=>hintOff();$('mKey0').onkeydown=e=>{e.key==='Enter'&&(hintOff(),keySave())};
+$('mKeySave').onclick=()=>{hintOff();keySave()};$('mHintOk').onclick=()=>hintOff();$('mHint').addEventListener('wheel',()=>{pdf&&hintOff()},{passive:true});$('mKey0').onkeydown=e=>{e.key==='Enter'&&(hintOff(),keySave())};
 $('mKey').value||($('mKeyFirst').hidden=false);
 
 // ---------- language, prompt ----------
@@ -485,7 +485,7 @@ function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,a
   N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el),o.y=null;
   col();
   document.title=pdf?'ocrp — '+pdfName:'ocrp';document.body.classList.toggle('pdf',!!pdf);
-  selHide();  fClose();pdf?(layout().then(()=>SC.scrollTop=Math.min(t.st||0,SC.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
+  selHide();hintOff();fClose();pdf?(layout().then(()=>SC.scrollTop=Math.min(t.st||0,SC.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
   tabUI();sched()}
 function tabFresh(){if(!pdf)return true;
   if(TABS.length>=TMAX)return msg(TMAX+' tabs are open, the most ocrp keeps; close one to open another'),false;
@@ -522,7 +522,7 @@ async function openPdf(buf,name){
   catch(e){msg('Cannot open '+name+': '+e.message);tabBack();return false}
   TN=0;
   selHide();
-  clr();pdfName=name;pdfH=jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');fc.clear();fClose();let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  clr();pdfName=name;pdfH=jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');fc.clear();fClose();hintOff();let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
   let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT||x.filename===AT0||x.filename===AT1)}catch(_){}
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
@@ -634,7 +634,7 @@ $('mFile').onchange=e=>{const fs=[...e.target.files];fs.length&&openFiles(fs);e.
 document.addEventListener('dragover',e=>[...e.dataTransfer?.types||[]].includes('Files')&&e.preventDefault());
 document.addEventListener('drop',e=>{const fs=[...e.dataTransfer?.files||[]];if(!fs.length)return;e.preventDefault();
   Promise.all([...e.dataTransfer.items].filter(x=>x.kind==='file').map(x=>x.getAsFileSystemHandle?.())).then(hs=>openFiles(fs,hs),()=>openFiles(fs))});
-document.addEventListener('click',e=>{const d=e.target.closest('.dd');document.querySelectorAll('.dd.open').forEach(x=>x!==d&&x.classList.remove('open'));
+document.addEventListener('click',e=>{document.body.classList.contains('ask')&&!e.target.closest('#mHint .wcard')&&hintOff();const d=e.target.closest('.dd');document.querySelectorAll('.dd.open').forEach(x=>x!==d&&x.classList.remove('open'));
   d&&(e.target.closest('.ddb')?d.classList.toggle('open'):e.target.closest('.menu button')&&d.classList.remove('open'))});
 let wzT=0;
 SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clearTimeout(wzT);
