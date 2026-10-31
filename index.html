@@ -7,115 +7,139 @@
 <script>try{localStorage.mrdTheme==='dark'&&(document.documentElement.dataset.theme='dark')}catch(_){}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-:root{--nt:#d99a00;--fg:#222;--bar:#f3f3f3;--line:#ccc;--btn:#fff;--btnb:#bbb;--btnh:#eef3ff;--bfg:buttontext;--view:#cfcfcf;--side:#f7f7f7;--h4:#555;--h4b:#ddd;--pageb:#777;--err:#c4392f;--erb:#cc41360f;--t3:#6e6e6e;--ok:#2f8f55;--on:#d6e4ff;--onb:#6d94e0;--onfg:buttontext}
-[data-theme=dark]{color-scheme:dark;--nt:#e8b030;--fg:#e5e5e5;--bar:#000;--line:#262626;--btn:#262626;--btnb:#000;--btnh:#404040;--bfg:#e5e5e5;--view:#141414;--side:#000;--h4:#a3a3a3;--h4b:#262626;--pageb:#404040;--err:#f1877f;--erb:#f07a7014;--t3:#8c8c8c;--ok:#4fc27e;--on:#e5e5e5;--onb:#e5e5e5;--onfg:#171717}
+/* ---------- basics (svguest's palette and controls) ---------- */
+:root{--fg:#262626;--bar:#e9e9e9;--line:#0000001a;--btn:#fafafa;--btnb:#00000021;--btnh:#00000012;--bfg:#262626;--on:#1a73e81f;--onb:#1a73e8;--onfg:#1f1f1f;--view:#d4d4d4;--side:#f2f2f2;--h4:#595959;--h4b:#00000014;--pageb:#00000038;--t3:#6e6e6e;--ok:#2f8f55;--er:#cc4136;--erb:#cc41360f;--sh:0 1px 2px #0000001f;--shm:0 0 0 1px #0000001a,0 8px 24px -6px #0000004d;--nt:#d99a00;--cm:#1a73e8}
+[data-theme=dark]{color-scheme:dark;--fg:#e3e3e3;--bar:#1f1f1f;--line:#ffffff1a;--btn:#303030;--btnb:#ffffff1f;--btnh:#ffffff14;--bfg:#e3e3e3;--on:#4c8df633;--onb:#4c8df6;--onfg:#f5f5f5;--view:#383838;--side:#262626;--h4:#a6a6a6;--h4b:#ffffff14;--pageb:#00000066;--t3:#8c8c8c;--ok:#4fc27e;--er:#f07a70;--erb:#f07a7014;--sh:0 1px 2px #0009;--shm:0 0 0 1px #ffffff1f,0 8px 24px -6px #000c;--nt:#e8b030;--cm:#4c8df6}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden}
-body{display:flex;flex-direction:column;font:12px/1.5 system-ui,sans-serif;color:var(--fg)}
-button{font:inherit;padding:2px 6px;border:1px solid var(--btnb);border-radius:3px;background:var(--btn);color:var(--bfg);cursor:pointer}
-button:hover{background:var(--btnh)}button:disabled{opacity:.4;cursor:default}button.on{background:var(--on);border-color:var(--onb);color:var(--onfg)}
+html,body{margin:0;height:100%;overflow:hidden;font:12px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--fg);-webkit-font-smoothing:antialiased}
+body{display:flex;flex-direction:column;background:var(--bar)}
+button{font:inherit;padding:2px 6px;border:1px solid var(--btnb);border-radius:6px;background:var(--btn);color:var(--bfg);cursor:pointer}
+button:hover{background-image:linear-gradient(var(--btnh),var(--btnh))}button:disabled{opacity:.4;cursor:default}
 input,select,textarea{font:inherit}
-[data-theme=dark] input:not([type=checkbox]):not([type=file]),[data-theme=dark] select,[data-theme=dark] textarea{background:#262626;color:#f5f5f5;border:1px solid #404040;border-radius:3px}
-[data-theme=dark] input:focus,[data-theme=dark] select:focus,[data-theme=dark] textarea:focus{outline:none;border-color:#a3a3a3}
-[data-theme=dark] dialog{background:#171717;color:#e5e5e5;border:1px solid #404040}
-kbd{font:11px ui-monospace,monospace;padding:0 4px;border:1px solid var(--line);border-radius:3px;background:var(--btn)}
-#mBar{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px 6px;background:var(--bar);border-bottom:1px solid var(--line)}
-#mBar i{width:1px;height:18px;background:var(--line);margin:0 4px}
-#mBar button{padding:1px 5px;border-color:transparent;background:transparent}
-#mBar button:hover{background:transparent;color:var(--onb)}
-#mBar button.on{background:transparent;border-color:transparent;color:var(--onb)}
-#mPgN{width:46px;text-align:center}
-#mPgT{color:var(--h4)}
+:where(input:not([type=checkbox]):not([type=file]),select,textarea){padding:1px 6px;background:var(--btn);color:var(--fg);border:1px solid var(--btnb);border-radius:6px}
+:where(input,select,textarea):focus{outline:none;border-color:var(--onb)}input[type=checkbox]{accent-color:var(--onb)}
+dialog{border:0;border-radius:10px;background:var(--side);color:var(--fg);box-shadow:var(--shm),0 30px 80px -20px #0005}dialog::backdrop{background:#0000004d}
+kbd{display:inline-block;min-width:1.6em;padding:0 5px;border-radius:4px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb),0 1px 0 var(--btnb);font:500 11px/18px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-align:center;color:var(--fg);white-space:nowrap}
+.chg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.ib{flex:none;width:26px;height:26px;padding:0;display:grid;place-items:center;border-color:transparent;background:transparent;color:var(--h4)}.ib:hover{background:var(--btnh);color:var(--fg)}
+.dd{position:relative}.menu{display:none;position:absolute;right:0;top:100%;margin-top:3px;z-index:20;min-width:210px;padding:4px;background:var(--btn);border-radius:8px;box-shadow:var(--shm)}.dd.open>.menu{display:block}
+.menu button{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;padding:3px 8px;text-align:left;white-space:nowrap;border-color:transparent;background:transparent}.menu button:hover{background:var(--btnh)}
+.menu kbd{min-width:0;padding:0;box-shadow:none;background:none;font:inherit;opacity:.6}
+.seg{display:flex;gap:2px;min-width:0;padding:2px;border-radius:7px;background:var(--btnh)}.seg button{flex:1;height:20px;padding:0 6px;border:0;border-radius:5px;background:none;color:var(--h4);white-space:nowrap}.seg button:hover{background:none;color:var(--fg)}.seg button.on{background:var(--btn);color:var(--fg);box-shadow:var(--sh)}
+/* ---------- toolbar ---------- */
+#mBar{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:4px;background:var(--bar);border-bottom:1px solid var(--line)}
+#mBar>button{border-color:transparent;background:transparent;padding:2px 8px}#mBar>button:hover{background:var(--btnh)}#mBar>button.on{background:var(--on);color:var(--onfg)}
+#mBar>i{width:1px;height:18px;background:var(--line);margin:0 4px}
+#mBrand{padding:0 8px 0 6px;font-weight:700;font-size:13px;letter-spacing:-.01em;user-select:none}
+#mPgN{width:42px;height:22px;text-align:center;-moz-appearance:textfield}#mPgN::-webkit-inner-spin-button,#mPgN::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#mPgT,#mZoomB{color:var(--h4);font-variant-numeric:tabular-nums}#mPgT::before{content:'/ ';color:var(--t3)}#mZoomB{min-width:40px;text-align:center}
+#mBar .sp{margin-left:auto}
+/* ---------- viewer ---------- */
 #mMain{flex:1;display:flex;min-height:0;position:relative}
-#mLink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
-#mLink path{fill:none;stroke:var(--nt);stroke-width:1.2;opacity:.55}
-#mLink circle{fill:var(--nt);opacity:.75}
-#mLink .on path{stroke-width:2;opacity:1}#mLink .on circle{opacity:1}
-.hl{position:absolute;z-index:1;pointer-events:none;border-radius:2px;background:#ffd54a55;mix-blend-mode:multiply}
-.hl.on{background:#ffc400a0}
-#mLane{flex:1;min-height:0;position:relative;z-index:6;overflow:hidden}
-#mNotes{position:absolute;left:0;right:0;top:0}
 #mLeft{flex:0 0 60%;min-width:200px;display:flex}
 #mViewWrap{flex:1;position:relative;display:flex;min-width:0}
-#mView{flex:1;overflow:auto;background:var(--view);padding:16px}
+#mView{flex:1;overflow:auto;background:var(--view);padding:16px;scrollbar-width:thin}
 #mHint{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--h4);pointer-events:none;padding:24px}
 #mHint[hidden]{display:none}
-#mHint>div{border:2px dashed var(--h4b);border-radius:8px;padding:26px 34px;max-width:420px;line-height:1.6}
-#mHint small{opacity:.8}
-#mSplit{flex:0 0 5px;cursor:col-resize;background:var(--bar);border-left:1px solid var(--line);border-right:1px solid var(--line)}
-#mThumb{display:none;width:112px;flex:none;overflow:auto;background:var(--bar);border-right:1px solid var(--line);padding:6px 6px 12px}
+#mHint>div{border:1.5px dashed var(--btnb);border-radius:12px;padding:26px 34px;max-width:420px;line-height:1.6;background:var(--side)}
+#mHint small{color:var(--t3)}
+#mSplit{flex:0 0 5px;cursor:col-resize;background:var(--bar);border-left:1px solid var(--line)}#mSplit:hover{background:var(--btnb)}
+#mThumb{display:none;width:116px;flex:none;overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:8px 6px 12px;scrollbar-width:thin}
 body.thumbs #mThumb{display:block}
-.tp{width:96px;margin:0 auto 8px;cursor:pointer}
-.tp .ph{background:var(--btn);outline:1px solid var(--pageb)}
-.tp canvas{display:block;width:100%;height:auto;outline:1px solid var(--pageb)}
-.tp b{display:block;text-align:center;font-weight:normal;font-size:10px;color:var(--h4);margin-top:2px}
-.tp.cur{outline:2px solid var(--onb);outline-offset:2px}
-.tp:hover .ph,.tp:hover canvas{outline-color:var(--onb)}
-.page{position:relative;margin:0 auto 12px;background:#fff;outline:1px solid var(--pageb);box-shadow:0 1px 4px #0006}
+.tp{width:96px;margin:0 auto 10px;cursor:pointer;border-radius:3px}
+.tp .ph{background:#fff;box-shadow:0 0 0 1px var(--pageb)}
+.tp canvas{display:block;width:100%;height:auto;box-shadow:0 0 0 1px var(--pageb)}
+.tp b{display:block;text-align:center;font-weight:normal;font-size:10px;color:var(--t3);margin-top:3px}
+.tp.cur{outline:2px solid var(--onb);outline-offset:3px}.tp.cur b{color:var(--onb)}
+.tp:hover .ph,.tp:hover canvas{box-shadow:0 0 0 1px var(--onb)}
+.page{position:relative;margin:0 auto 14px;background:#fff;box-shadow:0 0 0 1px var(--pageb),0 2px 8px -2px #0004}
 .page canvas{display:block;width:100%;height:100%}
 .textLayer{position:absolute;inset:0;overflow:hidden;line-height:1;text-size-adjust:none;forced-color-adjust:none;transform-origin:0 0;z-index:2}
 .textLayer span,.textLayer br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0 0}
-.textLayer ::selection{background:#2f6fde55}
+.textLayer ::selection{background:#1a73e84d}
 .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;user-select:none}
 .textLayer.selecting .endOfContent{top:0}
-#mRight{flex:1;min-width:300px;display:flex;flex-direction:column;background:var(--side)}
-#mRight>details{padding:4px 8px;border-top:1px solid var(--line)}
-#mRight>details>summary{cursor:pointer;color:var(--h4)}
-#mRight details label{display:grid;grid-template-columns:56px 1fr;gap:6px;align-items:center;margin:3px 0}
-#mRight [hidden],#mRight details label.up[hidden]{display:none}
-#mRight details label.up{display:block}
-#mRight details input,#mRight details select,#mRight details textarea{width:100%;min-width:0}
-#mRight details input[type=checkbox]{width:auto;justify-self:start;margin:0}
-#mRight .up small{display:block;margin:1px 0 2px;color:var(--h4)}
-#mComp{flex:none;margin:8px;padding:6px 6px 6px 8px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb)}
-#mComp:focus-within{box-shadow:inset 0 0 0 1px var(--onb)}
-#mSrc{display:block;width:100%;min-height:44px;height:72px;padding:1px 2px;border:0;border-radius:0;background:transparent;resize:vertical}
-#mOps{display:flex;align-items:center;gap:3px;margin-top:4px}
-#mOps label{display:flex;align-items:center;gap:4px;color:var(--h4);font-size:11.5px}
-#mClr,#mSave,#mPdf{flex:none;padding:0 6px;border-color:transparent;background:transparent;color:var(--h4);font-size:11px}
-#mClr:hover,#mSave:hover,#mPdf:hover{background:var(--btnh);color:var(--fg)}
-#mGo{flex:none;padding:2px 12px;border-color:transparent;border-radius:6px;background:var(--fg);color:var(--side)}
-#mGo:hover{background:var(--fg);opacity:.85}
-#mCnt{margin-left:auto;color:var(--t3);font-size:11px;white-space:nowrap}
-.item{position:absolute;left:10px;right:10px;display:flex;flex-direction:column;padding:7px 10px;border-radius:8px;background:var(--btn);box-shadow:0 0 0 1px var(--h4b),0 1px 3px #0001}
+/* ---------- highlights, links, selection bar ---------- */
+.hl{position:absolute;z-index:1;pointer-events:none;border-radius:2px;background:#ffd54a55;mix-blend-mode:multiply}.hl.on{background:#ffc400a0}
+.hl.c{background:#1a73e824}.hl.c.on{background:#1a73e85c}
+#mLink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#mLink path{fill:none;stroke:var(--nt);stroke-width:1.2;opacity:.55}#mLink circle{fill:var(--nt);opacity:.75}
+#mLink .c path{stroke:var(--cm)}#mLink .c circle{fill:var(--cm)}
+#mLink .on path{stroke-width:2;opacity:1}#mLink .on circle{opacity:1}
+#mSelT{position:absolute;z-index:9;display:flex;gap:2px;padding:3px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}#mSelT[hidden],#mSelT [hidden]{display:none}
+#mSelT button{display:flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border:0;border-radius:6px;background:none;color:var(--fg)}#mSelT button:hover{background:var(--btnh)}#mSelT .chg{width:14px;height:14px;color:var(--h4)}
+/* ---------- notes panel ---------- */
+#mRight{flex:1;min-width:300px;display:flex;flex-direction:column;position:relative;background:var(--side);border-left:1px solid var(--line)}
+#mRight [hidden]{display:none!important}
+#mRH{position:relative;z-index:7;flex:none;display:flex;align-items:center;gap:1px;height:34px;padding:0 4px 0 12px;border-bottom:1px solid var(--line);background:var(--side)}#mRH b{font-weight:600}#mRH small{margin:0 auto 0 6px;color:var(--t3);font-variant-numeric:tabular-nums}
+#mLane{flex:1;min-height:0;position:relative;z-index:6;overflow:hidden}
+#mNotes{position:absolute;left:0;right:0;top:0}
+.item{position:absolute;left:10px;right:10px;display:flex;flex-direction:column;gap:4px;padding:7px 10px 8px;border-radius:10px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb),var(--sh)}
 .item[hidden]{display:none}
-.item.on{box-shadow:0 0 0 1.5px var(--nt),0 2px 8px #0002}
-.item .u{margin-bottom:5px;padding-left:7px;border-left:2px solid var(--line);color:var(--h4);font-size:11.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.item .a{max-height:45vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
-.item .a.dim{color:var(--h4);font-size:12px}
-.item .a.er{padding:6px 9px;border-radius:8px;background:var(--erb);box-shadow:inset 0 0 0 1px var(--btnb);color:var(--err)}
-.item .mt span{margin-right:auto;overflow:hidden;text-overflow:ellipsis}
-.item .mt{display:flex;align-items:center;gap:2px;margin-top:4px;color:var(--t3);font-size:11px;white-space:nowrap}
-.item .rtb{flex:none;padding:0 6px;border-color:transparent;background:transparent;color:var(--h4);font-size:11px}
-.item .rtb:hover{background:var(--btnh);color:var(--fg)}
+.item.on{box-shadow:inset 0 0 0 1.5px var(--nt),0 6px 18px -6px #0004}.item.c.on{box-shadow:inset 0 0 0 1.5px var(--cm),0 6px 18px -6px #0004}
+.item .ih{display:flex;align-items:center;gap:6px;height:20px;color:var(--t3);font-size:11px;white-space:nowrap}
+.item .ih>i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--nt)}.item.c .ih>i{background:var(--cm)}
+.item .ih>b{font-weight:600;color:var(--h4)}.item .ih .md{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.item .ia{margin-left:auto;display:flex;gap:1px;opacity:0;transition:opacity .12s}.item:hover .ia,.item.on .ia,.item .ia.run{opacity:1}
+.item .ia button{width:22px;height:20px;padding:0;display:grid;place-items:center;border:0;border-radius:5px;background:none;color:var(--t3)}.item .ia button:hover{background:var(--btnh);color:var(--fg)}.item .ia .chg{width:13px;height:13px}
+.item .u{padding-left:7px;border-left:2px solid var(--line);color:var(--h4);font-size:11.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.item .a{max-height:45vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;scrollbar-width:thin}
+.item .dim{color:var(--h4)}.item .er{color:var(--er)}
+.item .a.er{padding:6px 9px;border-radius:8px;background:var(--erb);box-shadow:inset 0 0 0 1px var(--btnb)}
 .item .wt{display:flex;align-items:center;gap:6px;color:var(--h4)}
 .item .wt svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;animation:mBob 1.2s ease-in-out infinite}
-.item .wt .wm{min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--t3)}
 .item .wt .tm{margin-left:auto;color:var(--t3);font-variant-numeric:tabular-nums}
 .item .sh{white-space:nowrap;background:linear-gradient(90deg,var(--t3) 0 38%,var(--fg) 50%,var(--t3) 62% 100%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:mShim 1.7s linear infinite}
-.item details{margin-bottom:6px}
-.item details summary{cursor:pointer;color:var(--h4);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item details{margin-bottom:4px}
+.item details summary{cursor:pointer;color:var(--h4);font-size:12px}
 .item details.ok>summary::before{content:'✓ ';color:var(--ok)}
 .item .th{max-height:180px;overflow:auto;margin-top:3px;padding-left:8px;border-left:2px solid var(--line);font-size:11px;color:var(--h4);white-space:pre-wrap;overflow-wrap:anywhere}
+.item .ce{display:block;width:100%;min-height:36px;padding:0;border:0;border-radius:0;background:transparent;resize:none;line-height:1.55;overflow:hidden}
+.item .cv{display:flex;flex-direction:column;gap:6px;margin-top:4px;padding-top:7px;border-top:1px solid var(--h4b)}
+.item:not(.on) .cv:not(:has(.q)){display:none}.item:not(.on) .ci{display:none}
+.item .q{align-self:flex-end;max-width:88%;padding:4px 9px;border-radius:8px;background:var(--side);box-shadow:inset 0 0 0 1px var(--h4b);white-space:pre-wrap;overflow-wrap:anywhere}
+.item .r{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.item .ci{display:flex;align-items:flex-end;gap:4px;padding:3px 3px 3px 8px;border-radius:8px;background:var(--side);box-shadow:inset 0 0 0 1px var(--btnb)}.item .ci:focus-within{box-shadow:inset 0 0 0 1px var(--onb)}
+.item .ci textarea{flex:1;min-width:0;height:22px;max-height:120px;padding:2px 0;border:0;border-radius:0;background:transparent;resize:none;line-height:1.5}
+.item .ci button{flex:none;width:22px;height:22px;padding:0;display:grid;place-items:center;border:0;border-radius:6px;background:var(--fg);color:var(--side)}.item .ci button:hover{background:var(--fg);opacity:.85}.item .ci .chg{width:13px;height:13px;stroke-width:1.8}
 @keyframes mBob{50%{transform:translateY(-2px);opacity:.55}}
 @keyframes mShim{from{background-position:100% 0}to{background-position:0 0}}
 @media(prefers-reduced-motion:reduce){.item .wt svg,.item .sh{animation:none}}
-#mSt{height:22px;display:flex;align-items:center;gap:18px;padding:2px 2px 2px 8px;background:var(--bar);border-top:1px solid var(--line);white-space:nowrap;overflow:hidden}
+/* ---------- composer ---------- */
+#mComp{position:relative;z-index:7;flex:none;margin:8px;padding:6px 6px 6px 9px;border-radius:10px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb),var(--sh)}#mComp:focus-within{box-shadow:inset 0 0 0 1px var(--onb),var(--sh)}
+#mSrc{display:block;width:100%;min-height:40px;height:52px;padding:1px 0;border:0;border-radius:0;background:transparent;resize:none;line-height:1.5}
+#mComp .cb{display:flex;align-items:center;gap:3px;margin-top:4px}
+#mComp .gr{display:flex;align-items:center;gap:5px;color:var(--h4);font-size:11.5px;user-select:none;cursor:pointer}#mComp .gr input{margin:0}
+#mCnt{margin-left:auto;color:var(--t3);font-size:11px;white-space:nowrap}
+#mMd{display:flex;align-items:center;gap:4px;max-width:150px;height:26px;padding:0 6px 0 8px;border-color:transparent;background:transparent}#mMd span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#mMd::after{content:'▾';color:var(--t3);font-size:10px}#mMd:hover{background:var(--btnh)}#mMd.need{color:var(--onb);box-shadow:inset 0 0 0 1px var(--onb)}
+#mGo{flex:none;width:26px;height:26px;padding:0;display:grid;place-items:center;border-color:transparent;background:var(--fg);color:var(--side)}#mGo:hover{background:var(--fg);opacity:.85}#mGo .chg{stroke-width:1.8}
+/* ---------- settings sheet ---------- */
+#mConn{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;background:var(--side)}
+#mConn>header{flex:none;display:flex;align-items:center;gap:4px;height:34px;padding:0 4px;border-bottom:1px solid var(--line)}#mConn>header b{font-weight:600}
+#mConnB{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:10px 8px 16px}
+#mConn .card{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb)}#mConn .card>b{font-weight:600}
+#mConn .card p{margin:0;color:var(--t3);font-size:11px;line-height:1.45}
+#mConn .kv{display:grid;grid-template-columns:52px minmax(0,1fr);gap:6px 8px;align-items:center}#mConn .kv>span{color:var(--h4)}
+#mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
+#mConn .gr{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
+/* ---------- status bar, help ---------- */
+#mSt{height:24px;display:flex;align-items:center;gap:14px;padding:2px 2px 2px 10px;background:var(--bar);border-top:1px solid var(--line);white-space:nowrap;overflow:hidden}
 #mMsg{min-width:0;overflow:hidden;text-overflow:ellipsis}
 #mSel{margin-left:auto;color:var(--h4)}
-#mSt button{flex:none;padding:0 8px;line-height:16px;border-color:transparent;background:transparent}
-#mSt button:hover{background:var(--btnh)}
-#mHelp{padding:0;max-width:min(400px,96vw);max-height:92vh;border:1px solid var(--line)}
-#mHelp form{padding:12px 16px;font-size:12.5px;line-height:1.45}
-#mHelp h3{margin:0 0 6px}
-#mHelp dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 12px;margin:0}
-#mHelp dd{margin:0}
-#mHelp .ft{display:flex;align-items:center;margin:8px 0 0}
-#mHelp .ft button{margin-left:auto}
+#mSt button{flex:none;padding:0 8px;line-height:18px;border-color:transparent;background:transparent}#mSt button:hover{background:var(--btnh)}
+#mUndo{color:var(--onb)}
+.kg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3;vertical-align:-3px}.kg .kf{fill:currentColor;stroke:none}
+#mHelp{padding:0;width:min(420px,96vw)}
+#mHelp form{padding:14px 18px 12px;font-size:12.5px;line-height:1.45}
+#mHelp h3{margin:0 0 8px;font-size:15px}
+#mHelp dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0}
+#mHelp dt{color:var(--h4)}#mHelp dd{margin:0}
+#mHelp .ft{display:flex;margin:12px 0 0}#mHelp .ft button{margin-left:auto;padding:2px 12px}
 </style>
 </head>
 <body>
 <div id="mBar">
+<span id="mBrand">miniread</span>
 <button data-a="thumbs" title="Show or hide page thumbnails">Pages</button>
 <button data-a="open" title="Open a PDF, with its .miniread.json notes if you have them (or drop them on the viewer)">Open…</button>
 <input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
@@ -125,49 +149,57 @@ body.thumbs #mThumb{display:block}
 <span id="mPgT" title="Pages in this PDF">–</span>
 <button data-a="next" title="Next page">›</button><button data-a="last" title="Last page">»</button>
 <i></i>
-<button data-a="out" title="Zoom out (−)">−</button><span id="mZoomB" title="Zoom level">100%</span><button data-a="in" title="Zoom in (+)">＋</button>
+<button data-a="out" title="Zoom out (−)">−</button><span id="mZoomB" title="Zoom level">100%</span><button data-a="in" title="Zoom in (+)">+</button>
 <button data-a="fit" title="Fit the page width to the window (0)">Fit</button>
-<i></i><button data-a="help" title="Shortcuts (?)">Help</button>
+<button class="sp" data-a="help" title="Shortcuts (?)">Help</button>
 </div>
 <div id="mMain">
 <div id="mLeft"><div id="mThumb"></div><div id="mViewWrap"><div id="mView"></div>
-<div id="mHint"><div><b>Drop a PDF here</b>, or choose Open… above<br><small>Selected text is translated into a note on the right, linked to where it came from.</small></div></div>
+<div id="mHint"><div><b>Drop a PDF here</b>, or choose Open… above<br><small>Select text to translate it or comment on it; each note sits on the right, linked to its place.</small></div></div>
 </div></div>
 <div id="mSplit" title="Drag to resize the panes"></div>
 <div id="mRight">
+<div id="mRH"><b>Notes</b><small id="mNc"></small>
+<div class="dd"><button class="ib ddb" title="Save the notes"><svg class="chg" viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg></button><div class="menu">
+<button id="mSave" title="A .miniread.json file to keep beside the PDF; open it with the PDF to bring the notes back">Save notes (.json)<kbd>⌘S</kbd></button>
+<button id="mPdf" title="A copy of the PDF with the highlights and notes as comments (Preview, Acrobat); open it in miniread to bring the notes back">Save PDF with comments</button></div></div>
+<button class="ib" id="mClr" title="Clear all notes, highlights and the PDF's own annotations (Undo in the status bar)"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5"/></svg></button>
+<button class="ib" id="mCfgB" title="Settings: model, key, language"><svg class="chg" viewBox="0 0 16 16"><path d="M3 5h6M12 5h1M3 11h1M7 11h6"/><circle cx="10.5" cy="5" r="1.5"/><circle cx="5.5" cy="11" r="1.5"/></svg></button>
+</div>
 <div id="mLane"><div id="mNotes"></div></div>
-<details id="mCfg"><summary title="Your key stays in this browser">AI settings</summary>
-<label>Provider<select id="mProv" title="AI provider"><option value="Glm">GLM</option><option value="Ds">DeepSeek</option></select></label>
-<label>Model<select id="mModel" title="Model"></select></label>
-<label>Think<select id="mThink" title="Reasoning effort: how hard the model thinks before answering"><option value="low">Low</option><option value="high">High</option><option value="max">Max</option></select></label>
-<label>Key<input id="mKey" type="password" autocomplete="off" placeholder="API key" spellcheck="false"></label>
-<label>URL<input id="mEp" spellcheck="false"></label>
-<label id="mRlyL" hidden title="GLM blocks browser requests from this site (CORS). The relay is svguest's Cloudflare Worker: your key and the text pass through it, nothing is stored">Relay<input type="checkbox" id="mRly"></label>
-</details>
-<details><summary>Language</summary>
-<label>Into<select id="mLang"></select></label>
-<label class="up" hidden>Prompt<small>{lang} is replaced by the target language</small><textarea id="mPrompt" rows="4" spellcheck="false"></textarea></label>
-</details>
 <div id="mComp">
 <textarea id="mSrc" spellcheck="false" placeholder="Select text in the PDF, or paste it here — ⌘/Ctrl+Enter translates"></textarea>
-<div id="mOps">
-<label title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto">Auto</label>
-<button id="mClr" title="Remove all translations and highlights">Clear</button>
-<button id="mSave" title="Save the notes as a .miniread.json file to keep beside the PDF (⌘/Ctrl+S); open it with the PDF to bring them back">Save</button>
-<button id="mPdf" title="Save a copy of the PDF with the highlights and translations as comments (Preview, Acrobat); open that copy in miniread to bring the notes back">Save PDF</button>
+<div class="cb">
+<label class="gr" title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto">Auto</label>
 <span id="mCnt"></span>
-<button id="mGo" title="⌘/Ctrl+Enter">Translate</button>
+<button id="mMd" title="Model and key"><span id="mMdN"></span></button>
+<button id="mGo" title="Translate (⌘/Ctrl+Enter)"><svg class="chg" viewBox="0 0 16 16"><path d="M8 13V3M4 7l4-4 4 4"/></svg></button>
 </div>
 </div>
+<section id="mConn" hidden aria-label="Settings"><header><button class="ib" id="mConnX" title="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b>Settings</b></header>
+<div id="mConnB">
+<div class="card"><b>Model</b><div class="kv">
+<span>Provider</span><div><select id="mProv"><option value="Glm">GLM</option><option value="Ds">DeepSeek</option></select></div>
+<span>Model</span><select id="mModel"></select>
+<span>Think</span><div title="Reasoning effort: how hard the model thinks before answering"><select id="mThink"><option value="low">Low</option><option value="high">High</option><option value="max">Max</option></select></div>
+<span>Key</span><input id="mKey" type="password" autocomplete="off" placeholder="API key" spellcheck="false">
+<span>URL</span><input id="mEp" spellcheck="false">
+</div>
+<label class="gr" id="mRlyL"><input type="checkbox" id="mRly"><span>Use svguest's Cloudflare relay — GLM blocks browser requests from this site; your key and text pass through it, nothing is stored</span></label>
+<p>Keys stay in this browser.</p></div>
+<div class="card"><b>Language</b><div class="kv"><span>Into</span><div><select id="mLang"></select></div></div><textarea id="mPrompt" hidden></textarea>
+<p>Translations and answers in the chat under each translation use this language.</p></div>
+</div></section>
 </div>
 <svg id="mLink"></svg>
+<div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
-<div id="mSt"><span id="mMsg"></span><span id="mSel"></span><button data-a="theme">Theme</button></div>
+<div id="mSt"><span id="mMsg"></span><button id="mUndo" hidden>Undo</button><span id="mSel"></span><button data-a="theme"><svg class="kg" viewBox="0 0 16 16"><path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2z"/><path class="kf" d="M8 2a6 6 0 0 0 0 12z"/></svg></button></div>
 <dialog id="mHelp"><form method="dialog"><h3>Shortcuts</h3><dl>
-<dt><kbd>?</kbd></dt><dd>This help</dd>
-<dt><kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>Enter</kbd></dt><dd>Translate</dd>
+<dt>Select text</dt><dd>Translate or Comment from the bar that appears (Auto translates at once)</dd>
+<dt>Under a translation</dt><dd>Ask the AI about the passage</dd>
+<dt><kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>Enter</kbd></dt><dd>Translate the box · <kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>S</kbd> save notes</dd>
 <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Step pages (<kbd>Home</kbd>/<kbd>End</kbd>: first/last)</dd>
-<dt><kbd>↑</kbd> <kbd>↓</kbd> <kbd>Space</kbd></dt><dd>Scroll</dd>
 <dt><kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd></dt><dd>Zoom (<kbd>Ctrl</kbd>+wheel too)</dd>
 </dl><p class="ft"><button value="">Close</button></p></form></dialog>
 <script>
@@ -176,21 +208,35 @@ const $=i=>document.getElementById(i),V=$('mView'),ls=(k,v)=>{try{return v==null
 const el=(t,c,x)=>{const e=document.createElement(t);c&&(e.className=c);x!=null&&(e.textContent=x);return e},
   btn=(t,ti)=>{const e=el('button',0,t);ti&&(e.title=ti);return e},msg=t=>$('mMsg').textContent=t||'';
 const nl=n=>n.toLocaleString('en');
+const IC={up:'<path d="M8 13V3M4 7l4-4 4 4"/>',stop:'<rect x="4.5" y="4.5" width="7" height="7" rx="1.5" fill="currentColor" stroke="none"/>',x:'<path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/>',
+    copy:'<rect x="5.5" y="5.5" width="7.5" height="7.5" rx="1.5"/><path d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"/>',
+    retry:'<path d="M13 8a5 5 0 1 1-1.5-3.5M13 2.5v3h-3"/>'},
+  svg=k=>`<svg class="chg" viewBox="0 0 16 16">${IC[k]}</svg>`,
+  ibtn=(k,ti,f)=>{const b=btn('',ti);b.innerHTML=svg(k);b.onclick=f;return b},
+  copy=s=>navigator.clipboard.writeText(s).then(()=>msg('Copied'),()=>msg('Copy failed — the browser blocked clipboard access'));
+// seg(id): a select shown as svguest's segmented control (the select stays the source of truth, hidden)
+function seg(id){const s=$(id),g=el('div','seg'),up=()=>[...g.children].forEach(b=>b.classList.toggle('on',b.dataset.v===s.value));
+  for(const o of s.options){const b=btn(o.text);b.type='button';b.dataset.v=o.value;b.onclick=()=>{s.value=o.value;s.onchange?.();up()};g.append(b)}
+  s.hidden=true;s.after(g);up()}
 
-// ---------- AI settings (GLM / DeepSeek) ----------
+// ---------- AI settings (GLM / DeepSeek), shown in the Settings sheet ----------
 const AI={Glm:['https://open.bigmodel.cn/api/paas/v4/chat/completions','glm-5.3','glm-5.3-flash'],Ds:['https://api.deepseek.com/chat/completions','deepseek-v4-pro','deepseek-flash']},
   aiF=[['mKey','Key'],['mModel','Model'],['mEp','Ep']],
-  // GLM relay (same Worker as svguest): opt-in, only on GitHub Pages, only the two official GLM URLs
+  // GLM relay (same Worker as svguest): only on GitHub Pages, only the two official GLM URLs; on by default ('0' = off)
   RLY='https://svguest-glm.jieqiang-he-dawn.workers.dev',RLYR={'https://open.bigmodel.cn/api/paas/v4/chat/completions':'standard','https://open.bigmodel.cn/api/coding/paas/v4/chat/completions':'coding'},
   rlyOk=()=>location.origin==='https://jieqianghe.github.io'&&$('mProv').value==='Glm',
+  mdUI=()=>{$('mMdN').textContent=$('mModel').value;$('mMd').classList.toggle('need',!$('mKey').value.trim());$('mMd').title=$('mKey').value.trim()?'Model and key':'Add an API key'},
   aiLoad=()=>{const p=$('mProv').value,[u,...ms]=AI[p],m=ls('mrd'+p+'Model');
     $('mModel').replaceChildren(...ms.map(x=>new Option(x,x)));
     $('mModel').value=ms.includes(m)?m:ms[0];
-    $('mKey').value=ls('mrd'+p+'Key')||'';$('mEp').value=ls('mrd'+p+'Ep')||u;$('mRlyL').hidden=!rlyOk()};
-for(const[i,k]of[['mProv','mrdAi'],['mThink','mrdThink']]){const e=$(i),v=ls(k);v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>{ls(k,e.value);i==='mProv'&&aiLoad()}}
-for(const[i,k]of aiF)$(i).onchange=()=>ls('mrd'+$('mProv').value+k,$(i).value.trim());
+    $('mKey').value=ls('mrd'+p+'Key')||'';$('mEp').value=ls('mrd'+p+'Ep')||u;$('mRlyL').hidden=!rlyOk();mdUI()},
+  cfg=on=>{$('mConn').hidden=!on;on&&!$('mKey').value&&setTimeout(()=>$('mKey').focus())};
+for(const[i,k]of[['mProv','mrdAi'],['mThink','mrdThink']]){const e=$(i),v=ls(k);v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>{ls(k,e.value);i==='mProv'&&aiLoad()};seg(i)}
+for(const[i,k]of aiF)$(i).onchange=()=>{ls('mrd'+$('mProv').value+k,$(i).value.trim());mdUI()};
+$('mKey').oninput=mdUI;
 $('mRly').checked=ls('mrdGlmRelay')!=='0';$('mRly').onchange=()=>ls('mrdGlmRelay',$('mRly').checked?'1':'0');
-aiLoad();$('mCfg').open=!$('mKey').value;
+aiLoad();
+$('mCfgB').onclick=$('mMd').onclick=()=>cfg($('mConn').hidden);$('mConnX').onclick=()=>cfg(0);
 
 // ---------- language, prompt ----------
 const LANGS=['Simplified Chinese','English'],
@@ -199,12 +245,12 @@ $('mLang').replaceChildren(...LANGS.map(l=>new Option(l,l)));
 $('mLang').value=LANGS.includes(ls('mrdLang'))?ls('mrdLang'):LANGS[0];
 $('mAuto').checked=ls('mrdAuto')!=='0';
 $('mPrompt').value=ls('mrdPrompt')||PROMPT0;
-$('mLang').onchange=()=>ls('mrdLang',$('mLang').value);
+$('mLang').onchange=()=>ls('mrdLang',$('mLang').value);seg('mLang');
 $('mPrompt').onchange=()=>ls('mrdPrompt',$('mPrompt').value);
 $('mAuto').onchange=()=>ls('mrdAuto',$('mAuto').checked?'1':'0');
 
-// ---------- translate ----------
-const cnt=()=>$('mCnt').textContent=nl($('mSrc').value.length)+' chars';
+// ---------- requests ----------
+const cnt=()=>$('mCnt').textContent=$('mSrc').value?nl($('mSrc').value.length)+' chars':'';
 const glmJ={},  // GLM endpoints that answered with plain JSON instead of a stream: asked without stream next time
   MARK='<svg viewBox="6 4.75 228 228"><path d="M29 85.86L113 36.14M127 36.14L211 85.86" stroke-width="20"/><path d="M15 83h14v14H15zM113 25h14v14h-14zM211 83h14v14h-14z" stroke-width="14"/><path d="M98 111V101Q98 95 104 95H136Q142 95 142 101V111" stroke-width="16"/><rect x="44" y="111" width="152" height="100" rx="5" stroke-width="16"/></svg>',
   apiMsg=t=>{try{const j=JSON.parse(t),e=j.error||j;return(e.code?'['+e.code+'] ':'')+(e.message||t)}catch(_){return t}};
@@ -220,8 +266,8 @@ async function ask(model,msgs,myAc,ui){
   try{r=await post(body)}
   catch(e){
     if(e.name!=='TypeError'||myAc.signal.aborted)throw e;
-    if(rly)throw Error('The GLM relay could not be reached. Check the network, or turn Relay off. '+e.message);
-    if(p!=='Glm'||!body.stream)throw Error('The API could not be reached. Check the network and the URL'+(p==='Glm'&&rlyOk()?' — or turn on Relay in AI settings':'')+'. '+e.message);
+    if(rly)throw Error('The GLM relay could not be reached. Check the network, or turn the relay off in Settings. '+e.message);
+    if(p!=='Glm'||!body.stream)throw Error('The API could not be reached. Check the network and the URL'+(p==='Glm'&&rlyOk()?' — or turn on the relay in Settings':'')+'. '+e.message);
     msg('GLM streaming could not open; waiting for a single reply…');glmJ[u]=1;body.stream=false;
     try{r=await post(body)}catch(x){if(x.name==='TypeError'&&!myAc.signal.aborted)throw Error('GLM could not be reached. Check the network and the URL. '+x.message);throw x}
   }
@@ -245,21 +291,22 @@ async function ask(model,msgs,myAc,ui){
   on(buf);
   return{out,cut}
 }
-// ---------- notes: each translation is a bubble in the right lane, linked by a line to its highlight in the PDF ----------
-// o={rs:[[page,x,y,w,h]] in PDF units (null: pasted text), fy (where a pasted note sits), el, ac}; nAct is aligned to its anchor,
-// the others are pushed up/down so no two bubbles overlap
+// ---------- notes: translations (k:'t') and comments (k:'c') as cards in the right lane, linked by a line to their highlight ----------
+// o={k,t,rs:[[page,x,y,w,h]] in PDF units (null: pasted text),fy,out,m,chat:[[q,a]],el,ac}; nAct is aligned to its anchor,
+// the others are pushed up/down so no two cards overlap
 const N=[],NS=$('mNotes'),LK=$('mLink');let nAct=null,nLast=null,nRaf=0,selA=null;
 const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(sched),
   pgOf=n=>V.querySelector(`.page[data-n="${n}"]`),
   docH=()=>{const p=V.lastElementChild;return p?p.offsetTop+p.offsetHeight:0},
   want=o=>{if(!o.rs)return o.fy*(docH()||1);const p=pgOf(o.rs[0][0]);return p?p.offsetTop+o.rs[0][2]*scale-6:null},
   hl=d=>{d.querySelectorAll('.hl').forEach(h=>h.remove());const n=+d.dataset.n,c=v=>`calc(var(--scale-factor)*${v}px)`;
-    for(const o of N)for(const r of o.rs||[])if(r[0]===n){const h=el('div','hl'+(o===nAct?' on':''));h.o=o;
+    for(const o of N)for(const r of o.rs||[])if(r[0]===n){const h=el('div','hl'+(o.k==='c'?' c':'')+(o===nAct?' on':''));h.o=o;
       h.style.cssText=`left:${c(r[1])};top:${c(r[2])};width:${c(r[3])};height:${c(r[4])}`;d.append(h)}},
   hlAll=()=>V.querySelectorAll('.page').forEach(hl),
   act=o=>{nAct=o;N.forEach(x=>x.el.classList.toggle('on',x===o));V.querySelectorAll('.hl').forEach(h=>h.classList.toggle('on',h.o===o));sched()},
-  kill=o=>{o.ac.abort();o.el.remove();N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);nsave()},
-  clr=()=>{N.forEach(o=>{o.ac.abort();o.el.remove()});N.length=0;hlAll();act(null)};
+  pick=o=>{if(o===nAct)return;V.scrollTop+=(o.w??0)-parseFloat(o.el.style.top||0);act(o)},  // activate, keeping the card where it is
+  kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();o.el.remove();N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);nsave()},
+  clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();o.el.remove()});N.length=0;hlAll();act(null)};
 // rects(range): the selection's line boxes per page, merged, in PDF units, top first
 function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n,p.getBoundingClientRect()]),R=[];
   for(const c of rg.getClientRects()){const h=c.height/scale;if(c.width<1||h<1||h>40)continue;
@@ -270,6 +317,7 @@ function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n
   return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
 function frame(){nRaf=0;
   const M=$('mMain').getBoundingClientRect(),VR=V.getBoundingClientRect(),L=$('mLane').getBoundingClientRect(),W=$('mViewWrap').getBoundingClientRect(),vs=[];
+  $('mNc').textContent=N.length||'';
   for(const o of N){o.w=want(o);o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
   vs.sort((a,b)=>a.w-b.w);
   const h=vs.map(o=>o.el.offsetHeight),y=[],G=8,k=Math.max(0,vs.indexOf(nAct));
@@ -282,33 +330,33 @@ function frame(){nRaf=0;
   NS.style.transform=`translateY(${W.top-L.top-V.scrollTop}px)`;
   let s='';
   for(const o of vs){if(!o.rs)continue;const r=o.rs[0],p=pgOf(r[0]).getBoundingClientRect(),b=o.el.getBoundingClientRect(),
-    vr=VR.right-M.left-14,x1=Math.min(vr,p.left+(r[1]+r[3])*scale-M.left),y1=p.top+(r[2]+r[4])*scale+1-M.top,xe=Math.min(vr,Math.max(x1,p.right-M.left)),x2=b.left-M.left,y2=b.top+13-M.top,c=Math.max(16,(x2-xe)/2);
+    vr=VR.right-M.left-14,x1=Math.min(vr,p.left+(r[1]+r[3])*scale-M.left),y1=p.top+(r[2]+r[4])*scale+1-M.top,xe=Math.min(vr,Math.max(x1,p.right-M.left)),x2=b.left-M.left,y2=b.top+14-M.top,c=Math.max(16,(x2-xe)/2);
     if(y2<L.top-M.top||y2>L.bottom-M.top)continue;
-    s+=`<g${o===nAct?' class="on"':''}><circle cx="${x1}" cy="${y1}" r="2.5"/><path d="M${x1} ${y1}H${xe}C${xe+c} ${y1} ${x2-c} ${y2} ${x2} ${y2}"/></g>`}
+    s+=`<g class="${o.k}${o===nAct?' on':''}"><circle cx="${x1}" cy="${y1}" r="2.5"/><path d="M${x1} ${y1}H${xe}C${xe+c} ${y1} ${x2-c} ${y2} ${x2} ${y2}"/></g>`}
   LK.innerHTML=s}
-// translate(t,rs): t defaults to the box; rs to the PDF selection the box text came from. Requests run side by side, one per note
-// sv: a saved note ({out,m,fy}) shown again without a request
+// shell(o,label): the card frame — header (dot, kind, model/date, actions .ia), placed and activated
+function shell(o,label){const it=el('div','item '+o.k),ih=el('div','ih');o.ia=el('div','ia');o.md=el('span','md');
+  ih.append(el('i'),el('b',0,label),o.md,o.ia);it.append(ih);o.el=it;o.chat||=[];
+  it.onclick=e=>e.target.closest('button,summary')||pick(o);it.addEventListener('focusin',()=>pick(o));
+  NS.append(it);N.push(o);ro.observe(it);hlAll();act(o);return it}
+// translate(t,rs,sv): t defaults to the box; rs to the PDF selection the box text came from; sv: a saved note shown again
+// without a request. Requests run side by side, one per note
 async function translate(t,rs,sv){
-  t=t??$('mSrc').value.trim();const key=$('mKey').value.trim();
+  t=t??$('mSrc').value.trim();
   if(!t)return msg('Select text in the PDF, or paste it into the box');
-  if(!sv&&!key){$('mCfg').open=true;return msg('Enter an API key first (AI settings)')}
+  if(!sv&&!$('mKey').value.trim()){cfg(1);return msg('Add an API key first')}
   rs===undefined&&(rs=selA?.t===t?selA.rs:null);
-  const t0=performance.now(),srcN=t.length,model=sv?.m||$('mModel').value,
-    it=el('div','item'),a=el('div','a'),tx=el('span','tx'),
-    wt=el('div','wt'),wl=el('span','sh','Translating'),wm=el('span','wm',model),tm=el('span','tm','0 s'),
-    sb=btn('Stop','Stop this translation'),cp=btn('Copy','Copy the translation'),rt=btn('Retry','Translate this again'),rm=btn('×','Remove'),
-    o={t,rs,m:model,fy:rs?0:sv?sv.fy:(V.scrollTop+8)/(docH()||1),el:it,ac:new AbortController()},ok=()=>nLast===o;
-  for(const b of[sb,cp,rt,rm])b.className='rtb';
-  wt.innerHTML=MARK;wt.append(wl,wm,tm,sb);a.append(wt,tx);rs||it.append(el('div','u',t));it.append(a);
-  NS.append(it);N.push(o);nLast=o;ro.observe(it);hlAll();act(o);
+  const t0=performance.now(),model=sv?.m||$('mModel').value,
+    o={k:'t',t,rs,m:model,fy:rs?0:sv?sv.fy:(V.scrollTop+8)/(docH()||1),ac:new AbortController()},ok=()=>nLast===o,
+    it=shell(o,'Translation'),a=el('div','a'),tx=el('span','tx'),
+    wt=el('div','wt'),tm=el('span','tm','0 s'),sb=ibtn('stop','Stop',()=>o.ac.abort());
+  o.md.textContent=model;wt.innerHTML=MARK;wt.append(el('span','sh','Translating'),tm);a.append(wt,tx);rs||it.insertBefore(el('div','u',t),null);it.append(a);
+  o.ia.append(sb);o.ia.classList.add('run');nLast=o;
   const iv=setInterval(()=>tm.textContent=Math.round((performance.now()-t0)/1e3)+' s',1e3);
   let th=null,tb=null,tsm=null,t1=0,t2=0,thc=0,acc='',shut=0,cut=0,bad=0;
   const think=s=>{if(!th){t1=performance.now();tsm=el('summary',0,'Thinking…');tb=el('div','th');th=el('details','tk');th.open=true;th.append(tsm,tb);a.prepend(th)}
       tb.append(s);thc+=s.length},
     show=s=>{acc=s;tx.textContent=s;t2||(t2=performance.now());wt.hidden=true;th&&!shut&&(shut=1,th.open=false)};
-  it.onclick=e=>{if(e.target.closest('button,summary')||o===nAct)return;V.scrollTop+=(o.w??0)-parseFloat(it.style.top||0);act(o)};
-  sb.onclick=()=>o.ac.abort();rm.onclick=()=>kill(o);rt.onclick=()=>{kill(o);translate(t,rs)};
-  cp.onclick=()=>navigator.clipboard.writeText(acc).then(()=>{msg('Translation copied');cp.textContent='Copied';setTimeout(()=>cp.textContent='Copy',1200)},()=>msg('Copy failed — the browser blocked clipboard access'));
   sv||msg('Translating with '+model+'…');
   try{if(sv){show(sv.out);return}
     let msgs=[{role:'system',content:$('mPrompt').value.replaceAll('{lang}',$('mLang').value)},{role:'user',content:t}];
@@ -325,17 +373,49 @@ async function translate(t,rs,sv){
     if(e.name==='AbortError'){if(!acc){a.classList.add('dim');tx.textContent='Stopped'}ok()&&msg('Stopped')}
     else{a.classList.add('er');tx.textContent='✖ '+e.message;ok()&&msg('Translation failed')}
   }finally{
-    clearInterval(iv);wt.hidden=true;if(th){th.classList.add('ok');tsm.textContent='Thought for '+Math.max(1,Math.round(((t2||performance.now())-t1)/1e3))+' s'}
-    const mt=el('div','mt');o.out=acc;sv||nsave();mt.append(el('span',0,sv?model+' · saved':model+' · '+((performance.now()-t0)/1e3).toFixed(1)+' s'+(acc?' · '+nl(srcN)+'→'+nl(acc.length):'')));
-    acc&&mt.append(cp);bad&&mt.append(rt);mt.append(rm);it.append(mt);
+    clearInterval(iv);wt.hidden=true;sb.remove();o.ia.classList.remove('run');
+    if(th){th.classList.add('ok');tsm.textContent='Thought for '+Math.max(1,Math.round(((t2||performance.now())-t1)/1e3))+' s'}
+    o.out=acc;sv||(o.md.textContent=model+' · '+((performance.now()-t0)/1e3).toFixed(1)+' s');
+    acc&&o.ia.append(ibtn('copy','Copy the translation',()=>copy(acc)));
+    bad&&o.ia.append(ibtn('retry','Translate again',()=>{kill(o);translate(t,rs)}));
+    o.ia.append(ibtn('x','Remove',()=>kill(o)));
+    acc&&chatUI(o,sv?.chat);sv||nsave();
   }
 }
+// comment(t,rs,sv): a note of your own on the selection; an empty one goes away when it loses focus
+function comment(t,rs,sv){
+  const o={k:'c',t,rs,fy:0,out:sv?.out||'',d:sv?.d||new Date().toLocaleDateString([],{month:'short',day:'numeric'}),ac:new AbortController()},
+    it=shell(o,'Comment'),e=el('textarea','ce'),fit=()=>{e.style.height='auto';e.style.height=e.scrollHeight+'px'};
+  o.md.textContent=o.d;e.rows=2;e.placeholder='Write a comment…';e.value=o.out;e.spellcheck=false;it.append(e);
+  e.oninput=()=>{o.out=e.value;fit();clearTimeout(o.sT);o.sT=setTimeout(nsave,400)};
+  e.onblur=()=>setTimeout(()=>o.out.trim()||kill(o),150);
+  e.onkeydown=k=>{k.key==='Escape'&&e.blur()};
+  o.ia.append(ibtn('copy','Copy the comment',()=>copy(o.out)),ibtn('x','Remove',()=>kill(o)));
+  requestAnimationFrame(fit);sv||setTimeout(()=>e.focus({preventScroll:true}));return o}
+// chatUI(o,saved): the conversation under a translation; the passage and its translation go with every question
+function chatUI(o,saved){
+  const cv=el('div','cv'),ci=el('div','ci'),q=el('textarea'),go=btn('','Ask (Enter)');
+  q.rows=1;q.placeholder='Ask about this passage…';q.spellcheck=false;go.innerHTML=svg('up');ci.append(q,go);cv.append(ci);o.el.append(cv);o.cv=cv;
+  for(const[x,y]of saved||[])turn(o,x,y);
+  q.oninput=()=>{q.style.height='auto';q.style.height=Math.min(120,q.scrollHeight)+'px'};
+  q.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();go.click()}};
+  go.onclick=()=>{if(o.qc)return o.qc.abort();const s=q.value.trim();if(!s)return q.focus();q.value='';q.oninput();chat(o,s,go)}}
+const turn=(o,q,a)=>{const r=el('div','r',a??'');o.cv.insertBefore(el('div','q',q),o.cv.lastChild);o.cv.insertBefore(r,o.cv.lastChild);a!=null&&o.chat.push([q,a]);return r};
+async function chat(o,s,go){
+  if(!$('mKey').value.trim()){cfg(1);return msg('Add an API key first')}
+  const r=turn(o,s),wt=el('div','wt'),tx=el('span'),model=$('mModel').value;let acc='';
+  wt.innerHTML=MARK;wt.append(el('span','sh','Thinking'));r.append(wt,tx);
+  o.qc=new AbortController();go.innerHTML=svg('stop');go.title='Stop';
+  const msgs=[{role:'system',content:'You help a reader understand a passage from an academic PDF. Answer in '+$('mLang').value+', clearly and briefly, in plain text without Markdown headings.'},
+    {role:'user',content:'Passage:\n'+o.t+'\n\nTranslation:\n'+o.out},{role:'assistant',content:'Got it. What would you like to know?'},
+    ...o.chat.flatMap(([q,a])=>[{role:'user',content:q},{role:'assistant',content:a}]),{role:'user',content:s}];
+  try{await ask(model,msgs,o.qc,{think:()=>{},text:x=>{acc=x;wt.hidden=true;tx.textContent=x}});if(!acc)throw Error('Empty reply')}
+  catch(e){wt.hidden=true;if(e.name==='AbortError'){acc||(r.classList.add('dim'),tx.textContent='Stopped')}else{r.classList.add('er');tx.textContent='✖ '+e.message;acc=''}}
+  finally{o.qc=null;go.innerHTML=svg('up');go.title='Ask (Enter)';acc&&(o.chat.push([s,acc]),nsave())}}
 $('mGo').onclick=()=>translate();
-$('mClr').onclick=()=>{clr();nsave();msg('Translations cleared')};
-$('mSave').onclick=()=>nfile();$('mPdf').onclick=()=>npdf();
 $('mSrc').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();translate()}});
 $('mSrc').addEventListener('input',cnt);cnt();
-$('mLane').addEventListener('wheel',e=>{const a=e.target.closest('.a');if(a&&a.scrollHeight>a.clientHeight||e.ctrlKey)return;e.preventDefault();V.scrollTop+=e.deltaMode?e.deltaY*16:e.deltaY},{passive:false});
+$('mLane').addEventListener('wheel',e=>{const a=e.target.closest('.a,.ce,textarea');if(a&&a.scrollHeight>a.clientHeight||e.ctrlKey)return;e.preventDefault();V.scrollTop+=e.deltaMode?e.deltaY*16:e.deltaY},{passive:false});
 V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSelection().isCollapsed)return;
   const b=p.getBoundingClientRect(),n=+p.dataset.n,x=(e.clientX-b.left)/scale,y=(e.clientY-b.top)/scale,
     o=N.find(o=>o.rs?.some(r=>r[0]===n&&x>=r[1]&&x<=r[1]+r[3]&&y>=r[2]&&y<=r[2]+r[4]));o&&o!==nAct&&act(o)});
@@ -344,9 +424,9 @@ ro.observe(V);ro.observe($('mLane'));addEventListener('resize',sched);
 // ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>); Save writes <name>.miniread.json to keep beside the PDF ----------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
 const fpr=()=>pdf?.fingerprints?.[0]||'',
-  ndata=()=>({miniread:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out).map(o=>({t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m}))}),
+  ndata=()=>({miniread:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out?.trim()).map(o=>({k:o.k,t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m,d:o.d,...(o.chat.length&&{chat:o.chat})}))}),
   nsave=()=>{const f=fpr(),d=ndata();if(!f)return;try{d.notes.length?localStorage['mrdN:'+f]=JSON.stringify(d):localStorage.removeItem('mrdN:'+f)}catch(_){}},
-  nload=d=>{clr();for(const n of d?.notes||[])n?.t&&n.out&&translate(n.t,n.rs||null,n);act(null);return N.length};
+  nload=d=>{clr();for(const n of d?.notes||[])n?.t&&n.out&&(n.k==='c'?comment(n.t,n.rs||null,n):translate(n.t,n.rs||null,n));act(null);return N.length};
 // keep(blob,name,mime,ext,re): Chrome/Edge save dialog in the PDF's folder (re: remember the handle, so Save rewrites the same file), else a download
 async function keep(b,nm,mime,ext,re){
   if(window.showSaveFilePicker)try{let h=re&&jsH;h||=await showSaveFilePicker({suggestedName:nm,startIn:pdfH||'documents',types:[{description:nm,accept:{[mime]:[ext]}}]});re&&(jsH=h);
@@ -354,26 +434,37 @@ async function keep(b,nm,mime,ext,re){
   catch(e){re&&(jsH=null);return msg(e.name==='AbortError'?'':'Could not save: '+e.message)}
   const a=el('a');a.href=URL.createObjectURL(b);a.download=nm;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3);
   msg('Downloaded '+nm+' — keep it beside the PDF; open it in miniread to bring the notes back')}
-function nfile(){if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No translations to save');
+function nfile(){if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No notes to save');
   keep(new Blob([JSON.stringify(d,null,1)],{type:'application/json'}),pdfName.replace(/\.pdf$/i,'')+'.miniread.json','application/json','.json',1)}
-// npdf(): a copy of the PDF with one Highlight annotation per note and page (its translation as the comment) and the notes JSON
-// attached as ATT, which openPdf reads back. pdf-lib is inlined at the end of the file (#mPlib) and runs on first use only
-const ATT='miniread-notes.json',
+// npdf(): a copy of the PDF with one Highlight annotation per note and page (the translation, its chat or the comment as the
+// annotation's text) and the notes JSON attached as ATT, which openPdf reads back. Earlier miniread highlights and attachment are
+// replaced; after Clear (annOff) every markup annotation of the PDF is dropped. pdf-lib is inlined at the end (#mPlib), run on first use
+const ATT='miniread-notes.json',MK=new Set('Text FreeText Line Square Circle Polygon PolyLine Highlight Underline Squiggly StrikeOut Stamp Caret Ink Popup FileAttachment Sound Redact'.split(' ')),
   plib=()=>{if(!window.PDFLib){const x=el('script');x.textContent=$('mPlib').textContent;document.head.append(x)}};
 async function npdf(){
-  if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No translations to save');
+  if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length&&!annOff)return msg('No notes to save');
   msg('Building the PDF…');
-  try{plib();const{PDFDocument,PDFHexString,PDFName}=PDFLib,doc=await PDFDocument.load(await pdf.getData(),{ignoreEncryption:true}),P=doc.getPages(),T=x=>PDFHexString.fromText(x);
-    for(const g of P){const A=g.node.Annots();if(A)for(let i=A.size()-1;i>=0;i--)A.lookup(i)?.get?.(PDFName.of('T'))?.decodeText?.()==='miniread'&&A.remove(i)}  // an earlier export's highlights
+  try{plib();const{PDFDocument,PDFHexString,PDFName}=PDFLib,doc=await PDFDocument.load(await pdf.getData(),{ignoreEncryption:true}),P=doc.getPages(),T=x=>PDFHexString.fromText(x),K=x=>PDFName.of(x);
+    for(const g of P){const A=g.node.Annots();if(A)for(let i=A.size()-1;i>=0;i--){const a=A.lookup(i);
+      (a?.get?.(K('T'))?.decodeText?.()==='miniread'||annOff&&MK.has(String(a?.get?.(K('Subtype'))).slice(1)))&&A.remove(i)}}
+    const ar=doc.catalog.lookup(K('Names'))?.lookup?.(K('EmbeddedFiles'))?.lookup?.(K('Names'));
+    if(ar)for(let i=ar.size()-2;i>=0;i-=2)ar.lookup(i)?.decodeText?.()===ATT&&(ar.remove(i+1),ar.remove(i));
     for(const o of d.notes)for(const n of new Set((o.rs||[]).map(r=>r[0]))){
       const vp=(await pdf.getPage(n)).getViewport({scale:1}),q=[];
       for(const r of o.rs)r[0]===n&&[[r[1],r[2]],[r[1]+r[3],r[2]],[r[1],r[2]+r[4]],[r[1]+r[3],r[2]+r[4]]].forEach(([x,y])=>q.push(...vp.convertToPdfPoint(x,y)));
-      const xs=q.filter((_,i)=>!(i%2)),ys=q.filter((_,i)=>i%2);
+      const xs=q.filter((_,i)=>!(i%2)),ys=q.filter((_,i)=>i%2),c=o.k==='c';
       P[n-1].node.addAnnot(doc.context.register(doc.context.obj({Type:'Annot',Subtype:'Highlight',F:4,Rect:[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)],
-        QuadPoints:q,C:[1,.84,.29],CA:.6,T:T('miniread'),Contents:T(o.out)})))}
-    await doc.attach(new TextEncoder().encode(JSON.stringify(d)),ATT,{mimeType:'application/json',description:'miniread notes'});
+        QuadPoints:q,C:c?[.26,.52,.96]:[1,.84,.29],CA:c?.35:.6,T:T('miniread'),Contents:T(o.out+(o.chat||[]).map(([a,b])=>'\n\nQ: '+a+'\nA: '+b).join(''))})))}
+    d.notes.length&&await doc.attach(new TextEncoder().encode(JSON.stringify(d)),ATT,{mimeType:'application/json',description:'miniread notes'});
     await keep(new Blob([await doc.save()],{type:'application/pdf'}),pdfName.replace(/\.pdf$/i,'')+'.miniread.pdf','application/pdf','.pdf')
   }catch(e){msg('Could not build the PDF: '+e.message)}}
+// clrAll(): one click clears every note and highlight and hides the PDF's own annotations; Undo (status bar) for 10 s
+let undoD=null,undoT=0;
+function clrAll(){const d=ndata();if(!d.notes.length&&!N.length&&(annOff||!annN))return msg('Nothing to clear');
+  undoD={d,a:annOff};const n=N.length,h=!annOff&&annN;clr();annHide(1);nsave();
+  msg('Cleared '+n+' notes'+(h?' and '+h+' PDF annotations':'')+(h?' — Save PDF writes a copy without them':''));$('mUndo').hidden=false;clearTimeout(undoT);undoT=setTimeout(()=>$('mUndo').hidden=true,1e4)}
+$('mUndo').onclick=()=>{if(!undoD)return;nload(undoD.d);nsave();annHide(undoD.a);undoD=null;$('mUndo').hidden=true;msg('Restored')};
+$('mClr').onclick=clrAll;$('mSave').onclick=()=>nfile();$('mPdf').onclick=()=>npdf();
 // openFiles(files,handles): a PDF and/or its .miniread.json, from Open…, the file picker or a drop
 async function openFiles(fs,hs=[]){
   const i=fs.findIndex(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name)),j=fs.findIndex(f=>/\.json$/i.test(f.name));
@@ -388,15 +479,19 @@ async function openFiles(fs,hs=[]){
 
 // ---------- PDF ----------
 window.pdfjsLib&&(pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
-let pdf=null,scale=1,gen=0,obs,layP=Promise.resolve();
+let pdf=null,scale=1,gen=0,obs,layP=Promise.resolve(),annOff=false,annN=0;  // annOff: draw the PDF's own annotations or not; annN: how many markup ones it has
+const annHide=v=>{if(annOff===!!v)return;annOff=!!v;if(!pdf)return;const y=V.scrollTop;layout().then(()=>V.scrollTop=y);TH()&&buildThumbs().catch(()=>{})};
 const open=f=>f.arrayBuffer().then(b=>openPdf(b,f.name)).catch(e=>msg('Cannot read '+f.name+': '+e.message));  // resolves true once open
 async function openPdf(buf,name){
   if(!window.pdfjsLib)return msg('PDF engine failed to load — check the connection to cdnjs');
   try{const np=await pdfjsLib.getDocument({data:buf}).promise;pdf&&pdf.destroy().catch(()=>{});pdf=np}
   catch(e){msg('Cannot open '+name+': '+e.message);return false}
-  $('mHint').hidden=true;$('mPgT').textContent=pdf.numPages;$('mPgN').value=1;$('mPgN').max=pdf.numPages;
+  $('mHint').hidden=true;selHide();$('mPgT').textContent=pdf.numPages;$('mPgN').value=1;$('mPgN').max=pdf.numPages;
   clr();pdfName=name;pdfH=jsH=null;document.title='miniread — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
-  if(!k)try{const f=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT);f&&(k=nload(JSON.parse(new TextDecoder().decode(f.content))))}catch(_){}
+  let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT)}catch(_){}
+  annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // a miniread copy: its highlights are drawn by miniread, not twice
+  if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
+  const doc=pdf;(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)annN+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length})().catch(()=>{});
   msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});return true
 }
 function layout(){
@@ -412,7 +507,7 @@ async function draw(d){
   try{
     const page=await pdf.getPage(+d.dataset.n),vp=page.getViewport({scale}),r=devicePixelRatio||1,c=el('canvas'),t=el('div','textLayer');
     c.width=vp.width*r;c.height=vp.height*r;d.append(c,t);
-    await page.render({canvasContext:c.getContext('2d'),viewport:vp,transform:[r,0,0,r,0,0]}).promise;
+    await page.render({canvasContext:c.getContext('2d'),viewport:vp,transform:[r,0,0,r,0,0],annotationMode:annOff?pdfjsLib.AnnotationMode.DISABLE:pdfjsLib.AnnotationMode.ENABLE}).promise;
     await pdfjsLib.renderTextLayer({textContentSource:page.streamTextContent(),container:t,viewport:vp,textDivs:[]}).promise;
     t.append(el('div','endOfContent'));
   }catch(e){d.isConnected&&msg('Page '+(+d.dataset.n)+' did not render: '+(e.message||e))}
@@ -454,31 +549,45 @@ async function tdraw(d){
   try{const ph=d.firstChild,n=+d.dataset.n,p=await pdf.getPage(n),vp=p.getViewport({scale:ts}),
     r=Math.min(2,devicePixelRatio||1),c=el('canvas');
   c.width=vp.width*r;c.height=vp.height*r;
-  await p.render({canvasContext:c.getContext('2d'),viewport:vp,transform:[r,0,0,r,0,0]}).promise;
+  await p.render({canvasContext:c.getContext('2d'),viewport:vp,transform:[r,0,0,r,0,0],annotationMode:annOff?pdfjsLib.AnnotationMode.DISABLE:pdfjsLib.AnnotationMode.ENABLE}).promise;
   ph.replaceWith(c)}catch(_){}}
 function mark(){const T=$('mThumb'),t=T.querySelector(`.tp[data-n="${curN}"]`);
   t&&(T.querySelectorAll('.tp.cur').forEach(x=>x.classList.remove('cur')),t.classList.add('cur'),t.scrollIntoView({block:'nearest'}))}
 $('mThumb').onclick=e=>{const t=e.target.closest('.tp');t&&goto(+t.dataset.n)};
 setTh(ls('mrdThumbs')!=='0');
 
-// ---------- selection ----------
+// ---------- selection: Translate / Comment bar under the selection ----------
 let lastSel='';
-V.addEventListener('mousedown',e=>e.target.closest('.textLayer')?.classList.add('selecting'));
-document.addEventListener('mouseup',()=>{
+const selT=$('mSelT'),selHide=()=>selT.hidden=true;
+V.addEventListener('mousedown',e=>{e.target.closest('.textLayer')?.classList.add('selecting');selHide()});
+selT.onmousedown=e=>e.preventDefault();
+selT.onclick=e=>{const b=e.target.closest('button');if(!b||!selA)return;selHide();
+  b.dataset.s==='c'?comment(selA.t,selA.rs):translate(selA.t,selA.rs);getSelection().removeAllRanges()};
+document.addEventListener('mouseup',e=>{
   document.querySelectorAll('.textLayer.selecting').forEach(t=>t.classList.remove('selecting'));
+  if(selT.contains(e.target))return;
   const s=getSelection();if(!s.rangeCount||!V.contains(s.anchorNode))return;
   const txt=s.toString().replace(/([A-Za-z])-\s*\n\s*(?=[a-z])/g,'$1').replace(/\s+/g,' ').trim();if(!txt)return;
-  const w=(txt.match(/[A-Za-z0-9'’-]+|[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]/g)||[]).length;
+  const w=(txt.match(/[A-Za-z0-9'’-]+|[一-鿿぀-ヿ가-힯]/g)||[]).length,rg=s.getRangeAt(0);
   $('mSel').textContent='Selected '+nl(txt.length)+' chars · '+nl(w)+' words';
-  if(txt!==lastSel||txt!==$('mSrc').value){lastSel=txt;selA={t:txt,rs:rects(s.getRangeAt(0))};$('mSrc').value=txt;cnt();$('mAuto').checked&&translate()}
-});
+  const auto=$('mAuto').checked&&(txt!==lastSel||txt!==$('mSrc').value);
+  selA={t:txt,rs:rects(rg)};lastSel=txt;$('mSrc').value=txt;cnt();auto&&translate();
+  const c=[...rg.getClientRects()].filter(r=>r.width>1&&r.height>1&&r.height<60*scale).at(-1),M=$('mMain').getBoundingClientRect(),VR=V.getBoundingClientRect();
+  if(!c)return;selT.querySelector('[data-s=t]').hidden=auto;selT.hidden=false;
+  const x=Math.min(Math.max(c.right-M.left-selT.offsetWidth,VR.left-M.left+6),VR.right-M.left-selT.offsetWidth-18),
+    y=c.bottom-M.top+6+selT.offsetHeight>VR.bottom-M.top?c.top-M.top-selT.offsetHeight-6:c.bottom-M.top+6;
+  selT.style.left=x+'px';selT.style.top=y+'px'});
+V.addEventListener('scroll',selHide,{passive:true});
 
 // ---------- files, keys, actions ----------
 $('mFile').onchange=e=>{const fs=[...e.target.files];fs.length&&openFiles(fs);e.target.value=''};
 document.addEventListener('dragover',e=>[...e.dataTransfer?.types||[]].includes('Files')&&e.preventDefault());
 document.addEventListener('drop',e=>{const fs=[...e.dataTransfer?.files||[]];if(!fs.length)return;e.preventDefault();
   Promise.all([...e.dataTransfer.items].filter(x=>x.kind==='file').map(x=>x.getAsFileSystemHandle?.())).then(hs=>openFiles(fs,hs),()=>openFiles(fs))});
-document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){e.preventDefault();nfile()}});
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){e.preventDefault();nfile()}
+  else if(e.key==='Escape'){selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0)}});
+document.addEventListener('click',e=>{const d=e.target.closest('.dd');document.querySelectorAll('.dd.open').forEach(x=>x!==d&&x.classList.remove('open'));
+  d&&(e.target.closest('.ddb')?d.classList.toggle('open'):e.target.closest('.menu button')&&d.classList.remove('open'))});
 let wzT=0;
 V.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clearTimeout(wzT);
   wzT=setTimeout(()=>zoom(e.deltaY<0?1.2:1/1.2),60)}},{passive:false});
@@ -496,13 +605,12 @@ document.addEventListener('keydown',e=>{
 const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,types:[{description:'PDF or miniread notes',accept:{'application/pdf':['.pdf'],'application/json':['.json']}}]}).then(async hs=>openFiles(await Promise.all(hs.map(h=>h.getFile())),hs),e=>e.name!=='AbortError'&&msg(e.message)):$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(+$('mPgN').value-1),next:()=>goto(+$('mPgN').value+1),
   last:()=>goto(pdf?.numPages||1),out:()=>zoom(1/1.2),'in':()=>zoom(1.2),fit,help:()=>$('mHelp').showModal(),
   theme:()=>{const d=document.documentElement.dataset.theme!=='dark';setTheme(d);ls('mrdTheme',d?'dark':'light')}};
-function setTheme(d){document.documentElement.dataset.theme=d?'dark':'light';const b=qa('theme');
-  b.textContent='Theme: '+(d?'Dark':'Light');b.title=d?'Switch to light interface':'Switch to dark interface'}
+function setTheme(d){document.documentElement.dataset.theme=d?'dark':'light';qa('theme').title=d?'Switch to light interface':'Switch to dark interface'}
 setTheme(document.documentElement.dataset.theme==='dark');
 document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]());
 const sp=$('mSplit');
 sp.onpointerdown=e=>{e.preventDefault();sp.setPointerCapture(e.pointerId);
-  sp.onpointermove=m=>{$('mLeft').style.flexBasis=m.clientX+'px';sched()}};
+  sp.onpointermove=m=>{$('mLeft').style.flexBasis=m.clientX+'px';sched();selHide()}};
 sp.onpointerup=sp.onlostpointercapture=()=>sp.onpointermove=null;
 </script>
 <!-- pdf-lib 1.17.1 (MIT, https://github.com/Hopding/pdf-lib), minified; kept as text and run by plib() on the first Save PDF -->
