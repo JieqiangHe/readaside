@@ -129,6 +129,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 .item details summary{cursor:pointer;color:var(--h4);font-size:12px}
 .item details.ok>summary::before{content:'✓ ';color:var(--ok)}
 .item .th{max-height:180px;overflow:auto;margin-top:3px;padding-left:8px;border-left:2px solid var(--line);font-size:11px;color:var(--h4);white-space:pre-wrap;overflow-wrap:anywhere}
+.item img.cm{display:block;max-width:100%;margin-top:6px;border-radius:6px;box-shadow:0 0 0 1px var(--line);cursor:pointer}
 .item .ce{display:block;width:100%;min-height:36px;padding:0;border:0;border-radius:0;background:transparent;resize:none;font-size:13px;line-height:1.65;overflow:hidden}
 .item .cv{display:flex;flex-direction:column;gap:6px;margin-top:4px;padding-top:7px;border-top:1px solid var(--h4b)}
 .item:not(.on) .cv:not(:has(.q)){display:none}.item:not(.on) .ci{display:none}
@@ -431,12 +432,30 @@ async function translate(t,rs,sv){
   }
 }
 // comment(t,rs,sv): a note of your own on the selection; an empty one goes away when it loses focus
+// a pasted picture in a comment: shrink it, keep it in the note, show it under the text
+function pasteShot(o,e,refresh){
+  const f=[...(e.clipboardData?.files||[])].find(x=>/^image\//.test(x.type));if(!f)return;
+  e.preventDefault();
+  const r=new FileReader();
+  r.onload=()=>{const im=new Image();
+    im.onload=()=>{const k=Math.min(1,1400/Math.max(im.width,im.height)),c=el('canvas');
+      c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      o.img=c.toDataURL('image/jpeg',.82);refresh();nsave()};
+    im.src=r.result};
+  r.readAsDataURL(f)}
+
 function comment(t,rs,sv){
-  const o={k:'c',t,rs,fy:0,out:sv?.out||'',d:sv?.d||new Date().toLocaleDateString([],{month:'short',day:'numeric'}),ac:new AbortController()},
+  const o={k:'c',t,rs,fy:0,out:sv?.out||'',img:sv?.img||'',d:sv?.d||new Date().toLocaleDateString([],{month:'short',day:'numeric'}),ac:new AbortController()},
     it=shell(o,'Comment'),e=el('textarea','ce'),fit=()=>{e.style.height='auto';e.style.height=e.scrollHeight+'px'};
   o.md.textContent=o.d;e.rows=2;e.placeholder='Write a comment…';e.value=o.out;e.spellcheck=false;it.append(e);
+  const pic=el('img','cm');let imgOn=0;
+  const showPic=()=>{o.img?(pic.src=o.img,imgOn||(it.append(pic),imgOn=1)):imgOn&&(pic.remove(),imgOn=0)};
+  pic.title='Click to remove the picture';pic.onclick=ev=>{ev.stopPropagation();o.img='';showPic();nsave()};
+  o.img&&(it.append(pic),imgOn=1);
+  e.onpaste=ev=>pasteShot(o,ev,()=>{showPic();fit()});
   e.oninput=()=>{o.out=e.value;fit();clearTimeout(o.sT);o.sT=setTimeout(nsave,400)};
-  e.onblur=()=>setTimeout(()=>o.out.trim()||kill(o),150);
+  e.onblur=()=>setTimeout(()=>o.out.trim()||o.img||kill(o),150);
   e.onkeydown=k=>{k.key==='Escape'&&e.blur()};
   o.ia.append(ibtn('copy','Copy the comment',()=>copy(o.out)),ibtn('x','Remove',()=>kill(o)));
   requestAnimationFrame(fit);sv||setTimeout(()=>e.focus({preventScroll:true}));return o}
@@ -470,9 +489,11 @@ addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{col();pdf&&
 // ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>, the old miniread prefix); Save writes <name>.ocrp.json to keep beside the PDF ----------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
 const fpr=()=>pdf?.fingerprints?.[0]||'',
-  nmap=o=>({k:o.k,t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m,d:o.d,...(o.chat.length&&{chat:o.chat})}),
-  ndata=()=>({ocrp:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out?.trim()).map(nmap)}),
-  nsaveTab=(nm,fp,ns)=>{if(!fp)return;const k=ns.filter(o=>o.out?.trim());try{k.length?localStorage['mrdN:'+fp]=JSON.stringify({ocrp:1,pdf:nm,fp,notes:k.map(nmap)}):localStorage.removeItem('mrdN:'+fp)}catch(_){}},
+  nmap=o=>({k:o.k,t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m,d:o.d,...(o.img&&{img:o.img}),...(o.chat.length&&{chat:o.chat})}),
+  ndata=()=>({ocrp:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out?.trim()||o.img).map(nmap)}),
+  nsaveTab=(nm,fp,ns)=>{if(!fp)return;const k=ns.filter(o=>o.out?.trim()||o.img);
+    const dump=drop=>JSON.stringify({ocrp:1,pdf:nm,fp,notes:k.map(o=>drop&&o.img?{...nmap(o),img:void 0}:nmap(o))});
+    try{if(!k.length)localStorage.removeItem('mrdN:'+fp);else{let s=dump(0);s.length>35e5&&(s=dump(1));localStorage['mrdN:'+fp]=s}}catch(_){}},
   nsave=()=>nsaveTab(pdfName,fpr(),N),
   nload=d=>{clr();for(const n of d?.notes||[])n?.t&&n.out&&(n.k==='c'?comment(n.t,n.rs||null,n):translate(n.t,n.rs||null,n));act(null);return N.length};
 // keep(blob,name,mime,ext,re): Chrome/Edge save dialog in the PDF's folder (re: remember the handle, so Save rewrites the same file), else a download
@@ -489,6 +510,7 @@ function nmd(){
   if(!pdf)return msg('Open a PDF first');
   const ns=N.filter(o=>o.out?.trim());
   if(!ns.length)return msg('No notes to save');
+  const base=pdfName.replace(/\.pdf$/i,''),pics=[];let ix=0;
   const by=ns.slice().sort((a,b)=>(a.rs?.[0]?.[0]??1e9)-(b.rs?.[0]?.[0]??1e9)||(a.rs?.[0]?.[2]??a.fy*1e3)-(b.rs?.[0]?.[2]??b.fy*1e3)),
     L=['# '+pdfName.replace(/\.pdf$/i,''),'',ns.length+(ns.length>1?' notes':' note')+' · '+new Date().toISOString().slice(0,10),''];
   let pg=-1;
@@ -497,11 +519,13 @@ function nmd(){
     if(p!==pg){pg=p;L.push(p?'## Page '+p:'## Notes','')}
     if(o.t)String(o.t).trim().split('\n').forEach(t=>L.push('> '+t.trim()));
     if(o.t)L.push('');
-    if(o.k==='c'){L.push(o.out.trim(),'')}
+    if(o.img){const nm=base+'.p'+p+'.'+(++ix)+'.png';pics.push([nm,o.img]);L.push('![]('+nm+')','')}
+    if(o.k==='c'){o.out.trim()&&L.push(o.out.trim(),'')}
     else{L.push(o.out.trim(),'')
       for(const [q,a] of o.chat||[])L.push('**Q.** '+q.trim(),'',a.trim(),'')}
   }
-  keep(new Blob([L.join('\n')],{type:'text/markdown'}),pdfName.replace(/\.pdf$/i,'')+'.notes.md','text/markdown','.md',0);
+  keep(new Blob([L.join('\n')],{type:'text/markdown'}),base+'.notes.md','text/markdown','.md',0);
+  pics.forEach(([nm,url],i)=>setTimeout(()=>{const a=el('a');a.href=url;a.download=nm;a.click()},300+i*250));  // the pictures land beside the .md
 }
 
 // npdf(): a copy of the PDF with one Highlight annotation per note and page (the translation, its chat or the comment as the
