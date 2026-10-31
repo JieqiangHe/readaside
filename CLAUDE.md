@@ -10,7 +10,7 @@ A single-file PDF reader with side-by-side AI translation (GLM / DeepSeek, your 
 - UI text, tooltips, messages and README are English only. Never leave Chinese in the app.
 - Code style: dense and short, section comments `// ---------- name ----------`, match the surrounding one-liner style. Don't refactor unasked.
 - README is one sentence and the `**Live: ...**` line. Keep it that short.
-- UI philosophy: minimal chrome, styled after svguest (its palette variables, 6–10 px radii, `.ib` icon buttons, `.seg` segmented controls, `.dd/.menu` dropdowns, settings sheet `#mConn` with cards — user's choice, 2026-10-31). Don't add visible controls or filler text without asking.
+- UI philosophy: minimal chrome, styled after svguest (its palette variables, 6–10 px radii, `.ib` icon buttons, `.seg` segmented controls, `.dd/.menu` dropdowns, settings sheet `#mConn` with cards — user's choice, 2026-10-31). Don't add visible controls or filler text without asking. Toolbar (trimmed 2026-10-31, no app name): thumbnails icon, Open…, ‹ page / N ›, − zoom% + (the % button fits the width), and on the right ? and theme; the status bar holds only messages, Undo and the selection count. First/last page are Home/End only.
 
 ## Architecture (names in index.html)
 

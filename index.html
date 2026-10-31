@@ -28,11 +28,10 @@ kbd{display:inline-block;min-width:1.6em;padding:0 5px;border-radius:4px;backgro
 .seg{display:flex;gap:2px;min-width:0;padding:2px;border-radius:7px;background:var(--btnh)}.seg button{flex:1;height:20px;padding:0 6px;border:0;border-radius:5px;background:none;color:var(--h4);white-space:nowrap}.seg button:hover{background:none;color:var(--fg)}.seg button.on{background:var(--btn);color:var(--fg);box-shadow:var(--sh)}
 /* ---------- toolbar ---------- */
 #mBar{display:flex;flex-wrap:wrap;align-items:center;gap:3px;padding:4px;background:var(--bar);border-bottom:1px solid var(--line)}
-#mBar>button{border-color:transparent;background:transparent;padding:2px 8px}#mBar>button:hover{background:var(--btnh)}#mBar>button.on{background:var(--on);color:var(--onfg)}
+#mBar>button{border-color:transparent;background:transparent;padding:2px 8px}#mBar>.ib{width:28px;height:26px;padding:0;font-size:15px;color:var(--h4)}#mBar>.ib:hover{color:var(--fg)}#mBar>.ib.on{color:var(--onb)}#mBar>button:hover{background:var(--btnh)}#mBar>button.on{background:var(--on);color:var(--onfg)}
 #mBar>i{width:1px;height:18px;background:var(--line);margin:0 4px}
-#mBrand{padding:0 8px 0 6px;font-weight:700;font-size:13px;letter-spacing:-.01em;user-select:none}
 #mPgN{width:42px;height:22px;text-align:center;-moz-appearance:textfield}#mPgN::-webkit-inner-spin-button,#mPgN::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-#mPgT,#mZoomB{color:var(--h4);font-variant-numeric:tabular-nums}#mPgT::before{content:'/ ';color:var(--t3)}#mZoomB{min-width:40px;text-align:center}
+#mPgT{margin:0 2px 0 4px;color:var(--h4);font-variant-numeric:tabular-nums}#mPgT::before{content:'/ ';color:var(--t3)}#mBar>#mZoomB{min-width:50px;padding:2px 4px;color:var(--h4);font-variant-numeric:tabular-nums}
 #mBar .sp{margin-left:auto}
 /* ---------- viewer ---------- */
 #mMain{flex:1;display:flex;min-height:0;position:relative}
@@ -123,12 +122,11 @@ body.thumbs #mThumb{display:block}
 #mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
 #mConn .gr{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
 /* ---------- status bar, help ---------- */
-#mSt{height:24px;display:flex;align-items:center;gap:14px;padding:2px 2px 2px 10px;background:var(--bar);border-top:1px solid var(--line);white-space:nowrap;overflow:hidden}
+#mSt{height:24px;display:flex;align-items:center;gap:14px;padding:2px 10px;background:var(--bar);border-top:1px solid var(--line);white-space:nowrap;overflow:hidden}
 #mMsg{min-width:0;overflow:hidden;text-overflow:ellipsis}
 #mSel{margin-left:auto;color:var(--h4)}
 #mSt button{flex:none;padding:0 8px;line-height:18px;border-color:transparent;background:transparent}#mSt button:hover{background:var(--btnh)}
 #mUndo{color:var(--onb)}
-.kg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.3;vertical-align:-3px}.kg .kf{fill:currentColor;stroke:none}
 #mHelp{padding:0;width:min(420px,96vw)}
 #mHelp form{padding:14px 18px 12px;font-size:12.5px;line-height:1.45}
 #mHelp h3{margin:0 0 8px;font-size:15px}
@@ -139,19 +137,15 @@ body.thumbs #mThumb{display:block}
 </head>
 <body>
 <div id="mBar">
-<span id="mBrand">miniread</span>
-<button data-a="thumbs" title="Show or hide page thumbnails">Pages</button>
+<button class="ib" data-a="thumbs" title="Show or hide page thumbnails"><svg class="chg" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M6 3v10"/></svg></button>
 <button data-a="open" title="Open a PDF, with its .miniread.json notes if you have them (or drop them on the viewer)">Open…</button>
 <input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
 <i></i>
-<button data-a="first" title="First page">«</button><button data-a="prev" title="Previous page">‹</button>
-<input id="mPgN" type="number" min="1" value="1" title="Page number; Enter to go">
-<span id="mPgT" title="Pages in this PDF">–</span>
-<button data-a="next" title="Next page">›</button><button data-a="last" title="Last page">»</button>
+<button class="ib" data-a="prev" title="Previous page (←)">‹</button><input id="mPgN" type="number" min="1" value="1" title="Page number; Enter to go"><span id="mPgT" title="Pages in this PDF">–</span><button class="ib" data-a="next" title="Next page (→)">›</button>
 <i></i>
-<button data-a="out" title="Zoom out (−)">−</button><span id="mZoomB" title="Zoom level">100%</span><button data-a="in" title="Zoom in (+)">+</button>
-<button data-a="fit" title="Fit the page width to the window (0)">Fit</button>
-<button class="sp" data-a="help" title="Shortcuts (?)">Help</button>
+<button class="ib" data-a="out" title="Zoom out (−)">−</button><button id="mZoomB" data-a="fit" title="Zoom level — click to fit the page width (0)">100%</button><button class="ib" data-a="in" title="Zoom in (+)">+</button>
+<button class="ib sp" data-a="help" title="Shortcuts (?)">?</button>
+<button class="ib" data-a="theme"><svg class="chg" viewBox="0 0 16 16"><path d="M8 2.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11z"/><path d="M8 2.5a5.5 5.5 0 0 0 0 11z" fill="currentColor" stroke="none"/></svg></button>
 </div>
 <div id="mMain">
 <div id="mLeft"><div id="mThumb"></div><div id="mViewWrap"><div id="mView"></div>
@@ -194,7 +188,7 @@ body.thumbs #mThumb{display:block}
 <svg id="mLink"></svg>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
-<div id="mSt"><span id="mMsg"></span><button id="mUndo" hidden>Undo</button><span id="mSel"></span><button data-a="theme"><svg class="kg" viewBox="0 0 16 16"><path d="M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2z"/><path class="kf" d="M8 2a6 6 0 0 0 0 12z"/></svg></button></div>
+<div id="mSt"><span id="mMsg"></span><button id="mUndo" hidden>Undo</button><span id="mSel"></span></div>
 <dialog id="mHelp"><form method="dialog"><h3>Shortcuts</h3><dl>
 <dt>Select text</dt><dd>Translate or Comment from the bar that appears (Auto translates at once)</dd>
 <dt>Under a translation</dt><dd>Ask the AI about the passage</dd>
