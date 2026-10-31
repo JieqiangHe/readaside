@@ -103,6 +103,7 @@ ismiss on an empty window */
 .textLayer.selecting .endOfContent{top:0}
 /* ---------- highlights, links, selection bar ---------- */
 .hl{position:absolute;z-index:1;pointer-events:none;border-radius:2px;background:#f5a50040;mix-blend-mode:multiply}.hl.on{background:#f5a50091}
+.pend{position:absolute;z-index:1;pointer-events:none;border-radius:2px;background:#c9644214;box-shadow:inset 0 0 0 1px #c9644280}
 .hl.c{background:#1a73e826}.hl.c.on{background:#1a73e85c}
 .textLayer ::selection{background:#c964423d}
 .textLayer span.mq{background:#c964423d;border-radius:2px}
@@ -377,8 +378,10 @@ const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(
   col=()=>{const w=N.length?noteW()+32:0;NS.style.width=w?w+'px':'0';return w},
   want=o=>{if(!o.rs)return o.fy*(docH()||1);const pg=o.rs[0][0],p=pgOf(pg);if(!p)return null;
     let t=Infinity;for(const r of o.rs)r[0]===pg&&(t=Math.min(t,r[2]));return p.offsetTop+t*scale-4},  // the top of the note's passage; cards float down the right side
-  hl=d=>{d.querySelectorAll('.hl').forEach(h=>h.remove());const n=+d.dataset.n,c=v=>`calc(var(--scale-factor)*${v}px)`;
+  hl=d=>{d.querySelectorAll('.hl,.pend').forEach(h=>h.remove());const n=+d.dataset.n,c=v=>`calc(var(--scale-factor)*${v}px)`;
     for(const o of N)for(const r of o.rs||[])if(r[0]===n){const h=el('div','hl'+(o.k==='c'?' c':'')+(o===nAct?' on':''));h.o=o;
+      h.style.cssText=`left:${c(r[1])};top:${c(r[2])};width:${c(r[3])};height:${c(r[4])}`;d.append(h)}
+    if(selA?.pend)for(const r of selA.rs||[])if(r[0]===n){const h=el('div','pend');
       h.style.cssText=`left:${c(r[1])};top:${c(r[2])};width:${c(r[3])};height:${c(r[4])}`;d.append(h)}},
   hlAll=()=>V.querySelectorAll('.page').forEach(hl),
   act=o=>{nAct=o;N.forEach(x=>x.el.classList.toggle('on',x===o));V.querySelectorAll('.hl').forEach(h=>h.classList.toggle('on',h.o===o));sched()},
