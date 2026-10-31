@@ -266,7 +266,7 @@ const URL0='https://api.deepseek.com/chat/completions',MODELS=['deepseek-v4-pro'
     $('mModel').replaceChildren(...MODELS.map(x=>new Option(x,x)));
     $('mModel').value=MODELS.includes(m)?m:MODELS[0];
     $('mKey').value=ls('mrdDsKey')||'';$('mEp').value=ls('mrdDsEp')||URL0},
-  cfg=on=>{$('mConn').hidden=!on;on&&selHide();};
+  cfg=on=>{$('mConn').hidden=!on;on&&(selHide(),$('mOv').hidden=true)};
 {const e=$('mThink'),v=ls('mrdThink');v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>ls('mrdThink',e.value);seg('mThink')}
 for(const[i,k]of aiF)$(i).onchange=()=>ls('mrdDs'+k,$(i).value.trim());
 aiLoad();
