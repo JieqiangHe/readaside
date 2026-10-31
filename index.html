@@ -158,8 +158,12 @@ body.mq,body.mq *{cursor:crosshair!important}  /* the marquee is armed: the poin
 #mConn .sheet{display:flex;flex-direction:column;width:min(520px,92vw);max-height:min(86vh,880px);border-radius:10px;background:var(--bar);box-shadow:var(--shm),0 24px 60px -20px #00000066;overflow:hidden;animation:mSheet .22s cubic-bezier(.2,.8,.2,1)}
 #mConn .sheet>header{flex:none;display:flex;align-items:center;gap:6px;padding:14px 16px 6px}#mConn .sheet>header b{font-size:14px;font-weight:600}
 #mConnB{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px 16px 18px}
-#mConn .card{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--line)}#mConn .card>b{font-size:12.5px;font-weight:600}
+#mConn .card{position:relative;display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--line)}#mConn .card>b{font-size:12.5px;font-weight:600}
 #mConn .card p{margin:0;color:var(--t3);font-size:11px;line-height:1.45}
+.dsdot{position:absolute;top:14px;right:14px;width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .2s,box-shadow .2s}
+.dsdot.wait{background:var(--h4)}
+.dsdot.ok{background:#4c9a63;box-shadow:0 0 0 3px #4c9a6329}
+.dsdot.bad{background:#b8443a}
 #mConn .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 10px;align-items:center}#mConn .kv>span{color:var(--h4);font-size:11.5px}
 #mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
 #mConn .gr{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
@@ -215,7 +219,7 @@ body.mq,body.mq *{cursor:crosshair!important}  /* the marquee is armed: the poin
 <div id="mHint"><div class="hint">
 <div id="mKeyFirst" hidden><b data-t="DeepSeek API key">DeepSeek API key</b>
 <input id="mKey0" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false"><button class="lnk" id="mKeySave" data-t="Save">Save</button>
-<p data-t="Stored">Stored in this browser; change it later in Settings (,).</p></div>
+<p data-t="Stored in this browser; change it later in Settings (,).">Stored in this browser; change it later in Settings (,).</p></div>
 <div class="wcard">
 <div class="wh"><span class="wchip">ocrp</span>
 <div class="wp"><svg class="wl" viewBox="0 0 300 90" preserveAspectRatio="none"><path pathLength="1" d="M174 30.5C182 30.5 188 11.5 196 11.5"/></svg><div class="mp"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div><div class="mc"><b></b><i></i><i></i><i></i></div></div>
@@ -241,7 +245,7 @@ body.mq,body.mq *{cursor:crosshair!important}  /* the marquee is armed: the poin
 <div id="mNotes"></div>
 <section id="mConn" hidden aria-label="Settings"><div class="sheet"><header><button class="ib" id="mConnX" title="Back (Esc)" data-tt="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b data-t="Settings">Settings</b></header>
 <div id="mConnB">
-<div class="card"><b>DeepSeek</b><div class="kv">
+<div class="card"><b>DeepSeek</b><i class="dsdot" id="mDsDot"></i><div class="kv">
 <span data-t="Model">Model</span><select id="mModel"></select>
 <span data-t="Think">Think</span><div title="Reasoning effort: how hard the model thinks before answering"><select id="mThink"><option value="low" data-t="Low">Low</option><option value="high" data-t="High">High</option><option value="max" data-t="Max">Max</option></select></div>
 <span data-t="Key">Key</span><input id="mKey" type="password" autocomplete="off" placeholder="API key" spellcheck="false">
@@ -249,8 +253,8 @@ body.mq,body.mq *{cursor:crosshair!important}  /* the marquee is armed: the poin
 </div>
 <p data-t="Keys stay in this browser.">Keys stay in this browser.</p></div>
 <div class="card"><b data-t="Translating">Translating</b><div class="kv"><span data-t="Into">Into</span><div><select id="mLang"></select></div></div>
-<label class="gr" title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto"><span data-t="Auto">Auto — translate as soon as text is selected</span></label><textarea id="mPrompt" hidden></textarea>
-<p data-t="Off">Off: pick Translate from the bar under the selection. The chat under each translation also uses this language.</p></div>
+<label class="gr" title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto"><span data-t="Auto — translate as soon as text is selected">Auto — translate as soon as text is selected</span></label><textarea id="mPrompt" hidden></textarea>
+</div>
 </div></div></section>
 </div>
 <svg id="mLink"></svg>
@@ -285,10 +289,9 @@ const ZH={
   Pages:"翻页",Zoom:"缩放",Find:"查找",Theme:"主题",Thumbnails:"缩略图",Language:"语言",Settings:"设置",
   Model:"模型",Think:"思考",Key:"密钥",URL:"URL",Translating:"翻译",Into:"译为",Low:"低",High:"高",Max:"最高",
   "Keys stay in this browser.":"密钥只留在这个浏览器里。",
-  Auto:"自动 — 选中文字即刻翻译",
-  Off:"关掉后，用选区下方的小条点 Translate。每张翻译卡片下的问答也用这个语言。",
+  "Auto — translate as soon as text is selected":"自动 — 选中文字即刻翻译",
   "DeepSeek API key":"DeepSeek API key",Save:"保存",
-  Stored:"只存在这个浏览器里，之后可以在设置（,）里改。",
+  "Stored in this browser; change it later in Settings (,).":"只存在这个浏览器里，之后可以在设置（,）里改。",
   Translate:"翻译",Comment:"批注",
   "Translate the selection":"翻译所选文字","Write your own comment on the selection":"给所选文字写批注",
   Move:"移动",Open:"打开","Close tab":"关闭标签",Close:"关闭",
@@ -326,13 +329,24 @@ const URL0='https://api.deepseek.com/chat/completions',MODELS=['deepseek-v4-pro'
     $('mModel').replaceChildren(...MODELS.map(x=>new Option(x,x)));
     $('mModel').value=MODELS.includes(m)?m:MODELS[0];
     $('mKey').value=ls('mrdDsKey')||'';$('mEp').value=ls('mrdDsEp')||URL0},
-  cfg=on=>{$('mConn').hidden=!on;on&&(selHide(),$('mOv').hidden=true)};
+  cfg=on=>{$('mConn').hidden=!on;on&&(selHide(),$('mOv').hidden=true,dsCheck())},  // the lamp looks at the key every time the sheet opens
+  dsDot=s=>{const d=$('mDsDot');d.className='dsdot'+(s?' '+s:'');d.title=s==='ok'?'Key accepted':s==='bad'?'Key or URL refused, or the endpoint is unreachable':'Not checked yet'};
+let dsFor='',dsAt=0;
+const dsCheck=async()=>{
+  const k=$('mKey').value.trim(),ep=($('mEp').value.trim()||URL0).replace(/\/chat\/completions\/?$/,'').replace(/\/+$/,'');
+  if(!k||!ep)return dsDot('');
+  if(k+'|'+ep===dsFor&&Date.now()-dsAt<6e4)return;
+  dsFor=k+'|'+ep;dsAt=Date.now();dsDot('wait');
+  try{const c=new AbortController(),t=setTimeout(()=>c.abort(),8e3);
+    const r=await fetch(ep+'/models',{headers:{Authorization:'Bearer '+k},signal:c.signal});clearTimeout(t);
+    dsDot(r.ok?'ok':'bad')}
+  catch(_){dsDot('bad')}};
 {const e=$('mThink'),v=ls('mrdThink');v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>ls('mrdThink',e.value);seg('mThink')}
-for(const[i,k]of aiF)$(i).onchange=()=>ls('mrdDs'+k,$(i).value.trim());
+for(const[i,k]of aiF)$(i).onchange=()=>{ls('mrdDs'+k,$(i).value.trim());(k==='Key'||k==='Ep')&&dsCheck()};
 aiLoad();
 $('mConnX').onclick=()=>cfg(0);$('mConn').onclick=e=>{e.target===$('mConn')&&cfg(0)};
 // first run: type the key once; the empty viewer lists the important shortcuts
-const keySave=()=>{const v=$('mKey0').value.trim();if(!v)return $('mKey0').focus();ls('mrdDsKey',v);$('mKey').value=v;$('mKeyFirst').hidden=true;msg('Key saved')};
+const keySave=()=>{const v=$('mKey0').value.trim();if(!v)return $('mKey0').focus();ls('mrdDsKey',v);$('mKey').value=v;$('mKeyFirst').hidden=true;dsCheck();msg('Key saved')};
 const hintOff=()=>{document.body.classList.remove('ask');pdf||($('mHint').hidden=false);pdf&&($('mHint').hidden=true)},  // the card is the empty state: only a PDF can put it away
   hintOn=()=>{document.body.classList.add('ask');$('mHint').hidden=false};  // ? brings it back
 $('mKeySave').onclick=()=>{hintOff();keySave()};$('mHint').addEventListener('wheel',()=>{pdf&&hintOff()},{passive:true});$('mKey0').onkeydown=e=>{e.key==='Enter'&&(hintOff(),keySave())};
