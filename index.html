@@ -57,6 +57,7 @@ body.thumbs #mThumb{display:block}
 #mRight [hidden],#mRight details label.up[hidden]{display:none}
 #mRight details label.up{display:block}
 #mRight details input,#mRight details select,#mRight details textarea{width:100%;min-width:0}
+#mRight details input[type=checkbox]{width:auto;justify-self:start;margin:0}
 #mRight .up small{display:block;margin:1px 0 2px;color:var(--h4)}
 #mSrc{margin:6px 8px;width:calc(100% - 16px);height:84px;resize:vertical}
 #mOps{display:flex;gap:4px;align-items:center;padding:0 8px 6px}
@@ -119,6 +120,7 @@ body.thumbs #mThumb{display:block}
 <label>Think<select id="mThink" title="Reasoning effort: how hard the model thinks before answering"><option value="low">Low</option><option value="high">High</option><option value="max">Max</option></select></label>
 <label>Key<input id="mKey" type="password" autocomplete="off" placeholder="API key" spellcheck="false"></label>
 <label>URL<input id="mEp" spellcheck="false"></label>
+<label id="mRlyL" hidden title="GLM blocks browser requests from this site (CORS). The relay is svguest's Cloudflare Worker: your key and the text pass through it, nothing is stored">Relay<input type="checkbox" id="mRly"></label>
 </details>
 <details><summary>Language</summary>
 <label>Into<select id="mLang"></select></label>
@@ -154,12 +156,16 @@ const nl=n=>n.toLocaleString('en');
 // ---------- AI settings (GLM / DeepSeek) ----------
 const AI={Glm:['https://open.bigmodel.cn/api/paas/v4/chat/completions','glm-5.3','glm-5.3-flash'],Ds:['https://api.deepseek.com/chat/completions','deepseek-flash','deepseek-v4-pro']},
   aiF=[['mKey','Key'],['mModel','Model'],['mEp','Ep']],
+  // GLM relay (same Worker as svguest): opt-in, only on GitHub Pages, only the two official GLM URLs
+  RLY='https://svguest-glm.jieqiang-he-dawn.workers.dev',RLYR={'https://open.bigmodel.cn/api/paas/v4/chat/completions':'standard','https://open.bigmodel.cn/api/coding/paas/v4/chat/completions':'coding'},
+  rlyOk=()=>location.origin==='https://jieqianghe.github.io'&&$('mProv').value==='Glm',
   aiLoad=()=>{const p=$('mProv').value,[u,...ms]=AI[p],m=ls('mrd'+p+'Model');
     $('mModel').replaceChildren(...ms.map(x=>new Option(x,x)));
     $('mModel').value=ms.includes(m)?m:ms[0];
-    $('mKey').value=ls('mrd'+p+'Key')||'';$('mEp').value=ls('mrd'+p+'Ep')||u};
+    $('mKey').value=ls('mrd'+p+'Key')||'';$('mEp').value=ls('mrd'+p+'Ep')||u;$('mRlyL').hidden=!rlyOk()};
 for(const[i,k]of[['mProv','mrdAi'],['mThink','mrdThink']]){const e=$(i),v=ls(k);v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>{ls(k,e.value);i==='mProv'&&aiLoad()}}
 for(const[i,k]of aiF)$(i).onchange=()=>ls('mrd'+$('mProv').value+k,$(i).value.trim());
+$('mRly').checked=ls('mrdGlmRelay')==='1';$('mRly').onchange=()=>ls('mrdGlmRelay',$('mRly').checked?'1':'0');
 aiLoad();$('mCfg').open=!$('mKey').value;
 
 // ---------- language, prompt ----------
@@ -197,7 +203,9 @@ async function translate(go){
   const myAc=new AbortController(),ok=()=>ac===myAc;
   ac=myAc;$('mGo').textContent='Stop';msg('Translating with '+model+'…');
   try{
-    const r=await fetch($('mEp').value.trim(),{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},signal:myAc.signal,
+    const u=$('mEp').value.trim(),rly=rlyOk()&&$('mRly').checked;
+    if(rly&&!RLYR[u])throw Error('The relay only forwards the official GLM URL (standard or Coding Plan)');
+    const r=await fetch(rly?RLY+'/glm/'+RLYR[u]:u,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},signal:myAc.signal,...(rly&&{credentials:'omit',redirect:'error'}),
       body:JSON.stringify({model,messages:[{role:'system',content:$('mPrompt').value.replaceAll('{lang}',$('mLang').value)},{role:'user',content:text}],stream:true,max_tokens:32768,thinking:{type:'enabled'},reasoning_effort:$('mThink').value})});
     if(!r.ok)throw Error(r.status+' '+(await r.text()).slice(0,300));
     const rd=r.body.pipeThrough(new TextDecoderStream()).getReader();let buf='';
@@ -212,7 +220,7 @@ async function translate(go){
     ok()&&msg('Translated');
   }catch(e){
     if(e.name==='AbortError'){if(!acc){out.classList.add('dim');out.textContent='Stopped'}ok()&&msg('Stopped')}
-    else{acc||(out.style.display='none');it.append(el('div','t err','✖ '+e.message+(e instanceof TypeError?' (network, URL or CORS problem)':'')));ok()&&msg('Translation failed')}
+    else{acc||(out.style.display='none');it.append(el('div','t err','✖ '+e.message+(e instanceof TypeError?(rlyOk()&&!$('mRly').checked?' (network or CORS problem; for GLM turn on Relay in AI settings)':' (network, URL or CORS problem)'):'')));ok()&&msg('Translation failed')}
   }finally{ok()&&(ac=null,$('mGo').textContent='Translate');stats();tsm&&(tsm.textContent='Thought for '+nl(thc)+' chars')}
 }
 $('mGo').onclick=()=>translate();
