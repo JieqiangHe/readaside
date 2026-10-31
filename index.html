@@ -593,16 +593,24 @@ function mark(){const T=$('mThumb'),t=T.querySelector(`.tp[data-n="${curN}"]`);
 $('mThumb').onclick=e=>{const t=e.target.closest('.tp');t&&goto(+t.dataset.n)};
 setTh(ls('mrdThumbs')!=='0');
 
-// ---------- recent documents: a copy of the PDF bytes in IndexedDB, so Recent can reopen them without the file ----------
+// ---------- recent documents: metadata in one store, the PDF bytes in another, so listing never reads megabytes ----------
 let dbP=null;
-const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',1);r.onupgradeneeded=()=>r.result.createObjectStore('recent',{keyPath:'fp'});r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)}catch(_){ok(null)}})),
-  recAll=async()=>{const d=await db();if(!d)return[];return new Promise(ok=>{try{const q=d.transaction('recent').objectStore('recent').getAll();q.onsuccess=()=>ok(q.result.sort((a,b)=>b.t-a.t));q.onerror=()=>ok([])}catch(_){ok([])}})},
-  recPut=async(fp,name,buf,handle)=>{const d=await db();if(!d||!fp)return;try{const put=r=>new Promise(ok=>{const tx=d.transaction('recent','readwrite');tx.oncomplete=()=>ok(1);tx.onerror=()=>ok(0);tx.onabort=()=>ok(0);tx.objectStore('recent').put(r)});let r={fp,name,t:Date.now(),buf};handle&&(r.handle=handle);if(!await put(r)){delete r.handle;await put(r)}
-    const a=await recAll();a.slice(8).forEach(x=>d.transaction('recent','readwrite').objectStore('recent').delete(x.fp))}catch(_){}};
-const kTh=new Map(),rel=t=>{const s=Math.max(0,(Date.now()-t)/1e3);return s<60?'just now':s<3600?Math.round(s/60)+' min':s<86400?Math.round(s/3600)+' h':Math.round(s/86400)+' d'};
-const mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({scale:1}),c=el('canvas'),g=280/vp.width,v2=p.getViewport({scale:g});
-  c.width=Math.round(v2.width);c.height=Math.round(v2.height);
-  await p.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;return c.toDataURL('image/jpeg',.72)}catch(_){return ''}};
+const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',2);
+  r.onupgradeneeded=()=>{const d=r.result;['recent','blob'].forEach(s=>d.objectStoreNames.contains(s)||d.createObjectStore(s,{keyPath:'fp'}))};
+  r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)}catch(_){ok(null)}})),
+  ist=(d,s,mode)=>d.transaction(s,mode||'readonly').objectStore(s),
+  recAll=async()=>{const d=await db();if(!d)return[];return new Promise(ok=>{try{const q=ist(d,'recent').getAll();q.onsuccess=()=>{const l=q.result.sort((a,b)=>b.t-a.t);
+    l.forEach(r=>{if(r.buf){const tx=d.transaction(['recent','blob'],'readwrite');tx.objectStore('blob').put({fp:r.fp,buf:r.buf});const m={...r};delete m.buf;tx.objectStore('recent').put(m)}});
+    ok(l.map(r=>{const m={...r};delete m.buf;return m}))};q.onerror=()=>ok([])}catch(_){ok([])}})},
+  recBuf=async fp=>{const d=await db();if(!d)return null;return new Promise(ok=>{try{const q=ist(d,'blob').get(fp);q.onsuccess=()=>ok(q.result?.buf||null);q.onerror=()=>ok(null)}catch(_){ok(null)}})},
+  recPut=async(fp,name,buf,handle)=>{const d=await db();if(!d||!fp)return;try{
+    const old=await new Promise(ok=>{try{const q=ist(d,'recent').get(fp);q.onsuccess=()=>ok(q.result);q.onerror=()=>ok(null)}catch(_){ok(null)}});
+    const put=(meta,bytes)=>new Promise(ok=>{const tx=d.transaction(['recent','blob'],'readwrite');tx.oncomplete=()=>ok(1);tx.onerror=()=>ok(0);tx.onabort=()=>ok(0);
+      tx.objectStore('recent').put(meta);bytes&&tx.objectStore('blob').put({fp,buf:bytes})});
+    const meta={fp,name,t:Date.now(),thumb:old&&old.thumb};handle&&(meta.handle=handle);
+    if(!await put(meta,buf)&&handle){delete meta.handle;await put(meta,buf)}
+    const a=await recAll();a.slice(8).forEach(x=>{const tx=d.transaction(['recent','blob'],'readwrite');tx.objectStore('recent').delete(x.fp);tx.objectStore('blob').delete(x.fp)})}catch(_){}},
+  recThumb=async(fp,t)=>{const d=await db();if(!d||!fp||!t)return;try{const q=ist(d,'recent').get(fp);q.onsuccess=()=>{const r=q.result;r&&(r.thumb=t,ist(d,'recent','readwrite').put(r))}}catch(_){}};
 // ---------- palette (Cmd/Ctrl+K): a strip of big page previews, arrows to move, Enter to switch ----------
 const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map(),knodes=[],kJob=0;
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
@@ -639,13 +647,12 @@ const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   kOpen=()=>{$('mK').hidden=false;KQ.value='';kBuild();KQ.focus();recLoad()},
   kGo=i=>{const x=kHits[i];if(!x)return;kClose();
     if(x.k==='tab'){x.i!==TI&&tabGo(x.i)}else recOpen(x.r)},
-  recThumb=async(fp,t)=>{const d=await db();if(!d||!fp||!t)return;const r=await new Promise(ok=>{const q=d.transaction('recent').objectStore('recent').get(fp);q.onsuccess=()=>ok(q.result);q.onerror=()=>ok(null)});r&&(r.thumb=t,d.transaction('recent','readwrite').objectStore('recent').put(r))},
   recLoad=async()=>{kRec=await recAll();$('mK').hidden||(kRows(),kPaint())},
   recOpen=async r=>{const hd=r.handle;  // Chrome/Edge keep the real file handle; Safari falls back to the stored bytes
     if(hd)try{let p=hd.queryPermission?await hd.queryPermission({mode:'read'}):'granted';
       if(p!=='granted')p=hd.requestPermission?await hd.requestPermission({mode:'read'}):'denied';
       if(p==='granted'){const f=await hd.getFile();return openPdf(await f.arrayBuffer(),r.name,hd)}}catch(_){}
-    r.buf&&openPdf(r.buf,r.name).catch(()=>{})};
+    openPdf(await recBuf(r.fp)||r.buf,r.name).catch(()=>{})};
 KQ.addEventListener('input',kBuild);
 KQ.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp'){
