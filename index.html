@@ -106,6 +106,7 @@ ismiss on an empty window */
 .hl.c{background:#1a73e826}.hl.c.on{background:#1a73e85c}
 .textLayer ::selection{background:#c964423d}
 .textLayer span.mq{background:#c964423d;border-radius:2px}
+body.mq,body.mq *{cursor:crosshair!important}  /* the marquee is armed: the pointer says so */
 #mMarq{position:fixed;z-index:8;border:1px dashed var(--onb);background:#c9644214;border-radius:3px;pointer-events:none}
 #mMarq[hidden]{display:none}
 #mSelT{position:fixed;z-index:9;display:flex;gap:2px;padding:3px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}#mSelT[hidden],#mSelT [hidden]{display:none}
@@ -863,9 +864,9 @@ SC.addEventListener('scroll',selHide,{passive:true});
 let MQ=null;
 const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect();
 document.addEventListener('mousedown',e=>{
-  if(!pdf||!e.altKey||e.button!==0||!e.target.closest('.page'))return;
+  if(!pdf||e.button!==0||!(e.altKey||e.shiftKey)||!e.target.closest('.page'))return;
   e.preventDefault();getSelection().removeAllRanges();selHide();
-  MQ={x:e.clientX,y:e.clientY};mqEl.hidden=false;
+  MQ={x:e.clientX,y:e.clientY};mqEl.hidden=false;document.body.classList.add('mq');
   mqEl.style.left=MQ.x+'px';mqEl.style.top=MQ.y+'px';mqEl.style.width='0px';mqEl.style.height='0px';
 });
 const mqLit=new Set();
@@ -880,7 +881,7 @@ document.addEventListener('mousemove',e=>{if(!MQ)return;
   now.forEach(s=>{mqLit.has(s)||(s.classList.add('mq'),mqLit.add(s))});
 });
 document.addEventListener('mouseup',()=>{if(!MQ)return;
-  const r=mqBox();MQ=null;mqEl.hidden=true;mqLit.forEach(s=>s.classList.remove('mq'));mqLit.clear();
+  const r=mqBox();MQ=null;mqEl.hidden=true;document.body.classList.remove('mq');mqLit.forEach(s=>s.classList.remove('mq'));mqLit.clear();
   if(r.width<4||r.height<4)return;
   const rows=[];
   for(const p of V.querySelectorAll('.page')){
