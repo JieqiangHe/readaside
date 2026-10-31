@@ -566,15 +566,15 @@ async function openFiles(fs,hs=[]){
 // ---------- document tabs (svguest-style): the active pdf lives in the globals, background tabs hold snapshots; the strip shows from two ----------
 const TMAX=10,TABS=[{}];let TI=0,TN=0,TP=0;  // TN: this slot was pushed empty for an open that may still fail; TP: the tab to fall back to
 const fprOf=p=>p?.fingerprints?.[0]||'',tabNm=i=>(i===TI?pdfName:TABS[i].pdfName)||'';
-function tabHold(){TABS[TI]={pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN,st:SC.scrollTop,notes:N.slice()};
+function tabHold(){TABS[TI]={pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN,zr,st:SC.scrollTop,notes:N.slice()};
   obs?.disconnect();tobs?.disconnect();N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();LK.innerHTML='';
   $('mUndo').hidden=true;undoD=null;clearTimeout(undoT);selHide();nLast=null}
 function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN}=t);
   pdf=pdf||null;pdfName=pdfName||'';scale=scale||1;annOff=!!annOff;annN=annN||0;curN=curN||1;TABS[i]={};
   N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el),o.y=null;
-  col();
+  col();zr=t.zr||1;
   document.title=pdf?'ocrp — '+pdfName:'ocrp';document.body.classList.toggle('pdf',!!pdf);
-  selHide();hintOff();fClose();$('mOv').hidden=true;pdf?(layout().then(()=>SC.scrollTop=Math.min(t.st||0,SC.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
+  selHide();hintOff();fClose();$('mOv').hidden=true;pdf?(refit(zr).then(()=>{col();sched();SC.scrollTop=Math.min(t.st||0,SC.scrollHeight)}),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
   tabUI();sched()}
 function tabFresh(){if(!pdf)return true;
   if(TABS.length>=TMAX)return msg(TMAX+' tabs are open, the most ocrp keeps; close one to open another'),false;
@@ -584,7 +584,7 @@ function tabGo(i){if(i===TI||!TABS[i])return;tabHold();tabShow(i)}
 function tabClose(i){const nm=i===TI?pdfName:TABS[i].pdfName||'',ns=i===TI?N.slice():TABS[i].notes||[],dp=i===TI?pdf:TABS[i].pdf;
   nsaveTab(nm,fprOf(dp),ns);ns.forEach(o=>{o.ac.abort();o.qc?.abort()});dp?.destroy().catch(()=>{});
   if(TABS.length<2){N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
-    pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=1;scale=1;document.title='ocrp';document.body.classList.remove('pdf');col();LK.innerHTML='';
+    pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=1;scale=1;zr=1;document.title='ocrp';document.body.classList.remove('pdf');col();LK.innerHTML='';
     selHide();$('mUndo').hidden=true;undoD=null;
     TABS[0]={};TI=0;tabUI();sched();$('mHint').hidden=false;return msg('Closed')}
   if(i===TI){tabHold();TABS.splice(i,1);tabShow(Math.min(i,TABS.length-1))}
@@ -619,7 +619,7 @@ function layout(){
   return layP=(async()=>{for(let i=1;i<=doc.numPages;i++){
     const vp=(await doc.getPage(i)).getViewport({scale});if(g!==gen)return;
     const d=el('div','page');d.dataset.n=i;d.style.cssText=`width:${vp.width}px;height:${vp.height}px;--scale-factor:${scale}`;
-    hl(d);V.append(d);obs.observe(d);sched()}})().catch(()=>{})
+    hl(d);V.append(d);obs.observe(d);sched()}})().catch(()=>{}).then(()=>sched());  // one more frame once every page div exists, so cards that were hidden while the pages were built come back
 }
 async function draw(d){
   obs.unobserve(d);
@@ -631,13 +631,17 @@ async function draw(d){
     t.append(el('div','endOfContent'));
   }catch(e){d.isConnected&&msg('Page '+(+d.dataset.n)+' did not render: '+(e.message||e))}
 }
-function zoom(f){if(!pdf)return msg('Open a PDF first');
+let zr=1;  // zoom relative to the fit, so each tab keeps its zoom when the card column changes its width
+function zoom(f,keep){if(!pdf)return msg('Open a PDF first');
   const ns=Math.min(8,Math.max(.1,scale*f));if(ns===scale)return;
+  keep||(zr*=f);
   const y=SC.scrollTop/Math.max(1,SC.scrollHeight);scale=ns;
   layout().then(()=>SC.scrollTop=y*SC.scrollHeight)}
 function fit(){if(!pdf)return msg('Open a PDF first');
   N.length&&col();  // the column width always follows the current viewport before the page is fitted around it
-  pdf.getPage(1).then(p=>{const s=(SC.clientWidth-(TH()?$('mThumb').offsetWidth:0)-(N.length?noteW()+32:0)-34)/p.getViewport({scale:1}).width;zoom(s/scale)}).catch(()=>{})}
+  pdf.getPage(1).then(p=>{const s=(SC.clientWidth-(TH()?$('mThumb').offsetWidth:0)-(N.length?noteW()+32:0)-34)/p.getViewport({scale:1}).width;zr=1;zoom(s/scale,1)}).catch(()=>{})}
+const refit=z=>pdf.getPage(1).then(p=>{const s=(SC.clientWidth-(TH()?$('mThumb').offsetWidth:0)-(N.length?noteW()+32:0)-34)/p.getViewport({scale:1}).width*(z||1);
+  if(Math.abs(s-scale)>1e-3)scale=Math.min(8,Math.max(.1,s));return layout()}).catch(()=>layout());
 function cur(){let n=0;
   for(const p of V.querySelectorAll('.page')){if(p.offsetTop-SC.scrollTop<=SC.clientHeight*.4)n=+p.dataset.n;else break}
   n&&n!==curN&&(curN=n,mark())}
