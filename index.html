@@ -232,7 +232,8 @@ aiLoad();
 $('mConnX').onclick=()=>cfg(0);$('mConn').onclick=e=>{e.target===$('mConn')&&cfg(0)};
 // first run: type the key once; the empty viewer lists the important shortcuts
 const keySave=()=>{const v=$('mKey0').value.trim();if(!v)return $('mKey0').focus();ls('mrdDsKey',v);$('mKey').value=v;$('mKeyFirst').hidden=true;msg('Key saved')};
-$('mKeySave').onclick=keySave;$('mKey0').onkeydown=e=>{e.key==='Enter'&&keySave()};
+let hintGone=0;const hintOff=()=>{hintGone||(hintGone=1,$('mHint').hidden=true)};  // Enter or O clears the start screen
+$('mKeySave').onclick=()=>{hintOff();keySave()};$('mKey0').onkeydown=e=>{e.key==='Enter'&&(hintOff(),keySave())};
 $('mKey').value||($('mKeyFirst').hidden=false);
 
 // ---------- language, prompt ----------
@@ -613,12 +614,13 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
-  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();A.open()}return}
+  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}return}
   if(e.isComposing||e.keyCode===229)return;
   if(e.target.closest('input,textarea,select,button,a,[contenteditable]'))return;
-  if(k==='?'||k==='/'||(c==='Slash'&&e.shiftKey))$('mHelp').showModal();
+  if(k==='Enter')hintOff();
+  else if(k==='?'||k==='/'||(c==='Slash'&&e.shiftKey))$('mHelp').showModal();
   else if((k===','||c==='Comma')&&!e.shiftKey)cfg($('mConn').hidden);
-  else if(k==='o'||c==='KeyO')A.open();
+  else if(k==='o'||c==='KeyO'){hintOff();A.open()}
   else if(k==='t'||c==='KeyT')A.theme();else if(k==='h'||c==='KeyH')A.thumbs();
   else if(k==='+'||k==='='||c==='Equal'||c==='NumpadAdd')zoom(1.2);else if(k==='-'||c==='Minus'||c==='NumpadSubtract')zoom(1/1.2);else if(k==='0'||c==='Digit0'||c==='Numpad0')fit();
   else if(k==='ArrowLeft')goto(curN-1);else if(k==='ArrowRight')goto(curN+1);
