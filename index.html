@@ -54,9 +54,9 @@ button,.seg button,.item,.hl,.tp,.ci,#mTabs .tab{transition:background-color .16
 #mMain{flex:1;display:flex;min-height:0;position:relative}
 #mViewWrap{flex:1;position:relative;display:flex;min-width:0}
 #mView{flex:1;overflow:auto;background:var(--view);padding:16px;scrollbar-width:thin}
-#mThumb{display:none;width:116px;flex:none;overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:8px 6px 12px;scrollbar-width:thin}
+#mThumb{display:none;width:94px;flex:none;overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:8px 5px 12px;scrollbar-width:thin}
 body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
-.tp{width:96px;margin:0 auto 10px;cursor:pointer;border-radius:3px}
+.tp{width:78px;margin:0 auto 10px;cursor:pointer;border-radius:3px}
 .tp .ph{background:#fff;box-shadow:0 0 0 1px var(--pageb)}
 .tp canvas{display:block;width:100%;height:auto;box-shadow:0 0 0 1px var(--pageb)}
 .tp b{display:block;text-align:center;font-weight:normal;font-size:10px;color:var(--t3);margin-top:3px}
@@ -267,7 +267,7 @@ function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n
     if(m){const x=Math.min(m[1],r[1]),y=Math.min(m[2],r[2]);m[3]=Math.max(m[1]+m[3],r[1]+r[3])-x;m[4]=Math.max(m[2]+m[4],r[2]+r[4])-y;m[1]=x;m[2]=y}else R.push(r)}
   return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
 function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based), in content coordinates over the viewer
-  const vs=[],vw=V.clientWidth,w=Math.min(420,Math.max(280,Math.round(vw*.4))),cx=V.offsetLeft+vw-w-16;
+  const vs=[],vw=V.clientWidth,w=Math.min(420,Math.max(280,Math.round(vw*.4))),cx=V.offsetLeft+vw-w;
   for(const o of N){o.w=want(o);o.el.style.left=cx+'px';o.el.style.width=w+'px';
     o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
   vs.sort((a,b)=>a.w-b.w);
@@ -519,7 +519,7 @@ function setTh(on){document.body.classList.toggle('thumbs',on);ls('mrdThumbs',on
   qa('thumbs').textContent=on?'Hide':'Show';on&&pdf&&buildThumbs().catch(()=>{})}
 async function buildThumbs(){
   if(!pdf||!TH())return;const g=++tgen;tobs?.disconnect();const T=$('mThumb');T.replaceChildren();curN=0;
-  ts=96/(await pdf.getPage(1)).getViewport({scale:1}).width;
+  ts=78/(await pdf.getPage(1)).getViewport({scale:1}).width;
   tobs=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&tdraw(e.target)),{root:T,rootMargin:'300px 0px'});
   for(let i=1;i<=pdf.numPages;i++){
     const vp=(await pdf.getPage(i)).getViewport({scale:ts});if(g!==tgen)return;
