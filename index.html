@@ -27,7 +27,7 @@ kbd{display:inline-block;min-width:1.6em;padding:0 5px;border-radius:5px;backgro
 .menu kbd{min-width:0;padding:0;box-shadow:none;background:none;font:inherit;opacity:.6}
 .seg{display:flex;gap:2px;min-width:0;padding:2px;border-radius:9px;background:var(--btnh)}.seg button{flex:1;height:20px;padding:0 6px;border:0;border-radius:7px;background:none;color:var(--h4);white-space:nowrap}.seg button:hover{background:none;color:var(--fg)}.seg button.on{background:var(--btn);color:var(--fg);box-shadow:var(--sh)}
 /* ---------- motion (all of it off with reduced motion) ---------- */
-button,.seg button,#mComp,.item,.hl,.tp,#mSplit,.ci,#mMd{transition:background-color .16s,color .16s,box-shadow .2s,opacity .16s,outline-color .16s,filter .16s,transform .16s}
+button,.seg button,#mComp,.item,.hl,.tp,#mSplit,.ci,#mMd,#mTabs .tab{transition:background-color .16s,color .16s,box-shadow .2s,opacity .16s,outline-color .16s,filter .16s,transform .16s}
 .item{animation:mIn .32s cubic-bezier(.2,.8,.2,1)}.item.out{opacity:0;transform:translateX(10px) scale(.98);transition:opacity .18s,transform .18s;pointer-events:none}
 @keyframes mIn{from{opacity:0;transform:translateX(12px) scale(.98)}}
 .dd.open>.menu,#mSelT:not([hidden]){animation:mPop .16s cubic-bezier(.2,.8,.2,1)}@keyframes mPop{from{opacity:0;transform:translateY(-4px) scale(.98)}}
@@ -44,6 +44,10 @@ button,.seg button,#mComp,.item,.hl,.tp,#mSplit,.ci,#mMd{transition:background-c
 #mPgN{width:42px;height:22px;text-align:center;-moz-appearance:textfield}#mPgN::-webkit-inner-spin-button,#mPgN::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 #mPgT{margin:0 2px 0 4px;color:var(--h4);font-variant-numeric:tabular-nums}#mPgT::before{content:'/ ';color:var(--t3)}#mBar>#mZoomB{min-width:50px;padding:2px 4px;color:var(--h4);font-variant-numeric:tabular-nums}
 #mBar .sp{margin-left:auto}
+#mTabs{flex:1 1 0;min-width:0;display:none;align-items:center;gap:2px;height:27px;overflow-x:auto;scrollbar-width:none}#mTabs::-webkit-scrollbar{display:none}body.multi #mTabs{display:flex}
+#mTabs .tab{flex:0 1 auto;display:flex;align-items:center;gap:5px;max-width:190px;min-width:76px;height:25px;padding:0 3px 0 10px;border-radius:7px;color:var(--h4);cursor:default;user-select:none;white-space:nowrap}#mTabs .tab:hover{background:var(--btnh);color:var(--fg)}#mTabs .tab.on{background:var(--btn);color:var(--fg);box-shadow:var(--sh),inset 0 0 0 1px var(--btnb)}
+#mTabs .tab span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#mTabs .tab button{flex:none;display:grid;place-items:center;width:17px;height:17px;padding:0;border:0;border-radius:5px;background:none;color:var(--t3);visibility:hidden}#mTabs .tab:hover button,#mTabs .tab.on button{visibility:visible}#mTabs .tab button:hover{background:var(--btnh);color:var(--fg)}#mTabs .tab button svg{width:9px;height:9px;fill:none;stroke:currentColor;stroke-width:1.6}
 /* ---------- viewer ---------- */
 #mMain{flex:1;display:flex;min-height:0;position:relative}
 #mLeft{flex:0 0 60%;min-width:200px;display:flex}
@@ -147,6 +151,7 @@ body.thumbs #mThumb{display:block}
 <button class="ib" data-a="thumbs" title="Show or hide page thumbnails"><svg class="chg" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M6 3v10"/></svg></button>
 <button data-a="open" title="Open a PDF, with its .ocrp.json notes if you have them (or drop them on the viewer)">Open…</button>
 <input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
+<div id="mTabs" role="tablist" aria-label="Open PDFs"></div>
 <i></i>
 <button class="ib" data-a="prev" title="Previous page (←)">‹</button><input id="mPgN" type="number" min="1" value="1" title="Page number; Enter to go"><span id="mPgT" title="Pages in this PDF">–</span><button class="ib" data-a="next" title="Next page (→)">›</button>
 <i></i>
@@ -194,6 +199,7 @@ body.thumbs #mThumb{display:block}
 </div>
 <div id="mSt"><span id="mMsg"></span><button id="mUndo" hidden>Undo</button><span id="mSel"></span></div>
 <dialog id="mHelp"><form method="dialog"><h3>Shortcuts</h3><dl>
+<dt>Tabs</dt><dd>Every PDF opens in its own tab, with its own notes; middle-click or × closes it</dd>
 <dt>Select text</dt><dd>Translate or Comment from the bar that appears (Auto translates at once)</dd>
 <dt>Under a translation</dt><dd>Ask the AI about the passage</dd>
 <dt><kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>Enter</kbd></dt><dd>Translate the box · <kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>S</kbd> save notes</dd>
@@ -399,8 +405,10 @@ ro.observe(V);ro.observe($('mLane'));addEventListener('resize',sched);
 // ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>, the old miniread prefix); Save writes <name>.ocrp.json to keep beside the PDF ----------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
 const fpr=()=>pdf?.fingerprints?.[0]||'',
-  ndata=()=>({ocrp:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out?.trim()).map(o=>({k:o.k,t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m,d:o.d,...(o.chat.length&&{chat:o.chat})}))}),
-  nsave=()=>{const f=fpr(),d=ndata();if(!f)return;try{d.notes.length?localStorage['mrdN:'+f]=JSON.stringify(d):localStorage.removeItem('mrdN:'+f)}catch(_){}},
+  nmap=o=>({k:o.k,t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m,d:o.d,...(o.chat.length&&{chat:o.chat})}),
+  ndata=()=>({ocrp:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out?.trim()).map(nmap)}),
+  nsaveTab=(nm,fp,ns)=>{if(!fp)return;const k=ns.filter(o=>o.out?.trim());try{k.length?localStorage['mrdN:'+fp]=JSON.stringify({ocrp:1,pdf:nm,fp,notes:k.map(nmap)}):localStorage.removeItem('mrdN:'+fp)}catch(_){}},
+  nsave=()=>nsaveTab(pdfName,fpr(),N),
   nload=d=>{clr();for(const n of d?.notes||[])n?.t&&n.out&&(n.k==='c'?comment(n.t,n.rs||null,n):translate(n.t,n.rs||null,n));act(null);return N.length};
 // keep(blob,name,mime,ext,re): Chrome/Edge save dialog in the PDF's folder (re: remember the handle, so Save rewrites the same file), else a download
 async function keep(b,nm,mime,ext,re){
@@ -452,6 +460,43 @@ async function openFiles(fs,hs=[]){
   jsH=hs[j]||null;const n=nload(d);nsave();
   msg('Restored '+n+' notes from '+fs[j].name+(d.fp&&d.fp!==fpr()?' — they were saved for '+(d.pdf||'another PDF')+', so positions may be off':''))}
 
+// ---------- document tabs (svguest-style): the active pdf lives in the globals, background tabs hold snapshots; the strip shows from two ----------
+const TMAX=10,TABS=[{}];let TI=0,TN=0,TP=0;  // TN: this slot was pushed empty for an open that may still fail; TP: the tab to fall back to
+const fprOf=p=>p?.fingerprints?.[0]||'',tabNm=i=>(i===TI?pdfName:TABS[i].pdfName)||'';
+function tabHold(){TABS[TI]={pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN,st:V.scrollTop,src:$('mSrc').value,notes:N.slice()};
+  obs?.disconnect();tobs?.disconnect();N.forEach(o=>o.el.remove());NS.replaceChildren();LK.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
+  $('mUndo').hidden=true;undoD=null;clearTimeout(undoT);selHide();nLast=null}
+function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN}=t);
+  pdf=pdf||null;pdfName=pdfName||'';scale=scale||1;annOff=!!annOff;annN=annN||0;curN=curN||0;TABS[i]={};
+  N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el);
+  document.title=pdf?'ocrp — '+pdfName:'ocrp';
+  $('mPgT').textContent=pdf?pdf.numPages:'–';$('mPgN').max=pdf?.numPages||1;$('mPgN').value=curN||1;
+  $('mSrc').value=t.src||'';cnt();selHide();
+  pdf?(layout().then(()=>V.scrollTop=Math.min(t.st||0,V.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
+  tabUI();sched()}
+function tabFresh(){if(!pdf)return true;
+  if(TABS.length>=TMAX)return msg(TMAX+' tabs are open, the most ocrp keeps; close one to open another'),false;
+  TP=TI;tabHold();TABS.push({});TI=TABS.length-1;pdf=null;pdfName='';TN=1;return true}
+function tabBack(){if(!TN)return;TN=0;TABS.splice(TI,1);tabShow(TP)}
+function tabGo(i){if(i===TI||!TABS[i])return;tabHold();tabShow(i)}
+function tabClose(i){const nm=i===TI?pdfName:TABS[i].pdfName||'',ns=i===TI?N.slice():TABS[i].notes||[],dp=i===TI?pdf:TABS[i].pdf;
+  nsaveTab(nm,fprOf(dp),ns);ns.forEach(o=>{o.ac.abort();o.qc?.abort()});dp?.destroy().catch(()=>{});
+  if(TABS.length<2){N.forEach(o=>o.el.remove());NS.replaceChildren();LK.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
+    pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=0;scale=1;document.title='ocrp';
+    $('mPgT').textContent='–';$('mPgN').value=1;$('mSrc').value='';cnt();selHide();$('mUndo').hidden=true;undoD=null;
+    TABS[0]={};TI=0;tabUI();sched();return msg('Closed')}
+  if(i===TI){tabHold();TABS.splice(i,1);tabShow(Math.min(i,TABS.length-1))}
+  else{TABS.splice(i,1);i<TI&&TI--}
+  tabUI();msg('Closed '+nm)}
+function tabUI(){const w=$('mTabs');document.body.classList.toggle('multi',TABS.length>1);
+  const nm=TABS.map((_,i)=>tabNm(i)),key=TI+'|'+nm.join('|');if(w._k===key)return;w._k=key;
+  w.replaceChildren(...TABS.map((_,i)=>{const d=el('div','tab'+(i===TI?' on':'')),x=el('button');
+    x.innerHTML='<svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6"/></svg>';x.title='Close this tab';
+    d.title=nm[i];d.append(el('span',0,nm[i].replace(/\.pdf$/i,'')||'PDF'),x);
+    d.onpointerdown=e=>{e.button===1&&e.preventDefault()};
+    d.onclick=e=>{x.contains(e.target)?tabClose(i):tabGo(i)};d.onauxclick=e=>{e.button===1&&tabClose(i)};return d}));
+  const o=w.querySelector('.on');o&&o.scrollIntoView({block:'nearest',inline:'nearest'})}
+
 // ---------- PDF ----------
 window.pdfjsLib&&(pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
 let pdf=null,scale=1,gen=0,obs,layP=Promise.resolve(),annOff=false,annN=0;  // annOff: draw the PDF's own annotations or not; annN: how many markup ones it has
@@ -459,15 +504,17 @@ const annHide=v=>{if(annOff===!!v)return;annOff=!!v;if(!pdf)return;const y=V.scr
 const open=f=>f.arrayBuffer().then(b=>openPdf(b,f.name)).catch(e=>msg('Cannot read '+f.name+': '+e.message));  // resolves true once open
 async function openPdf(buf,name){
   if(!window.pdfjsLib)return msg('PDF engine failed to load — check the connection to cdnjs');
-  try{const np=await pdfjsLib.getDocument({data:buf}).promise;pdf&&pdf.destroy().catch(()=>{});pdf=np}
-  catch(e){msg('Cannot open '+name+': '+e.message);return false}
+  if(!tabFresh())return false;
+  try{const np=await pdfjsLib.getDocument({data:buf}).promise;pdf=np}
+  catch(e){msg('Cannot open '+name+': '+e.message);tabBack();return false}
+  TN=0;
   selHide();$('mPgT').textContent=pdf.numPages;$('mPgN').value=1;$('mPgN').max=pdf.numPages;
-  clr();pdfName=name;pdfH=jsH=null;document.title='ocrp — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  clr();pdfName=name;pdfH=jsH=null;curN=0;document.title='ocrp — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
   let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT||x.filename===AT0||x.filename===AT1)}catch(_){}
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
-  const doc=pdf;(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)annN+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length})().catch(()=>{});
-  msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});return true
+  const doc=pdf,a0={n:0};(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)a0.n+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length;doc===pdf&&(annN=a0.n)})().catch(()=>{});
+  msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});tabUI();return true
 }
 function layout(){
   const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();$('mZoomB').textContent=Math.round(scale*100)+'%';
