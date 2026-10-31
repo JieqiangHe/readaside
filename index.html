@@ -621,6 +621,12 @@ const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',2);
     if(!await put(meta,buf)&&handle){delete meta.handle;await put(meta,buf)}
     const a=await recAll();a.slice(8).forEach(x=>{const tx=d.transaction(['recent','blob'],'readwrite');tx.objectStore('recent').delete(x.fp);tx.objectStore('blob').delete(x.fp)})}catch(_){}},
   recThumb=async(fp,t)=>{const d=await db();if(!d||!fp||!t)return;try{const q=ist(d,'recent').get(fp);q.onsuccess=()=>{const r=q.result;r&&(r.thumb=t,ist(d,'recent','readwrite').put(r))}}catch(_){}};
+// first-page previews for the palette, kept by fingerprint; recents also carry one in IndexedDB
+const kTh=new Map(),
+  rel=t=>{const s=Math.max(0,(Date.now()-t)/1e3);return s<60?'just now':s<3600?Math.round(s/60)+' min':s<86400?Math.round(s/3600)+' h':Math.round(s/86400)+' d'},
+  mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({scale:1}),c=el('canvas'),g=280/vp.width,v2=p.getViewport({scale:g});
+    c.width=Math.round(v2.width);c.height=Math.round(v2.height);
+    await p.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;return c.toDataURL('image/jpeg',.72)}catch(_){return ''}};
 // ---------- palette (Cmd/Ctrl+K): a strip of big page previews, arrows to move, Enter to switch ----------
 const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map(),knodes=[],kJob=0;
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
