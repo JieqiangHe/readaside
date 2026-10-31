@@ -199,6 +199,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <li><svg viewBox="0 0 16 16"><path d="M4 2.5h6l2 2v9H4z"/><path d="M6 6.5h4M6 9h4"/></svg><b>Open a PDF</b><span><kbd>O</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save notes</b><span><kbd>N</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><b>Save PDF</b><span><kbd>P</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save Markdown</b><span><kbd data-k="shf">⇧</kbd><kbd>N</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><rect x="2.5" y="4.5" width="8" height="9" rx="1"/><path d="M5.5 2.5h7a1 1 0 0 1 1 1v7"/></svg><b>Documents</b><span><kbd>D</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M2.5 8h11M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg><b>Pages</b><span><kbd>←</kbd><kbd>→</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="M7 5v4M5 7h4"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Zoom</b><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span></li>
@@ -454,6 +455,26 @@ async function keep(b,nm,mime,ext,re){
   msg('Downloaded '+nm+' — keep it beside the PDF; open it in ocrp to bring the notes back')}
 function nfile(){if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No notes to save');
   keep(new Blob([JSON.stringify(d,null,1)],{type:'application/json'}),pdfName.replace(/\.pdf$/i,'')+'.ocrp.json','application/json','.json',1)}
+// nmd(): the notes as a Markdown file, page by page — the passage as a quote, then the translation or the comment, then the questions
+function nmd(){
+  if(!pdf)return msg('Open a PDF first');
+  const ns=N.filter(o=>o.out?.trim());
+  if(!ns.length)return msg('No notes to save');
+  const by=ns.slice().sort((a,b)=>(a.rs?.[0]?.[0]??1e9)-(b.rs?.[0]?.[0]??1e9)||(a.rs?.[0]?.[2]??a.fy*1e3)-(b.rs?.[0]?.[2]??b.fy*1e3)),
+    L=['# '+pdfName.replace(/\.pdf$/i,''),'',ns.length+(ns.length>1?' notes':' note')+' · '+new Date().toISOString().slice(0,10),''];
+  let pg=-1;
+  for(const o of by){
+    const p=o.rs?.[0]?.[0]??0;
+    if(p!==pg){pg=p;L.push(p?'## Page '+p:'## Notes','')}
+    if(o.t)String(o.t).trim().split('\n').forEach(t=>L.push('> '+t.trim()));
+    if(o.t)L.push('');
+    if(o.k==='c'){L.push(o.out.trim(),'')}
+    else{L.push(o.out.trim(),'')
+      for(const [q,a] of o.chat||[])L.push('**Q.** '+q.trim(),'',a.trim(),'')}
+  }
+  keep(new Blob([L.join('\n')],{type:'text/markdown'}),pdfName.replace(/\.pdf$/i,'')+'.notes.md','text/markdown','.md',0);
+}
+
 // npdf(): a copy of the PDF with one Highlight annotation per note and page (the translation, its chat or the comment as the
 // annotation's text) and the notes JSON attached as ATT, which openPdf reads back. Earlier ocrp highlights and attachment are
 // replaced; after Clear (annOff) every markup annotation of the PDF is dropped. pdf-lib is inlined at the end (#mPlib), run on first use
@@ -747,7 +768,7 @@ document.addEventListener('keydown',e=>{
   else if(k==='f'||c==='KeyF'){e.preventDefault();fOpen()}
   else if(k==='d'||c==='KeyD'){e.preventDefault();kOpen()}
   else if(k==='p'||c==='KeyP'){e.preventDefault();npdf()}
-  else if(k==='n'||c==='KeyN'){e.preventDefault();nfile()}
+  else if(k==='n'||c==='KeyN'){e.preventDefault();e.shiftKey?nmd():nfile()}
   else if(k==='['||c==='BracketLeft')tabGo((TI-1+TABS.length)%TABS.length);else if(k===']'||c==='BracketRight')tabGo((TI+1)%TABS.length);
   else if((k===','||c==='Comma')&&!e.shiftKey){e.preventDefault();cfg($('mConn').hidden)}
   else if(k==='o'||c==='KeyO'){hintOff();A.open()}
