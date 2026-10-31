@@ -537,8 +537,8 @@ V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSele
 ro.observe(V);ro.observe(NS);let rzT=0;
 addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{col();pdf&&fit();sched()},120)});
 
-let warnN=0,warnT=0;
-const warn=t=>{if(warnN)return;warnN=1;const w=$('mWarn');w.textContent=t;w.hidden=false;clearTimeout(warnT);warnT=setTimeout(()=>w.hidden=true,9e3);w.onclick=()=>w.hidden=true};
+let warnT=0,warnMsg='',warnAt=0;
+const warn=t=>{if(t===warnMsg&&Date.now()-warnAt<3e4)return;warnMsg=t;warnAt=Date.now();const w=$('mWarn');w.textContent=t;w.hidden=false;clearTimeout(warnT);warnT=setTimeout(()=>w.hidden=true,9e3);w.onclick=()=>w.hidden=true};
 // ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>); N writes <name>.notes.md, P writes a PDF that carries the notes --------------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
 const fpr=()=>pdf?.fingerprints?.[0]||'',
@@ -846,7 +846,8 @@ selT.onmousedown=e=>e.preventDefault();
 selT.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=selA||mqLast;
   selHide();if(!a)return warn('Nothing is selected — drag over the page again');
   getSelection().removeAllRanges();
-  try{b.dataset.s==='c'?comment(a.t,a.rs):translate(a.t,a.rs)}
+  try{const p=b.dataset.s==='c'?comment(a.t,a.rs):translate(a.t,a.rs);
+    p&&p.catch&&p.catch(err=>warn('Translation stopped: '+(err.message||err)))}
   catch(err){warn('Could not start: '+(err.message||err))}};
 document.addEventListener('mouseup',e=>{
   document.querySelectorAll('.textLayer.selecting').forEach(t=>t.classList.remove('selecting'));
