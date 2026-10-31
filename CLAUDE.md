@@ -1,12 +1,12 @@
 # ocrp
 
-A single-file PDF reader with side-by-side AI translation (DeepSeek, your own key). Live at https://jieqianghe.github.io/readaside/ (GitHub Pages serves `main`). Forked from an older Chinese 12-provider app and rewritten all-English, minimal. ocrp = old, clean, read, paper: a personal tool for going through papers fast, and for the occasional slow close read of a good one. Renamed miniread → readaside → ocrp on 2026-10-31; `.miniread.json`/`.readaside.json` files, PDF annotations and attachments by those names are still read.
+A single-file PDF reader with side-by-side AI translation (DeepSeek, your own key). Live at https://jieqianghe.github.io/ocrp/ (GitHub Pages serves `main`). Forked from an older Chinese 12-provider app and rewritten all-English, minimal. ocrp = old, clean, read, paper: a personal tool for going through papers fast, and for the occasional slow close read of a good one. Renamed miniread → readaside → ocrp on 2026-10-31; `.miniread.json`/`.readaside.json` files, PDF annotations and attachments by those names are still read.
 
 ## Repo rules
 
 - The whole app is one file, `index.html`. The repo mirrors minisvg's layout: `index.html`, `README.md`, `LICENSE` (GPL-3.0, same as minisvg), `.gitignore`, `CLAUDE.md`. Do not add test files or other folders.
 - Plain JavaScript, no framework, no build step. Only external dependency: pdf.js 3.11.174 from cdnjs (viewer + worker); it must keep working as a local/static page. pdf-lib 1.17.1 (MIT) is inlined at the end of `index.html` as `<script type="text/plain" id="mPlib">` (user's OK, 2026-10-31; ~525 KB, run by `plib()` on first Save PDF) — don't edit inside it; keep code above it.
-- Commit to `main` and push to GitHub (remote is SSH: `git@github.com:JieqiangHe/readaside.git`) after each change — standing OK from the user (2026-10-07: everything in the folder goes up, only .DS_Store stays ignored).
+- Commit to `main` and push to GitHub (remote is SSH: `git@github.com:JieqiangHe/ocrp.git`) after each change — standing OK from the user (2026-10-07: everything in the folder goes up, only .DS_Store stays ignored).
 - UI text, tooltips, messages and README are English only. Never leave Chinese in the app.
 - Code style: dense and short, section comments `// ---------- name ----------`, match the surrounding one-liner style. Don't refactor unasked.
 - README is short: the ocrp name spelled out, a sentence or two on what it is for, and the `**Live: ...**` line.
