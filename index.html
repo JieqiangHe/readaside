@@ -187,9 +187,9 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <div class="wb"><h3>ocrp <span>old, clean, read, paper</span></h3>
 <ul>
 <li><svg viewBox="0 0 16 16"><path d="M4 2.5h6l2 2v9H4z"/><path d="M6 6.5h4M6 9h4"/></svg><b>Open a PDF</b><span><kbd>O</kbd></span></li>
-<li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save notes</b><span><kbd>⌘</kbd><kbd>S</kbd></span></li>
-<li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><b>Save PDF</b><span><kbd>⌘</kbd><kbd>⇧</kbd><kbd>S</kbd></span></li>
-<li><svg viewBox="0 0 16 16"><rect x="2.5" y="4.5" width="8" height="9" rx="1"/><path d="M5.5 2.5h7a1 1 0 0 1 1 1v7"/></svg><b>Documents</b><span><kbd>⌘</kbd><kbd>K</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save notes</b><span><kbd data-k="cmd">⌘</kbd><kbd>S</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><b>Save PDF</b><span><kbd data-k="cmd">⌘</kbd><kbd data-k="shf">⇧</kbd><kbd>S</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><rect x="2.5" y="4.5" width="8" height="9" rx="1"/><path d="M5.5 2.5h7a1 1 0 0 1 1 1v7"/></svg><b>Documents</b><span><kbd data-k="cmd">⌘</kbd><kbd>K</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M2.5 8h11M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg><b>Pages</b><span><kbd>←</kbd><kbd>→</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="M7 5v4M5 7h4"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Zoom</b><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Find</b><span><kbd>F</kbd></span></li>
@@ -218,11 +218,12 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <svg id="mLink"></svg>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
-<div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>↑↓</kbd>Move<kbd>↵</kbd>Open<kbd>Esc</kbd>Close</p></div></div>
+<div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>↑↓</kbd>Move<kbd data-k="ret">↵</kbd>Open<kbd>Esc</kbd>Close</p></div></div>
 <div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
 <script>
 'use strict';
 const $=i=>document.getElementById(i),V=$('mView'),SC=$('mMain'),ls=(k,v)=>{try{return v==null?localStorage[k]:localStorage[k]=v}catch(_){}};
+const MAC=/Mac|iPhone|iPad/i.test(navigator.platform+' '+navigator.userAgent),KLBL={cmd:'Ctrl',shf:'Shift',alt:'Alt',ret:'Enter'};  // keycaps follow the OS
 const el=(t,c,x)=>{const e=document.createElement(t);c&&(e.className=c);x!=null&&(e.textContent=x);return e},
   btn=(t,ti)=>{const e=el('button',0,t);ti&&(e.title=ti);return e},msg=()=>{};
 const nl=n=>n.toLocaleString('en');
@@ -707,6 +708,7 @@ const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,ty
     document.startViewTransition&&!RM.matches?document.startViewTransition(f):f()}};
 function setTheme(d){document.documentElement.dataset.theme=d?'dark':'light'}
 setTheme(document.documentElement.dataset.theme==='dark');
+MAC||document.querySelectorAll('[data-k]').forEach(k=>{k.textContent=KLBL[k.dataset.k]||k.textContent});
 document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]());
 </script>
 <!-- pdf-lib 1.17.1 (MIT, https://github.com/Hopding/pdf-lib), minified; kept as text and run by plib() on the first Save PDF -->
