@@ -862,7 +862,10 @@ SC.addEventListener('scroll',selHide,{passive:true});
 
 // ---------- marquee selection (Option/Alt + drag): the text inside a box, in reading order, because a PDF's own text order is not its visual one
 let MQ=null;
-const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect();
+const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect(),mqArm=on=>document.body.classList.toggle('mq',!!on&&!!pdf);
+document.addEventListener('keydown',e=>{(e.key==='Alt'||e.key==='Shift')&&mqArm(1)});  // the pointer shows the mode before the first drag
+document.addEventListener('keyup',e=>{(e.key==='Alt'||e.key==='Shift')&&mqArm(0)});
+addEventListener('blur',()=>mqArm(0));
 document.addEventListener('mousedown',e=>{
   if(!pdf||e.button!==0||!(e.altKey||e.shiftKey)||!e.target.closest('.page'))return;
   e.preventDefault();getSelection().removeAllRanges();selHide();
