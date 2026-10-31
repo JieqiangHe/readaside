@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>miniread</title>
+<title>readaside</title>
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADElEQVR4nGNgYGAAAAAEAAH2FzhVAAAAAElFTkSuQmCC">
 <script>try{localStorage.mrdTheme==='dark'&&(document.documentElement.dataset.theme='dark')}catch(_){}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -149,7 +149,7 @@ body.thumbs #mThumb{display:block}
 <body>
 <div id="mBar">
 <button class="ib" data-a="thumbs" title="Show or hide page thumbnails"><svg class="chg" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="10" rx="1.5"/><path d="M6 3v10"/></svg></button>
-<button data-a="open" title="Open a PDF, with its .miniread.json notes if you have them (or drop them on the viewer)">Open…</button>
+<button data-a="open" title="Open a PDF, with its .readaside.json notes if you have them (or drop them on the viewer)">Open…</button>
 <input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
 <i></i>
 <button class="ib" data-a="prev" title="Previous page (←)">‹</button><input id="mPgN" type="number" min="1" value="1" title="Page number; Enter to go"><span id="mPgT" title="Pages in this PDF">–</span><button class="ib" data-a="next" title="Next page (→)">›</button>
@@ -166,8 +166,8 @@ body.thumbs #mThumb{display:block}
 <div id="mRight">
 <div id="mRH"><b>Notes</b><small id="mNc"></small>
 <div class="dd"><button class="ib ddb" title="Save the notes"><svg class="chg" viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg></button><div class="menu">
-<button id="mSave" title="A .miniread.json file to keep beside the PDF; open it with the PDF to bring the notes back">Save notes (.json)<kbd>⌘S</kbd></button>
-<button id="mPdf" title="A copy of the PDF with the highlights and notes as comments (Preview, Acrobat); open it in miniread to bring the notes back">Save PDF with comments</button></div></div>
+<button id="mSave" title="A .readaside.json file to keep beside the PDF; open it with the PDF to bring the notes back">Save notes (.json)<kbd>⌘S</kbd></button>
+<button id="mPdf" title="A copy of the PDF with the highlights and notes as comments (Preview, Acrobat); open it in readaside to bring the notes back">Save PDF with comments</button></div></div>
 <button class="ib" id="mClr" title="Clear all notes, highlights and the PDF's own annotations (Undo in the status bar)"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5"/></svg></button>
 <button class="ib" id="mCfgB" title="Settings: model, key, language"><svg class="chg" viewBox="0 0 16 16"><path d="M3 5h6M12 5h1M3 11h1M7 11h6"/><circle cx="10.5" cy="5" r="1.5"/><circle cx="5.5" cy="11" r="1.5"/></svg></button>
 </div>
@@ -401,42 +401,42 @@ V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSele
     o=N.find(o=>o.rs?.some(r=>r[0]===n&&x>=r[1]&&x<=r[1]+r[3]&&y>=r[2]&&y<=r[2]+r[4]));o&&o!==nAct&&act(o)});
 ro.observe(V);ro.observe($('mLane'));addEventListener('resize',sched);
 
-// ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>); Save writes <name>.miniread.json to keep beside the PDF ----------
+// ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>, the old miniread prefix); Save writes <name>.readaside.json to keep beside the PDF ----------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
 const fpr=()=>pdf?.fingerprints?.[0]||'',
-  ndata=()=>({miniread:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out?.trim()).map(o=>({k:o.k,t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m,d:o.d,...(o.chat.length&&{chat:o.chat})}))}),
+  ndata=()=>({readaside:1,pdf:pdfName,fp:fpr(),notes:N.filter(o=>o.out?.trim()).map(o=>({k:o.k,t:o.t,rs:o.rs,fy:o.fy,out:o.out,m:o.m,d:o.d,...(o.chat.length&&{chat:o.chat})}))}),
   nsave=()=>{const f=fpr(),d=ndata();if(!f)return;try{d.notes.length?localStorage['mrdN:'+f]=JSON.stringify(d):localStorage.removeItem('mrdN:'+f)}catch(_){}},
   nload=d=>{clr();for(const n of d?.notes||[])n?.t&&n.out&&(n.k==='c'?comment(n.t,n.rs||null,n):translate(n.t,n.rs||null,n));act(null);return N.length};
 // keep(blob,name,mime,ext,re): Chrome/Edge save dialog in the PDF's folder (re: remember the handle, so Save rewrites the same file), else a download
 async function keep(b,nm,mime,ext,re){
   if(window.showSaveFilePicker)try{let h=re&&jsH;h||=await showSaveFilePicker({suggestedName:nm,startIn:pdfH||'documents',types:[{description:nm,accept:{[mime]:[ext]}}]});re&&(jsH=h);
-    const w=await h.createWritable();await w.write(b);await w.close();return msg('Saved '+h.name+' — open it in miniread to bring the notes back')}
+    const w=await h.createWritable();await w.write(b);await w.close();return msg('Saved '+h.name+' — open it in readaside to bring the notes back')}
   catch(e){re&&(jsH=null);return msg(e.name==='AbortError'?'':'Could not save: '+e.message)}
   const a=el('a');a.href=URL.createObjectURL(b);a.download=nm;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3);
-  msg('Downloaded '+nm+' — keep it beside the PDF; open it in miniread to bring the notes back')}
+  msg('Downloaded '+nm+' — keep it beside the PDF; open it in readaside to bring the notes back')}
 function nfile(){if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No notes to save');
-  keep(new Blob([JSON.stringify(d,null,1)],{type:'application/json'}),pdfName.replace(/\.pdf$/i,'')+'.miniread.json','application/json','.json',1)}
+  keep(new Blob([JSON.stringify(d,null,1)],{type:'application/json'}),pdfName.replace(/\.pdf$/i,'')+'.readaside.json','application/json','.json',1)}
 // npdf(): a copy of the PDF with one Highlight annotation per note and page (the translation, its chat or the comment as the
-// annotation's text) and the notes JSON attached as ATT, which openPdf reads back. Earlier miniread highlights and attachment are
+// annotation's text) and the notes JSON attached as ATT, which openPdf reads back. Earlier readaside highlights and attachment are
 // replaced; after Clear (annOff) every markup annotation of the PDF is dropped. pdf-lib is inlined at the end (#mPlib), run on first use
-const ATT='miniread-notes.json',MK=new Set('Text FreeText Line Square Circle Polygon PolyLine Highlight Underline Squiggly StrikeOut Stamp Caret Ink Popup FileAttachment Sound Redact'.split(' ')),
+const ATT='readaside-notes.json',AT0='miniread-notes.json',AU=['miniread','readaside'],MK=new Set('Text FreeText Line Square Circle Polygon PolyLine Highlight Underline Squiggly StrikeOut Stamp Caret Ink Popup FileAttachment Sound Redact'.split(' ')),
   plib=()=>{if(!window.PDFLib){const x=el('script');x.textContent=$('mPlib').textContent;document.head.append(x)}};
 async function npdf(){
   if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length&&!annOff)return msg('No notes to save');
   msg('Building the PDF…');
   try{plib();const{PDFDocument,PDFHexString,PDFName}=PDFLib,doc=await PDFDocument.load(await pdf.getData(),{ignoreEncryption:true}),P=doc.getPages(),T=x=>PDFHexString.fromText(x),K=x=>PDFName.of(x);
     for(const g of P){const A=g.node.Annots();if(A)for(let i=A.size()-1;i>=0;i--){const a=A.lookup(i);
-      (a?.get?.(K('T'))?.decodeText?.()==='miniread'||annOff&&MK.has(String(a?.get?.(K('Subtype'))).slice(1)))&&A.remove(i)}}
+      (AU.includes(a?.get?.(K('T'))?.decodeText?.())||annOff&&MK.has(String(a?.get?.(K('Subtype'))).slice(1)))&&A.remove(i)}}
     const ar=doc.catalog.lookup(K('Names'))?.lookup?.(K('EmbeddedFiles'))?.lookup?.(K('Names'));
-    if(ar)for(let i=ar.size()-2;i>=0;i-=2)ar.lookup(i)?.decodeText?.()===ATT&&(ar.remove(i+1),ar.remove(i));
+    if(ar)for(let i=ar.size()-2;i>=0;i-=2)[ATT,AT0].includes(ar.lookup(i)?.decodeText?.())&&(ar.remove(i+1),ar.remove(i));
     for(const o of d.notes)for(const n of new Set((o.rs||[]).map(r=>r[0]))){
       const vp=(await pdf.getPage(n)).getViewport({scale:1}),q=[];
       for(const r of o.rs)r[0]===n&&[[r[1],r[2]],[r[1]+r[3],r[2]],[r[1],r[2]+r[4]],[r[1]+r[3],r[2]+r[4]]].forEach(([x,y])=>q.push(...vp.convertToPdfPoint(x,y)));
       const xs=q.filter((_,i)=>!(i%2)),ys=q.filter((_,i)=>i%2),c=o.k==='c';
       P[n-1].node.addAnnot(doc.context.register(doc.context.obj({Type:'Annot',Subtype:'Highlight',F:4,Rect:[Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)],
-        QuadPoints:q,C:c?[.26,.52,.96]:[1,.84,.29],CA:c?.35:.6,T:T('miniread'),Contents:T(o.out+(o.chat||[]).map(([a,b])=>'\n\nQ: '+a+'\nA: '+b).join(''))})))}
-    d.notes.length&&await doc.attach(new TextEncoder().encode(JSON.stringify(d)),ATT,{mimeType:'application/json',description:'miniread notes'});
-    await keep(new Blob([await doc.save()],{type:'application/pdf'}),pdfName.replace(/\.pdf$/i,'')+'.miniread.pdf','application/pdf','.pdf')
+        QuadPoints:q,C:c?[.26,.52,.96]:[1,.84,.29],CA:c?.35:.6,T:T('readaside'),Contents:T(o.out+(o.chat||[]).map(([a,b])=>'\n\nQ: '+a+'\nA: '+b).join(''))})))}
+    d.notes.length&&await doc.attach(new TextEncoder().encode(JSON.stringify(d)),ATT,{mimeType:'application/json',description:'readaside notes'});
+    await keep(new Blob([await doc.save()],{type:'application/pdf'}),pdfName.replace(/\.pdf$/i,'')+'.readaside.pdf','application/pdf','.pdf')
   }catch(e){msg('Could not build the PDF: '+e.message)}}
 // clrAll(): one click clears every note and highlight and hides the PDF's own annotations; Undo (status bar) for 10 s
 let undoD=null,undoT=0;
@@ -445,14 +445,14 @@ function clrAll(){const d=ndata();if(!d.notes.length&&!N.length&&(annOff||!annN)
   msg('Cleared '+n+' notes'+(h?' and '+h+' PDF annotations':'')+(h?' — Save PDF writes a copy without them':''));$('mUndo').hidden=false;clearTimeout(undoT);undoT=setTimeout(()=>$('mUndo').hidden=true,1e4)}
 $('mUndo').onclick=()=>{if(!undoD)return;nload(undoD.d);nsave();annHide(undoD.a);undoD=null;$('mUndo').hidden=true;msg('Restored')};
 $('mClr').onclick=clrAll;$('mSave').onclick=()=>nfile();$('mPdf').onclick=()=>npdf();
-// openFiles(files,handles): a PDF and/or its .miniread.json, from Open…, the file picker or a drop
+// openFiles(files,handles): a PDF and/or its .readaside.json, from Open…, the file picker or a drop
 async function openFiles(fs,hs=[]){
   const i=fs.findIndex(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name)),j=fs.findIndex(f=>/\.json$/i.test(f.name));
   if(i<0&&j<0)return msg('Not a PDF: '+fs[0].name);
   if(i>=0&&!await open(fs[i]))return;i>=0&&(pdfH=hs[i]||null);
   if(j<0)return;let d;
   try{d=JSON.parse(await fs[j].text())}catch(e){return msg('Cannot read '+fs[j].name+': '+e.message)}
-  if(!d?.miniread)return msg(fs[j].name+' is not a miniread notes file');
+  if(!d?.readaside&&!d?.miniread)return msg(fs[j].name+' is not a readaside notes file');
   if(!pdf)return msg('Open '+(d.pdf||'the PDF')+' first, then its notes');
   jsH=hs[j]||null;const n=nload(d);nsave();
   msg('Restored '+n+' notes from '+fs[j].name+(d.fp&&d.fp!==fpr()?' — they were saved for '+(d.pdf||'another PDF')+', so positions may be off':''))}
@@ -467,9 +467,9 @@ async function openPdf(buf,name){
   try{const np=await pdfjsLib.getDocument({data:buf}).promise;pdf&&pdf.destroy().catch(()=>{});pdf=np}
   catch(e){msg('Cannot open '+name+': '+e.message);return false}
   $('mHint').hidden=true;selHide();$('mPgT').textContent=pdf.numPages;$('mPgN').value=1;$('mPgN').max=pdf.numPages;
-  clr();pdfName=name;pdfH=jsH=null;document.title='miniread — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
-  let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT)}catch(_){}
-  annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // a miniread copy: its highlights are drawn by miniread, not twice
+  clr();pdfName=name;pdfH=jsH=null;document.title='readaside — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT||x.filename===AT0)}catch(_){}
+  annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // a readaside copy: its highlights are drawn by readaside, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
   const doc=pdf;(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)annN+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length})().catch(()=>{});
   msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});return true
@@ -582,7 +582,7 @@ document.addEventListener('keydown',e=>{
     if(k==='ArrowDown')d=.2;else if(k==='ArrowUp')d=-.2;
     else if(k==='PageDown'||(k===' '&&!e.shiftKey))d=.9;else if(k==='PageUp'||(k===' '&&e.shiftKey))d=-.9;
     d&&(e.preventDefault(),V.scrollBy(0,d*V.clientHeight))}});
-const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,types:[{description:'PDF or miniread notes',accept:{'application/pdf':['.pdf'],'application/json':['.json']}}]}).then(async hs=>openFiles(await Promise.all(hs.map(h=>h.getFile())),hs),e=>e.name!=='AbortError'&&msg(e.message)):$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(+$('mPgN').value-1),next:()=>goto(+$('mPgN').value+1),
+const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,types:[{description:'PDF or readaside notes',accept:{'application/pdf':['.pdf'],'application/json':['.json']}}]}).then(async hs=>openFiles(await Promise.all(hs.map(h=>h.getFile())),hs),e=>e.name!=='AbortError'&&msg(e.message)):$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(+$('mPgN').value-1),next:()=>goto(+$('mPgN').value+1),
   last:()=>goto(pdf?.numPages||1),out:()=>zoom(1/1.2),'in':()=>zoom(1.2),fit,help:()=>$('mHelp').showModal(),
   theme:()=>{const d=document.documentElement.dataset.theme!=='dark',f=()=>{setTheme(d);sched()};ls('mrdTheme',d?'dark':'light');
     document.startViewTransition&&!RM.matches?document.startViewTransition(f):f()}};
