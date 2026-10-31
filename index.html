@@ -853,6 +853,7 @@ selT.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=selA||m
     p&&p.catch&&p.catch(err=>warn('Translation stopped: '+(err.message||err)))}
   catch(err){warn('Could not start: '+(err.message||err))}};
 document.addEventListener('mouseup',e=>{
+  if(MQ&&MQ.on)return;  // the box owns this drag
   document.querySelectorAll('.textLayer.selecting').forEach(t=>t.classList.remove('selecting'));
   if(selT.contains(e.target))return;
   const s=getSelection();if(!s.rangeCount||!V.contains(s.anchorNode))return;
@@ -869,18 +870,18 @@ SC.addEventListener('scroll',selHide,{passive:true});
 
 // ---------- marquee selection (Option/Alt + drag): the text inside a box, in reading order, because a PDF's own text order is not its visual one
 let MQ=null,mqLast=null;
-const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect(),mqArm=on=>document.body.classList.toggle('mq',!!on&&!!pdf);
-document.addEventListener('keydown',e=>{(e.key==='Alt'||e.key==='Shift')&&mqArm(1)});  // the pointer shows the mode before the first drag
-document.addEventListener('keyup',e=>{(e.key==='Alt'||e.key==='Shift')&&mqArm(0)});
-addEventListener('blur',()=>mqArm(0));
+const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect(),mqLit=new Set();
+addEventListener('blur',()=>{MQ=null;document.body.classList.remove('mq')});
 document.addEventListener('mousedown',e=>{
-  if(!pdf||e.button!==0||!(e.altKey||e.shiftKey)||!e.target.closest('.page'))return;
-  e.preventDefault();getSelection().removeAllRanges();selHide();
-  MQ={x:e.clientX,y:e.clientY};mqEl.hidden=false;document.body.classList.add('mq');
-  mqEl.style.left=MQ.x+'px';mqEl.style.top=MQ.y+'px';mqEl.style.width='0px';mqEl.style.height='0px';
+  if(!pdf||e.button!==0||e.metaKey||e.ctrlKey||!e.target.closest('.page'))return;
+  MQ={x:e.clientX,y:e.clientY,on:0};  // armed only once the pointer moves, so a double click still picks a word
 });
-const mqLit=new Set();
 document.addEventListener('mousemove',e=>{if(!MQ)return;
+  if(!MQ.on){
+    if(Math.abs(e.clientX-MQ.x)+Math.abs(e.clientY-MQ.y)<4)return;
+    MQ.on=1;getSelection().removeAllRanges();selHide();mqEl.hidden=false;document.body.classList.add('mq');
+    mqEl.style.left=MQ.x+'px';mqEl.style.top=MQ.y+'px';mqEl.style.width='0px';mqEl.style.height='0px'}
+  getSelection().removeAllRanges();  // the browser keeps wanting to select from the press; keep it empty
   mqEl.style.left=Math.min(MQ.x,e.clientX)+'px';mqEl.style.top=Math.min(MQ.y,e.clientY)+'px';
   mqEl.style.width=Math.abs(e.clientX-MQ.x)+'px';mqEl.style.height=Math.abs(e.clientY-MQ.y)+'px';
   const r=mqBox(),now=new Set();
@@ -891,7 +892,9 @@ document.addEventListener('mousemove',e=>{if(!MQ)return;
   now.forEach(s=>{mqLit.has(s)||(s.classList.add('mq'),mqLit.add(s))});
 });
 document.addEventListener('mouseup',()=>{if(!MQ)return;
-  const r=mqBox();MQ=null;mqEl.hidden=true;document.body.classList.remove('mq');mqLit.forEach(s=>s.classList.remove('mq'));mqLit.clear();
+  const r=mqBox(),on=MQ.on;MQ=null;mqEl.hidden=true;document.body.classList.remove('mq');
+  mqLit.forEach(s=>s.classList.remove('mq'));mqLit.clear();
+  if(!on)return;  // a click, not a drag: leave the native behaviour alone
   if(r.width<4||r.height<4)return;
   const rows=[];
   for(const p of V.querySelectorAll('.page')){
