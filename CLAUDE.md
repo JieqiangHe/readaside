@@ -36,7 +36,7 @@ A single-file PDF reader with side-by-side AI translation (DeepSeek, your own ke
 - pdf.js is pinned to 3.11.174: v4 replaced `pdfjsLib.renderTextLayer` with a `TextLayer` class — don't upgrade casually.
 - The repo has to stay public: Pages is a branch deploy from `main`, and a private repo drops the site (it went dark 2026-10-10 that way and was re-enabled 2026-10-31).
 - DeepSeek receives both `thinking:{type:'enabled'}` and `reasoning_effort`; fine with the current models, revisit if the API rejects them.
-- The card classes reuse svguest's chat names (`wt/sh/tm/tk/th/er/dim`) and the `MARK` waiting icon; keep them in sync when svguest changes.
+- The card classes reuse svguest's chat names (`wt/sh/tm/tk/th/er/dim`); keep them in sync when svguest changes. `MARK` is readaside's own waiting icon (a page with a spark, user's request 2026-10-31), not svguest's house.
 
 ## Testing
 
