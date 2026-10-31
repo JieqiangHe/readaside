@@ -43,9 +43,6 @@ button,.seg button,.item,.hl,.tp,.ci,#mTabs .tab{transition:background-color .16
 #mUndo{flex:none;color:var(--onb)}
 #mBar .menu{left:0;right:auto}
 .menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
-#mPgN{width:42px;height:22px;text-align:center;-moz-appearance:textfield}#mPgN::-webkit-inner-spin-button,#mPgN::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
-#mPgT{margin:0 2px 0 4px;color:var(--h4);font-variant-numeric:tabular-nums}#mPgT::before{content:'/ ';color:var(--t3)}
-#mZoomB{min-width:50px;padding:2px 4px;color:var(--h4);font-variant-numeric:tabular-nums}
 #mTabs{flex:1 1 0;min-width:0;display:none;align-items:center;gap:2px;height:27px;overflow-x:auto;scrollbar-width:none}#mTabs::-webkit-scrollbar{display:none}body.multi #mTabs{display:flex}
 #mTabs .tab{flex:0 1 auto;display:flex;align-items:center;gap:5px;max-width:190px;min-width:76px;height:25px;padding:0 3px 0 10px;border-radius:7px;color:var(--h4);cursor:default;user-select:none;white-space:nowrap}#mTabs .tab:hover{background:var(--btnh);color:var(--fg)}#mTabs .tab.on{background:var(--btn);color:var(--fg);box-shadow:var(--sh),inset 0 0 0 1px var(--btnb)}
 #mTabs .tab span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -119,7 +116,7 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 #mConn .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:7px 10px;align-items:center}#mConn .kv>span{color:var(--h4);font-size:11.5px}
 #mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:26px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
 #mConn .gr{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
-#mConn .vw{display:flex;align-items:center;gap:4px;min-width:0}#mConn .vw .ib{width:26px;height:26px;font-size:14px}#mConn .vw input{width:42px;flex:none}#mConn .kv>button{justify-self:start;height:26px}
+#mConn .kv>button{justify-self:start;height:26px}
 /* ---------- help ---------- */
 #mHelp{padding:0;width:min(420px,96vw)}
 #mHelp form{padding:16px 18px 14px;font-size:12.5px;line-height:1.45}
@@ -158,13 +155,9 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 <label class="gr" title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto">Auto — translate as soon as text is selected</label><textarea id="mPrompt" hidden></textarea>
 <p>Off: pick Translate from the bar under the selection. The chat under each translation also uses this language.</p></div>
 <div class="card"><b>View</b><div class="kv">
-<span>Page</span><div class="vw"><button class="ib" data-a="prev" title="Previous page (←)">‹</button><input id="mPgN" type="number" min="1" value="1" title="Page number; Enter to go"><span id="mPgT" title="Pages in this PDF">–</span><button class="ib" data-a="next" title="Next page (→)">›</button></div>
-<span>Zoom</span><div class="vw"><button class="ib" data-a="out" title="Zoom out (−)">−</button><button id="mZoomB" data-a="fit" title="Fit the page width (0)">100%</button><button class="ib" data-a="in" title="Zoom in (+)">+</button></div>
 <span>Theme</span><button data-a="theme">Dark</button>
 <span>Thumbnails</span><button data-a="thumbs">Show</button>
-<span>Keys</span><button data-a="help">Shortcuts (?)</button>
-</div>
-<p>Reading is all keys: ← → pages, + − 0 zoom, ? for everything.</p></div>
+</div></div>
 </div></div></section>
 </div>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
@@ -429,10 +422,9 @@ function tabHold(){TABS[TI]={pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN,st:V.sc
   obs?.disconnect();tobs?.disconnect();N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
   $('mUndo').hidden=true;undoD=null;clearTimeout(undoT);selHide();nLast=null}
 function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN}=t);
-  pdf=pdf||null;pdfName=pdfName||'';scale=scale||1;annOff=!!annOff;annN=annN||0;curN=curN||0;TABS[i]={};
+  pdf=pdf||null;pdfName=pdfName||'';scale=scale||1;annOff=!!annOff;annN=annN||0;curN=curN||1;TABS[i]={};
   N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el),o.y=null;
   document.title=pdf?'ocrp — '+pdfName:'ocrp';
-  $('mPgT').textContent=pdf?pdf.numPages:'–';$('mPgN').max=pdf?.numPages||1;$('mPgN').value=curN||1;
   selHide();  pdf?(layout().then(()=>V.scrollTop=Math.min(t.st||0,V.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
   tabUI();sched()}
 function tabFresh(){if(!pdf)return true;
@@ -443,8 +435,8 @@ function tabGo(i){if(i===TI||!TABS[i])return;tabHold();tabShow(i)}
 function tabClose(i){const nm=i===TI?pdfName:TABS[i].pdfName||'',ns=i===TI?N.slice():TABS[i].notes||[],dp=i===TI?pdf:TABS[i].pdf;
   nsaveTab(nm,fprOf(dp),ns);ns.forEach(o=>{o.ac.abort();o.qc?.abort()});dp?.destroy().catch(()=>{});
   if(TABS.length<2){N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
-    pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=0;scale=1;document.title='ocrp';
-    $('mPgT').textContent='–';$('mPgN').value=1;selHide();$('mUndo').hidden=true;undoD=null;
+    pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=1;scale=1;document.title='ocrp';
+    selHide();$('mUndo').hidden=true;undoD=null;
     TABS[0]={};TI=0;tabUI();sched();return msg('Closed')}
   if(i===TI){tabHold();TABS.splice(i,1);tabShow(Math.min(i,TABS.length-1))}
   else{TABS.splice(i,1);i<TI&&TI--}
@@ -469,8 +461,8 @@ async function openPdf(buf,name){
   try{const np=await pdfjsLib.getDocument({data:buf}).promise;pdf=np}
   catch(e){msg('Cannot open '+name+': '+e.message);tabBack();return false}
   TN=0;
-  selHide();$('mPgT').textContent=pdf.numPages;$('mPgN').value=1;$('mPgN').max=pdf.numPages;
-  clr();pdfName=name;pdfH=jsH=null;curN=0;document.title='ocrp — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  selHide();
+  clr();pdfName=name;pdfH=jsH=null;curN=1;document.title='ocrp — '+name;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
   let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT||x.filename===AT0||x.filename===AT1)}catch(_){}
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
@@ -478,7 +470,7 @@ async function openPdf(buf,name){
   msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});tabUI();return true
 }
 function layout(){
-  const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();$('mZoomB').textContent=Math.round(scale*100)+'%';
+  const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();
   obs=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&draw(e.target)),{root:V,rootMargin:'800px 0px'});
   return layP=(async()=>{for(let i=1;i<=doc.numPages;i++){
     const vp=(await doc.getPage(i)).getViewport({scale});if(g!==gen)return;
@@ -503,14 +495,13 @@ function fit(){if(!pdf)return msg('Open a PDF first');
   pdf.getPage(1).then(p=>{const s=(V.clientWidth-34)/p.getViewport({scale:1}).width;zoom(s/scale)}).catch(()=>{})}
 function cur(){let n=0;
   for(const p of V.querySelectorAll('.page')){if(p.offsetTop-V.scrollTop<=V.clientHeight*.4)n=+p.dataset.n;else break}
-  n&&n!==curN&&(curN=n,$('mPgN').value=n,mark())}
+  n&&n!==curN&&(curN=n,mark())}
 V.addEventListener('scroll',()=>{requestAnimationFrame(cur);sched()},{passive:true});
 function goto(n){if(!pdf)return msg('Open a PDF first');
   n=Math.min(Math.max(1,n||1),pdf.numPages);
   const p=V.querySelector(`.page[data-n="${n}"]`);
   if(p)V.scrollTop=p.offsetTop-8;else layP.then(()=>V.querySelector(`.page[data-n="${n}"]`)?.scrollIntoView());
-  $('mPgN').value=n;n!==curN&&(curN=n,mark())}
-$('mPgN').onchange=()=>goto(+$('mPgN').value);
+  n!==curN&&(curN=n,mark())}
 
 // ---------- thumbnails ----------
 let ts=1,tobs=null,tgen=0,curN=0;
@@ -518,7 +509,7 @@ const TH=()=>document.body.classList.contains('thumbs'),qa=a=>document.querySele
 function setTh(on){document.body.classList.toggle('thumbs',on);ls('mrdThumbs',on?'1':'0');
   qa('thumbs').textContent=on?'Hide':'Show';on&&pdf&&buildThumbs().catch(()=>{})}
 async function buildThumbs(){
-  if(!pdf||!TH())return;const g=++tgen;tobs?.disconnect();const T=$('mThumb');T.replaceChildren();curN=0;
+  if(!pdf||!TH())return;const g=++tgen;tobs?.disconnect();const T=$('mThumb');T.replaceChildren();
   ts=78/(await pdf.getPage(1)).getViewport({scale:1}).width;
   tobs=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&tdraw(e.target)),{root:T,rootMargin:'300px 0px'});
   for(let i=1;i<=pdf.numPages;i++){
@@ -526,7 +517,7 @@ async function buildThumbs(){
     const d=el('div','tp');d.dataset.n=i;
     const ph=el('div','ph');ph.style.height=Math.round(vp.height)+'px';
     d.append(ph,el('b',0,i));T.append(d);tobs.observe(d)}
-  g===tgen&&(curN=+$('mPgN').value||1,mark())}
+  g===tgen&&mark()}
 async function tdraw(d){
   tobs.unobserve(d);
   try{const ph=d.firstChild,n=+d.dataset.n,p=await pdf.getPage(n),vp=p.getViewport({scale:ts}),
@@ -578,13 +569,13 @@ document.addEventListener('keydown',e=>{
   const k=e.key;
   if(k==='?')$('mHelp').showModal();
   else if(k==='+'||k==='=')zoom(1.2);else if(k==='-')zoom(1/1.2);else if(k==='0')fit();
-  else if(k==='ArrowLeft')goto(+$('mPgN').value-1);else if(k==='ArrowRight')goto(+$('mPgN').value+1);
+  else if(k==='ArrowLeft')goto(curN-1);else if(k==='ArrowRight')goto(curN+1);
   else if(k==='Home')goto(1);else if(k==='End')goto(pdf?.numPages||1);
   else{let d=0;
     if(k==='ArrowDown')d=.2;else if(k==='ArrowUp')d=-.2;
     else if(k==='PageDown'||(k===' '&&!e.shiftKey))d=.9;else if(k==='PageUp'||(k===' '&&e.shiftKey))d=-.9;
     d&&(e.preventDefault(),V.scrollBy(0,d*V.clientHeight))}});
-const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,types:[{description:'PDF or ocrp notes',accept:{'application/pdf':['.pdf'],'application/json':['.json']}}]}).then(async hs=>openFiles(await Promise.all(hs.map(h=>h.getFile())),hs),e=>e.name!=='AbortError'&&msg(e.message)):$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(+$('mPgN').value-1),next:()=>goto(+$('mPgN').value+1),
+const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,types:[{description:'PDF or ocrp notes',accept:{'application/pdf':['.pdf'],'application/json':['.json']}}]}).then(async hs=>openFiles(await Promise.all(hs.map(h=>h.getFile())),hs),e=>e.name!=='AbortError'&&msg(e.message)):$('mFile').click(),thumbs:()=>setTh(!TH()),first:()=>goto(1),prev:()=>goto(curN-1),next:()=>goto(curN+1),
   last:()=>goto(pdf?.numPages||1),out:()=>zoom(1/1.2),'in':()=>zoom(1.2),fit,help:()=>$('mHelp').showModal(),
   theme:()=>{const d=document.documentElement.dataset.theme!=='dark',f=()=>{setTheme(d);sched()};ls('mrdTheme',d?'dark':'light');
     document.startViewTransition&&!RM.matches?document.startViewTransition(f):f()}};
