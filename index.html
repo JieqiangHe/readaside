@@ -644,7 +644,7 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
-  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}else if(k==='f'){e.preventDefault();fOpen()}return}
+  if(mod){if(k==='s'){e.preventDefault();e.shiftKey?npdf():nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
   if(e.isComposing||e.keyCode===229)return;
   if(e.target.closest('input,textarea,select,button,a,[contenteditable]'))return;
   if(k==='Enter')hintOff();
