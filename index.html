@@ -54,7 +54,7 @@ button,.seg button,.item,.hl,.tp,#mSplit,.ci,#mTabs .tab{transition:background-c
 #mView{flex:1;overflow:auto;background:var(--view);padding:16px;scrollbar-width:thin}
 #mSplit{flex:0 0 5px;cursor:col-resize;background:var(--bar);border-left:1px solid var(--line)}#mSplit:hover{background:var(--onb);opacity:.4}
 #mThumb{display:none;width:116px;flex:none;overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:8px 6px 12px;scrollbar-width:thin}
-body.thumbs #mThumb{display:block}
+body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 .tp{width:96px;margin:0 auto 10px;cursor:pointer;border-radius:3px}
 .tp .ph{background:#fff;box-shadow:0 0 0 1px var(--pageb)}
 .tp canvas{display:block;width:100%;height:auto;box-shadow:0 0 0 1px var(--pageb)}
@@ -120,10 +120,10 @@ body.thumbs #mThumb{display:block}
 #mConnB{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:12px 10px 18px}
 #mConn .card{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--line)}#mConn .card>b{font-weight:600}
 #mConn .card p{margin:0;color:var(--t3);font-size:11px;line-height:1.45}
-#mConn .kv{display:grid;grid-template-columns:52px minmax(0,1fr);gap:6px 8px;align-items:center}#mConn .kv>span{color:var(--h4)}
+#mConn .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 8px;align-items:center}#mConn .kv>span{color:var(--h4)}
 #mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
 #mConn .gr{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
-#mConn .vw{display:flex;align-items:center;gap:3px;min-width:0}#mConn .vw .ib{width:24px;height:24px;font-size:14px}#mConn .kv>button{justify-self:start}
+#mConn .vw{display:flex;align-items:center;gap:3px;min-width:0}#mConn .vw .ib{width:24px;height:24px;font-size:14px}#mConn .vw input{width:42px;flex:none}#mConn .kv>button{justify-self:start}
 /* ---------- status bar, help ---------- */
 #mSt{height:26px;display:flex;align-items:center;gap:14px;padding:2px 10px;background:var(--bar);border-top:1px solid var(--line);white-space:nowrap;overflow:hidden}
 #mMsg{min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -168,7 +168,7 @@ body.thumbs #mThumb{display:block}
 <p>Keys stay in this browser.</p></div>
 <div class="card"><b>Translating</b><div class="kv"><span>Into</span><div><select id="mLang"></select></div></div>
 <label class="gr" title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto">Auto — translate as soon as text is selected</label><textarea id="mPrompt" hidden></textarea>
-<p>Off: pick Translate from the bar under the selection. Translations and answers in the chat under each translation use this language.</p></div>
+<p>Off: pick Translate from the bar under the selection. The chat under each translation also uses this language.</p></div>
 <div class="card"><b>View</b><div class="kv">
 <span>Page</span><div class="vw"><button class="ib" data-a="prev" title="Previous page (←)">‹</button><input id="mPgN" type="number" min="1" value="1" title="Page number; Enter to go"><span id="mPgT" title="Pages in this PDF">–</span><button class="ib" data-a="next" title="Next page (→)">›</button></div>
 <span>Zoom</span><div class="vw"><button class="ib" data-a="out" title="Zoom out (−)">−</button><button id="mZoomB" data-a="fit" title="Fit the page width (0)">100%</button><button class="ib" data-a="in" title="Zoom in (+)">+</button></div>
@@ -214,7 +214,7 @@ const URL0='https://api.deepseek.com/chat/completions',MODELS=['deepseek-v4-pro'
   aiLoad=()=>{const m=ls('mrdDsModel');
     $('mModel').replaceChildren(...MODELS.map(x=>new Option(x,x)));
     $('mModel').value=MODELS.includes(m)?m:MODELS[0];
-    $('mKey').value=ls('mrdDsKey')||'';$('mEp').value=ls('mrdDsEp')||''},
+    $('mKey').value=ls('mrdDsKey')||'';$('mEp').value=ls('mrdDsEp')||URL0},
   cfg=on=>{$('mConn').hidden=!on;on&&!$('mKey').value&&setTimeout(()=>$('mKey').focus())};
 {const e=$('mThink'),v=ls('mrdThink');v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>ls('mrdThink',e.value);seg('mThink')}
 for(const[i,k]of aiF)$(i).onchange=()=>ls('mrdDs'+k,$(i).value.trim());
