@@ -7,8 +7,8 @@
 <script>try{localStorage.mrdTheme==='dark'&&(document.documentElement.dataset.theme='dark')}catch(_){}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-:root{--fg:#222;--bar:#f3f3f3;--line:#ccc;--btn:#fff;--btnb:#bbb;--btnh:#eef3ff;--bfg:buttontext;--view:#cfcfcf;--side:#f7f7f7;--h4:#555;--h4b:#ddd;--pageb:#777;--err:#c4392f;--erb:#cc41360f;--t3:#6e6e6e;--ok:#2f8f55;--on:#d6e4ff;--onb:#6d94e0;--onfg:buttontext}
-[data-theme=dark]{color-scheme:dark;--fg:#e5e5e5;--bar:#000;--line:#262626;--btn:#262626;--btnb:#000;--btnh:#404040;--bfg:#e5e5e5;--view:#141414;--side:#000;--h4:#a3a3a3;--h4b:#262626;--pageb:#404040;--err:#f1877f;--erb:#f07a7014;--t3:#8c8c8c;--ok:#4fc27e;--on:#e5e5e5;--onb:#e5e5e5;--onfg:#171717}
+:root{--nt:#d99a00;--fg:#222;--bar:#f3f3f3;--line:#ccc;--btn:#fff;--btnb:#bbb;--btnh:#eef3ff;--bfg:buttontext;--view:#cfcfcf;--side:#f7f7f7;--h4:#555;--h4b:#ddd;--pageb:#777;--err:#c4392f;--erb:#cc41360f;--t3:#6e6e6e;--ok:#2f8f55;--on:#d6e4ff;--onb:#6d94e0;--onfg:buttontext}
+[data-theme=dark]{color-scheme:dark;--nt:#e8b030;--fg:#e5e5e5;--bar:#000;--line:#262626;--btn:#262626;--btnb:#000;--btnh:#404040;--bfg:#e5e5e5;--view:#141414;--side:#000;--h4:#a3a3a3;--h4b:#262626;--pageb:#404040;--err:#f1877f;--erb:#f07a7014;--t3:#8c8c8c;--ok:#4fc27e;--on:#e5e5e5;--onb:#e5e5e5;--onfg:#171717}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
 body{display:flex;flex-direction:column;font:12px/1.5 system-ui,sans-serif;color:var(--fg)}
@@ -26,7 +26,15 @@ kbd{font:11px ui-monospace,monospace;padding:0 4px;border:1px solid var(--line);
 #mBar button.on{background:transparent;border-color:transparent;color:var(--onb)}
 #mPgN{width:46px;text-align:center}
 #mPgT{color:var(--h4)}
-#mMain{flex:1;display:flex;min-height:0}
+#mMain{flex:1;display:flex;min-height:0;position:relative}
+#mLink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#mLink path{fill:none;stroke:var(--nt);stroke-width:1.2;opacity:.55}
+#mLink circle{fill:var(--nt);opacity:.75}
+#mLink .on path{stroke-width:2;opacity:1}#mLink .on circle{opacity:1}
+.hl{position:absolute;z-index:1;pointer-events:none;border-radius:2px;background:#ffd54a55;mix-blend-mode:multiply}
+.hl.on{background:#ffc400a0}
+#mLane{flex:1;min-height:0;position:relative;z-index:6;overflow:hidden}
+#mNotes{position:absolute;left:0;right:0;top:0}
 #mLeft{flex:0 0 60%;min-width:200px;display:flex}
 #mViewWrap{flex:1;position:relative;display:flex;min-width:0}
 #mView{flex:1;overflow:auto;background:var(--view);padding:16px}
@@ -51,8 +59,8 @@ body.thumbs #mThumb{display:block}
 .textLayer .endOfContent{display:block;position:absolute;inset:100% 0 0;z-index:-1;cursor:default;user-select:none}
 .textLayer.selecting .endOfContent{top:0}
 #mRight{flex:1;min-width:300px;display:flex;flex-direction:column;background:var(--side)}
-#mRight details{padding:4px 8px;border-bottom:1px solid var(--line)}
-#mRight summary{cursor:pointer;color:var(--h4)}
+#mRight>details{padding:4px 8px;border-top:1px solid var(--line)}
+#mRight>details>summary{cursor:pointer;color:var(--h4)}
 #mRight details label{display:grid;grid-template-columns:56px 1fr;gap:6px;align-items:center;margin:3px 0}
 #mRight [hidden],#mRight details label.up[hidden]{display:none}
 #mRight details label.up{display:block}
@@ -69,14 +77,15 @@ body.thumbs #mThumb{display:block}
 #mGo{flex:none;padding:2px 12px;border-color:transparent;border-radius:6px;background:var(--fg);color:var(--side)}
 #mGo:hover{background:var(--fg);opacity:.85}
 #mCnt{margin-left:auto;color:var(--t3);font-size:11px;white-space:nowrap}
-#mBody{flex:1;min-height:0;display:flex;flex-direction:column}
-#mHist{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:10px}
-.item{display:flex;flex-direction:column}
-.item .u{align-self:flex-end;max-width:88%;padding:6px 10px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--h4b);white-space:pre-wrap;overflow-wrap:anywhere}
-.item .a{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.item{position:absolute;left:10px;right:10px;display:flex;flex-direction:column;padding:7px 10px;border-radius:8px;background:var(--btn);box-shadow:0 0 0 1px var(--h4b),0 1px 3px #0001}
+.item[hidden]{display:none}
+.item.on{box-shadow:0 0 0 1.5px var(--nt),0 2px 8px #0002}
+.item .u{margin-bottom:5px;padding-left:7px;border-left:2px solid var(--line);color:var(--h4);font-size:11.5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.item .a{max-height:45vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
 .item .a.dim{color:var(--h4);font-size:12px}
 .item .a.er{padding:6px 9px;border-radius:8px;background:var(--erb);box-shadow:inset 0 0 0 1px var(--btnb);color:var(--err)}
-.item .mt{display:flex;align-items:center;gap:2px;margin-top:6px;color:var(--t3);font-size:11px;white-space:nowrap}
+.item .mt span{margin-right:auto;overflow:hidden;text-overflow:ellipsis}
+.item .mt{display:flex;align-items:center;gap:2px;margin-top:4px;color:var(--t3);font-size:11px;white-space:nowrap}
 .item .rtb{flex:none;padding:0 6px;border-color:transparent;background:transparent;color:var(--h4);font-size:11px}
 .item .rtb:hover{background:var(--btnh);color:var(--fg)}
 .item .wt{display:flex;align-items:center;gap:6px;color:var(--h4)}
@@ -122,10 +131,11 @@ body.thumbs #mThumb{display:block}
 </div>
 <div id="mMain">
 <div id="mLeft"><div id="mThumb"></div><div id="mViewWrap"><div id="mView"></div>
-<div id="mHint"><div><b>Drop a PDF here</b>, or choose Open… above<br><small>Text pasted into the panel on the right translates without a PDF.</small></div></div>
+<div id="mHint"><div><b>Drop a PDF here</b>, or choose Open… above<br><small>Selected text is translated into a note on the right, linked to where it came from.</small></div></div>
 </div></div>
 <div id="mSplit" title="Drag to resize the panes"></div>
 <div id="mRight">
+<div id="mLane"><div id="mNotes"></div></div>
 <details id="mCfg"><summary title="Your key stays in this browser">AI settings</summary>
 <label>Provider<select id="mProv" title="AI provider"><option value="Glm">GLM</option><option value="Ds">DeepSeek</option></select></label>
 <label>Model<select id="mModel" title="Model"></select></label>
@@ -142,15 +152,13 @@ body.thumbs #mThumb{display:block}
 <textarea id="mSrc" spellcheck="false" placeholder="Select text in the PDF, or paste it here — ⌘/Ctrl+Enter translates"></textarea>
 <div id="mOps">
 <label title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto">Auto</label>
-<button id="mClr" title="Remove all translations">Clear</button>
+<button id="mClr" title="Remove all translations and highlights">Clear</button>
 <span id="mCnt"></span>
 <button id="mGo" title="⌘/Ctrl+Enter">Translate</button>
 </div>
 </div>
-<div id="mBody">
-<div id="mHist"></div>
 </div>
-</div>
+<svg id="mLink"></svg>
 </div>
 <div id="mSt"><span id="mMsg"></span><span id="mSel"></span><button data-a="theme">Theme</button></div>
 <dialog id="mHelp"><form method="dialog"><h3>Shortcuts</h3><dl>
@@ -179,7 +187,7 @@ const AI={Glm:['https://open.bigmodel.cn/api/paas/v4/chat/completions','glm-5.3'
     $('mKey').value=ls('mrd'+p+'Key')||'';$('mEp').value=ls('mrd'+p+'Ep')||u;$('mRlyL').hidden=!rlyOk()};
 for(const[i,k]of[['mProv','mrdAi'],['mThink','mrdThink']]){const e=$(i),v=ls(k);v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>{ls(k,e.value);i==='mProv'&&aiLoad()}}
 for(const[i,k]of aiF)$(i).onchange=()=>ls('mrd'+$('mProv').value+k,$(i).value.trim());
-$('mRly').checked=ls('mrdGlmRelay')==='1';$('mRly').onchange=()=>ls('mrdGlmRelay',$('mRly').checked?'1':'0');
+$('mRly').checked=ls('mrdGlmRelay')!=='0';$('mRly').onchange=()=>ls('mrdGlmRelay',$('mRly').checked?'1':'0');
 aiLoad();$('mCfg').open=!$('mKey').value;
 
 // ---------- language, prompt ----------
@@ -195,7 +203,6 @@ $('mAuto').onchange=()=>ls('mrdAuto',$('mAuto').checked?'1':'0');
 
 // ---------- translate ----------
 const cnt=()=>$('mCnt').textContent=nl($('mSrc').value.length)+' chars';
-let ac;
 const glmJ={},  // GLM endpoints that answered with plain JSON instead of a stream: asked without stream next time
   MARK='<svg viewBox="6 4.75 228 228"><path d="M29 85.86L113 36.14M127 36.14L211 85.86" stroke-width="20"/><path d="M15 83h14v14H15zM113 25h14v14h-14zM211 83h14v14h-14z" stroke-width="14"/><path d="M98 111V101Q98 95 104 95H136Q142 95 142 101V111" stroke-width="16"/><rect x="44" y="111" width="152" height="100" rx="5" stroke-width="16"/></svg>',
   apiMsg=t=>{try{const j=JSON.parse(t),e=j.error||j;return(e.code?'['+e.code+'] ':'')+(e.message||t)}catch(_){return t}};
@@ -236,52 +243,99 @@ async function ask(model,msgs,myAc,ui){
   on(buf);
   return{out,cut}
 }
-async function translate(go){
-  if(ac){ac.abort();if(!go)return}
-  const text=$('mSrc').value.trim(),key=$('mKey').value.trim();
-  if(!text)return msg('Select text in the PDF, or paste it into the box');
+// ---------- notes: each translation is a bubble in the right lane, linked by a line to its highlight in the PDF ----------
+// o={rs:[[page,x,y,w,h]] in PDF units (null: pasted text), fy (where a pasted note sits), el, ac}; nAct is aligned to its anchor,
+// the others are pushed up/down so no two bubbles overlap
+const N=[],NS=$('mNotes'),LK=$('mLink');let nAct=null,nLast=null,nRaf=0,selA=null;
+const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(sched),
+  pgOf=n=>V.querySelector(`.page[data-n="${n}"]`),
+  docH=()=>{const p=V.lastElementChild;return p?p.offsetTop+p.offsetHeight:0},
+  want=o=>{if(!o.rs)return o.fy*(docH()||1);const p=pgOf(o.rs[0][0]);return p?p.offsetTop+o.rs[0][2]*scale-6:null},
+  hl=d=>{d.querySelectorAll('.hl').forEach(h=>h.remove());const n=+d.dataset.n,c=v=>`calc(var(--scale-factor)*${v}px)`;
+    for(const o of N)for(const r of o.rs||[])if(r[0]===n){const h=el('div','hl'+(o===nAct?' on':''));h.o=o;
+      h.style.cssText=`left:${c(r[1])};top:${c(r[2])};width:${c(r[3])};height:${c(r[4])}`;d.append(h)}},
+  hlAll=()=>V.querySelectorAll('.page').forEach(hl),
+  act=o=>{nAct=o;N.forEach(x=>x.el.classList.toggle('on',x===o));V.querySelectorAll('.hl').forEach(h=>h.classList.toggle('on',h.o===o));sched()},
+  kill=o=>{o.ac.abort();o.el.remove();N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct)},
+  clr=()=>{N.forEach(o=>{o.ac.abort();o.el.remove()});N.length=0;hlAll();act(null)};
+// rects(range): the selection's line boxes per page, merged, in PDF units, top first
+function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n,p.getBoundingClientRect()]),R=[];
+  for(const c of rg.getClientRects()){const h=c.height/scale;if(c.width<1||h<1||h>40)continue;
+    const cx=c.left+c.width/2,cy=c.top+c.height/2,f=P.find(([,b])=>cx>=b.left&&cx<=b.right&&cy>=b.top&&cy<=b.bottom);if(!f)continue;
+    const r=[f[0],(c.left-f[1].left)/scale,(c.top-f[1].top)/scale,c.width/scale,h],
+      m=R.find(q=>q[0]===r[0]&&Math.min(q[2]+q[4],r[2]+r[4])-Math.max(q[2],r[2])>Math.min(q[4],r[4])/2&&r[1]<=q[1]+q[3]+q[4]*1.5&&q[1]<=r[1]+r[3]+r[4]*1.5);
+    if(m){const x=Math.min(m[1],r[1]),y=Math.min(m[2],r[2]);m[3]=Math.max(m[1]+m[3],r[1]+r[3])-x;m[4]=Math.max(m[2]+m[4],r[2]+r[4])-y;m[1]=x;m[2]=y}else R.push(r)}
+  return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
+function frame(){nRaf=0;
+  const M=$('mMain').getBoundingClientRect(),VR=V.getBoundingClientRect(),L=$('mLane').getBoundingClientRect(),W=$('mViewWrap').getBoundingClientRect(),vs=[];
+  for(const o of N){o.w=want(o);o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
+  vs.sort((a,b)=>a.w-b.w);
+  const h=vs.map(o=>o.el.offsetHeight),y=[],G=8,k=Math.max(0,vs.indexOf(nAct));
+  if(vs.length){y[k]=vs[k].w;
+    for(let i=k+1;i<vs.length;i++)y[i]=Math.max(vs[i].w,y[i-1]+h[i-1]+G);
+    for(let i=k-1;i>=0;i--)y[i]=Math.min(vs[i].w,y[i+1]-h[i]-G);
+    for(let i=0;i<vs.length;i++)y[i]=Math.max(y[i],i?y[i-1]+h[i-1]+G:8);
+    vs.forEach((o,i)=>o.el.style.top=y[i]+'px')}
+  V.style.paddingBottom=Math.max(16,(vs.length?y.at(-1)+h.at(-1):0)-docH()+16)+'px';
+  NS.style.transform=`translateY(${W.top-L.top-V.scrollTop}px)`;
+  let s='';
+  for(const o of vs){if(!o.rs)continue;const r=o.rs[0],p=pgOf(r[0]).getBoundingClientRect(),b=o.el.getBoundingClientRect(),
+    vr=VR.right-M.left-14,x1=Math.min(vr,p.left+(r[1]+r[3])*scale-M.left),y1=p.top+(r[2]+r[4])*scale+1-M.top,xe=Math.min(vr,Math.max(x1,p.right-M.left)),x2=b.left-M.left,y2=b.top+13-M.top,c=Math.max(16,(x2-xe)/2);
+    if(y2<L.top-M.top||y2>L.bottom-M.top)continue;
+    s+=`<g${o===nAct?' class="on"':''}><circle cx="${x1}" cy="${y1}" r="2.5"/><path d="M${x1} ${y1}H${xe}C${xe+c} ${y1} ${x2-c} ${y2} ${x2} ${y2}"/></g>`}
+  LK.innerHTML=s}
+// translate(t,rs): t defaults to the box; rs to the PDF selection the box text came from. Requests run side by side, one per note
+async function translate(t,rs){
+  t=t??$('mSrc').value.trim();const key=$('mKey').value.trim();
+  if(!t)return msg('Select text in the PDF, or paste it into the box');
   if(!key){$('mCfg').open=true;return msg('Enter an API key first (AI settings)')}
-  const t0=performance.now(),srcN=text.length,model=$('mModel').value,H=$('mHist'),
+  rs===undefined&&(rs=selA?.t===t?selA.rs:null);
+  const t0=performance.now(),srcN=t.length,model=$('mModel').value,
     it=el('div','item'),a=el('div','a'),tx=el('span','tx'),
     wt=el('div','wt'),wl=el('span','sh','Translating'),wm=el('span','wm',model),tm=el('span','tm','0 s'),
-    cp=btn('Copy','Copy the translation'),rm=btn('×','Remove');
-  wt.innerHTML=MARK;wt.append(wl,wm,tm);a.append(wt,tx);it.append(el('div','u',text),a);
-  const near=()=>H.scrollHeight-H.scrollTop-H.clientHeight<34,bot=near(),
-    iv=setInterval(()=>tm.textContent=Math.round((performance.now()-t0)/1e3)+' s',1e3);
-  let th=null,tb=null,tsm=null,t1=0,t2=0,thc=0,acc='',shut=0,cut=0;
+    sb=btn('Stop','Stop this translation'),cp=btn('Copy','Copy the translation'),rt=btn('Retry','Translate this again'),rm=btn('×','Remove'),
+    o={rs,fy:rs?0:(V.scrollTop+8)/(docH()||1),el:it,ac:new AbortController()},ok=()=>nLast===o;
+  for(const b of[sb,cp,rt,rm])b.className='rtb';
+  wt.innerHTML=MARK;wt.append(wl,wm,tm,sb);a.append(wt,tx);rs||it.append(el('div','u',t));it.append(a);
+  NS.append(it);N.push(o);nLast=o;ro.observe(it);hlAll();act(o);
+  const iv=setInterval(()=>tm.textContent=Math.round((performance.now()-t0)/1e3)+' s',1e3);
+  let th=null,tb=null,tsm=null,t1=0,t2=0,thc=0,acc='',shut=0,cut=0,bad=0;
   const think=s=>{if(!th){t1=performance.now();tsm=el('summary',0,'Thinking…');tb=el('div','th');th=el('details','tk');th.open=true;th.append(tsm,tb);a.prepend(th)}
       tb.append(s);thc+=s.length},
-    show=s=>{const b=near();acc=s;tx.textContent=s;t2||(t2=performance.now());wt.hidden=true;th&&!shut&&(shut=1,th.open=false);b&&(H.scrollTop=H.scrollHeight)};
-  H.append(it);bot&&(H.scrollTop=H.scrollHeight);
-  rm.onclick=()=>it.remove();
+    show=s=>{acc=s;tx.textContent=s;t2||(t2=performance.now());wt.hidden=true;th&&!shut&&(shut=1,th.open=false)};
+  it.onclick=e=>{if(e.target.closest('button,summary')||o===nAct)return;V.scrollTop+=(o.w??0)-parseFloat(it.style.top||0);act(o)};
+  sb.onclick=()=>o.ac.abort();rm.onclick=()=>kill(o);rt.onclick=()=>{kill(o);translate(t,rs)};
   cp.onclick=()=>navigator.clipboard.writeText(acc).then(()=>{msg('Translation copied');cp.textContent='Copied';setTimeout(()=>cp.textContent='Copy',1200)},()=>msg('Copy failed — the browser blocked clipboard access'));
-  const myAc=new AbortController(),ok=()=>ac===myAc;
-  ac=myAc;$('mGo').textContent='Stop';msg('Translating with '+model+'…');
+  msg('Translating with '+model+'…');
   try{
-    let msgs=[{role:'system',content:$('mPrompt').value.replaceAll('{lang}',$('mLang').value)},{role:'user',content:text}];
+    let msgs=[{role:'system',content:$('mPrompt').value.replaceAll('{lang}',$('mLang').value)},{role:'user',content:t}];
     for(let round=0;;round++){
-      const r=await ask(model,msgs,myAc,{think,text:show});
+      const r=await ask(model,msgs,o.ac,{think,text:show});
       cut=r.cut;
       if(!cut||round>=3)break;
-      msg(`Cut off at the token limit; continuing (${round+1}/3)…`);
+      ok()&&msg(`Cut off at the token limit; continuing (${round+1}/3)…`);
       msgs=[...msgs,{role:'assistant',content:acc},{role:'user',content:'Continue the translation exactly where it stopped, without repeating anything.'}]
     }
     if(!acc&&!thc)throw Error('Empty reply');
     ok()&&msg(cut?'Translated, but cut off at the token limit — lower Think or translate less text':'Translated');
-  }catch(e){
+  }catch(e){bad=1;
     if(e.name==='AbortError'){if(!acc){a.classList.add('dim');tx.textContent='Stopped'}ok()&&msg('Stopped')}
     else{a.classList.add('er');tx.textContent='✖ '+e.message;ok()&&msg('Translation failed')}
   }finally{
-    clearInterval(iv);ok()&&(ac=null,$('mGo').textContent='Translate');
-    wt.hidden=true;if(th){th.classList.add('ok');tsm.textContent='Thought for '+Math.max(1,Math.round(((t2||performance.now())-t1)/1e3))+' s'}
-    const b=near(),mt=el('div','mt',model+' · '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+((performance.now()-t0)/1e3).toFixed(1)+' s'+(acc?' · '+nl(srcN)+'→'+nl(acc.length):''));
-    cp.disabled=!acc;mt.append(cp,rm);it.append(mt);b&&(H.scrollTop=H.scrollHeight);
+    clearInterval(iv);wt.hidden=true;if(th){th.classList.add('ok');tsm.textContent='Thought for '+Math.max(1,Math.round(((t2||performance.now())-t1)/1e3))+' s'}
+    const mt=el('div','mt');mt.append(el('span',0,model+' · '+((performance.now()-t0)/1e3).toFixed(1)+' s'+(acc?' · '+nl(srcN)+'→'+nl(acc.length):'')));
+    acc&&mt.append(cp);bad&&mt.append(rt);mt.append(rm);it.append(mt);
   }
 }
 $('mGo').onclick=()=>translate();
-$('mClr').onclick=()=>{ac?.abort();$('mHist').replaceChildren();msg('History cleared')};
-$('mSrc').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();translate(1)}});
+$('mClr').onclick=()=>{clr();msg('Translations cleared')};
+$('mSrc').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();translate()}});
 $('mSrc').addEventListener('input',cnt);cnt();
+$('mLane').addEventListener('wheel',e=>{const a=e.target.closest('.a');if(a&&a.scrollHeight>a.clientHeight||e.ctrlKey)return;e.preventDefault();V.scrollTop+=e.deltaMode?e.deltaY*16:e.deltaY},{passive:false});
+V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSelection().isCollapsed)return;
+  const b=p.getBoundingClientRect(),n=+p.dataset.n,x=(e.clientX-b.left)/scale,y=(e.clientY-b.top)/scale,
+    o=N.find(o=>o.rs?.some(r=>r[0]===n&&x>=r[1]&&x<=r[1]+r[3]&&y>=r[2]&&y<=r[2]+r[4]));o&&o!==nAct&&act(o)});
+ro.observe(V);ro.observe($('mLane'));addEventListener('resize',sched);
 
 // ---------- PDF ----------
 window.pdfjsLib&&(pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js');
@@ -292,7 +346,7 @@ async function openPdf(buf,name){
   try{const np=await pdfjsLib.getDocument({data:buf}).promise;pdf&&pdf.destroy().catch(()=>{});pdf=np}
   catch(e){return msg('Cannot open '+name+': '+e.message)}
   $('mHint').hidden=true;$('mPgT').textContent=pdf.numPages;$('mPgN').value=1;$('mPgN').max=pdf.numPages;
-  document.title='miniread — '+name;msg(name+' · '+pdf.numPages+' pages');V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});
+  clr();document.title='miniread — '+name;msg(name+' · '+pdf.numPages+' pages');V.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});
 }
 function layout(){
   const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();$('mZoomB').textContent=Math.round(scale*100)+'%';
@@ -300,7 +354,7 @@ function layout(){
   return layP=(async()=>{for(let i=1;i<=doc.numPages;i++){
     const vp=(await doc.getPage(i)).getViewport({scale});if(g!==gen)return;
     const d=el('div','page');d.dataset.n=i;d.style.cssText=`width:${vp.width}px;height:${vp.height}px;--scale-factor:${scale}`;
-    V.append(d);obs.observe(d)}})().catch(()=>{})
+    hl(d);V.append(d);obs.observe(d);sched()}})().catch(()=>{})
 }
 async function draw(d){
   obs.unobserve(d);
@@ -321,7 +375,7 @@ function fit(){if(!pdf)return msg('Open a PDF first');
 function cur(){let n=0;
   for(const p of V.querySelectorAll('.page')){if(p.offsetTop-V.scrollTop<=V.clientHeight*.4)n=+p.dataset.n;else break}
   n&&n!==curN&&(curN=n,$('mPgN').value=n,mark())}
-V.addEventListener('scroll',()=>requestAnimationFrame(cur),{passive:true});
+V.addEventListener('scroll',()=>{requestAnimationFrame(cur);sched()},{passive:true});
 function goto(n){if(!pdf)return msg('Open a PDF first');
   n=Math.min(Math.max(1,n||1),pdf.numPages);
   const p=V.querySelector(`.page[data-n="${n}"]`);
@@ -365,7 +419,7 @@ document.addEventListener('mouseup',()=>{
   const txt=s.toString().replace(/([A-Za-z])-\s*\n\s*(?=[a-z])/g,'$1').replace(/\s+/g,' ').trim();if(!txt)return;
   const w=(txt.match(/[A-Za-z0-9'’-]+|[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]/g)||[]).length;
   $('mSel').textContent='Selected '+nl(txt.length)+' chars · '+nl(w)+' words';
-  if(txt!==lastSel||txt!==$('mSrc').value){lastSel=txt;$('mSrc').value=txt;cnt();$('mAuto').checked&&translate(1)}
+  if(txt!==lastSel||txt!==$('mSrc').value){lastSel=txt;selA={t:txt,rs:rects(s.getRangeAt(0))};$('mSrc').value=txt;cnt();$('mAuto').checked&&translate()}
 });
 
 // ---------- files, keys, actions ----------
@@ -396,7 +450,7 @@ setTheme(document.documentElement.dataset.theme==='dark');
 document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]());
 const sp=$('mSplit');
 sp.onpointerdown=e=>{e.preventDefault();sp.setPointerCapture(e.pointerId);
-  sp.onpointermove=m=>$('mLeft').style.flexBasis=m.clientX+'px'};
+  sp.onpointermove=m=>{$('mLeft').style.flexBasis=m.clientX+'px';sched()}};
 sp.onpointerup=sp.onlostpointercapture=()=>sp.onpointermove=null;
 </script>
 </body>
