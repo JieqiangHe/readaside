@@ -534,7 +534,8 @@ async function openPdf(buf,name,h){
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
   const doc=pdf,a0={n:0};(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)a0.n+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length;doc===pdf&&(annN=a0.n)})().catch(()=>{});
   msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));SC.scrollTop=0;fit();requestAnimationFrame(()=>pdf===doc&&fit());TH()&&buildThumbs().catch(()=>{});tabUI();
-  const ab=buf instanceof ArrayBuffer?buf.slice(0):buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength);recPut(fpr(),name,ab,h);mkThumb(pdf).then(t=>{t&&(kTh.set(fpr(),t),recThumb(fpr(),t))});return true
+  const sz=buf.byteLength||0,ab=sz>4e7?null:(buf instanceof ArrayBuffer?buf.slice(0):buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength));  // do not copy a huge file just to skip it
+  recPut(fpr(),name,ab,h);mkThumb(pdf).then(t=>{t&&(kTh.set(fpr(),t),recThumb(fpr(),t))});return true
 }
 function layout(){
   const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();
