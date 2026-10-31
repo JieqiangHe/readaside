@@ -843,8 +843,11 @@ let lastSel='',autoT=0;
 const selT=$('mSelT'),selHide=()=>selT.hidden=true;
 V.addEventListener('mousedown',e=>{clearTimeout(autoT);e.target.closest('.textLayer')?.classList.add('selecting');selHide()});
 selT.onmousedown=e=>e.preventDefault();
-selT.onclick=e=>{const b=e.target.closest('button');if(!b||!selA)return;selHide();
-  b.dataset.s==='c'?comment(selA.t,selA.rs):translate(selA.t,selA.rs);getSelection().removeAllRanges()};
+selT.onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=selA||mqLast;
+  selHide();if(!a)return warn('Nothing is selected — drag over the page again');
+  getSelection().removeAllRanges();
+  try{b.dataset.s==='c'?comment(a.t,a.rs):translate(a.t,a.rs)}
+  catch(err){warn('Could not start: '+(err.message||err))}};
 document.addEventListener('mouseup',e=>{
   document.querySelectorAll('.textLayer.selecting').forEach(t=>t.classList.remove('selecting'));
   if(selT.contains(e.target))return;
@@ -861,7 +864,7 @@ document.addEventListener('mouseup',e=>{
 SC.addEventListener('scroll',selHide,{passive:true});
 
 // ---------- marquee selection (Option/Alt + drag): the text inside a box, in reading order, because a PDF's own text order is not its visual one
-let MQ=null;
+let MQ=null,mqLast=null;
 const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect(),mqArm=on=>document.body.classList.toggle('mq',!!on&&!!pdf);
 document.addEventListener('keydown',e=>{(e.key==='Alt'||e.key==='Shift')&&mqArm(1)});  // the pointer shows the mode before the first drag
 document.addEventListener('keyup',e=>{(e.key==='Alt'||e.key==='Shift')&&mqArm(0)});
@@ -906,7 +909,7 @@ document.addEventListener('mouseup',()=>{if(!MQ)return;
     const lft=Math.min(...it.map(i=>i.b.left)),rgt=Math.max(...it.map(i=>i.b.right)),
       top=Math.min(...it.map(i=>i.b.top)),bot=Math.max(...it.map(i=>i.b.bottom));
     return [l.n,(lft-p0.pl)/scale,(top-p0.pt)/scale,(rgt-lft)/scale,(bot-top)/scale]});
-  selA={t:txt,rs};selT.querySelector('[data-s=t]').hidden=false;selT.hidden=false;
+  selA={t:txt,rs};mqLast={t:txt,rs};selT.querySelector('[data-s=t]').hidden=false;selT.hidden=false;
   const w=selT.offsetWidth,h=selT.offsetHeight,x=Math.min(Math.max(r.left+r.width/2-w/2,8),innerWidth-w-18);
   selT.style.left=x+'px';selT.style.top=(r.bottom+6+h>innerHeight?r.top-h-6:r.bottom+6)+'px';
 });
