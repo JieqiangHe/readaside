@@ -610,7 +610,7 @@ async function openPdf(buf,name,h){
   catch(e){msg('Cannot open '+name+': '+e.message);tabBack();pdf||($('mHint').hidden=false);return false}
   TN=0;
   selHide();
-  clr();pdfName=name;pdfH=h||null;jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');setTh(false);  // every open starts without the sidebarfc.clear();fClose();hintOff();$('mOv').hidden=true;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
+  clr();pdfName=name;pdfH=h||null;jsH=null;curN=1;document.title='ocrp — '+name;document.body.classList.add('pdf');setTh(false,1);  // every open starts without the sidebarfc.clear();fClose();hintOff();$('mOv').hidden=true;let k=0;try{k=nload(JSON.parse(localStorage['mrdN:'+fpr()]||'{}'))}catch(_){}
   let at=null;try{at=Object.values(await pdf.getAttachments()||{}).find(x=>x.filename===ATT||x.filename===AT0||x.filename===AT1)}catch(_){}
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
@@ -661,7 +661,8 @@ function goto(n){if(!pdf)return msg('Open a PDF first');
 // ---------- thumbnails ----------
 let ts=1,tobs=null,tgen=0,curN=0;const tc=new Map();  // rendered thumbnails, by fingerprint and page
 const TH=()=>document.body.classList.contains('thumbs');
-function setTh(on){document.body.classList.toggle('thumbs',on);on&&pdf&&buildThumbs().catch(()=>{})}  // no remembered state: the strip starts hidden with every load
+function setTh(on,quiet){document.body.classList.toggle('thumbs',on);if(!pdf||quiet)return;  // no remembered state: the strip starts hidden with every load
+  const y=SC.scrollTop/Math.max(1,SC.scrollHeight);refit(zr).then(()=>{SC.scrollTop=y*SC.scrollHeight});on&&buildThumbs().catch(()=>{})}
 async function buildThumbs(){
   if(!pdf||!TH())return;const g=++tgen;tobs?.disconnect();const T=$('mThumb');T.replaceChildren();
   ts=78/(await pdf.getPage(1)).getViewport({scale:1}).width;
