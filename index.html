@@ -150,6 +150,10 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mK>div{position:absolute;left:50%;top:15vh;transform:translateX(-50%);width:min(520px,calc(100vw - 32px));padding:4px;border-radius:10px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 30px 70px -20px #0005}
 #mKq{display:block;width:100%;padding:7px 8px;font-size:13.5px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;outline:none}
 #mKl{max-height:min(52vh,380px);overflow:auto;padding:3px 0}
+#mKl h4{margin:8px 8px 3px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)}
+#mKl h4:not(:first-child){margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
+#mKl div.rc span{color:var(--h4)}
+#mKl div.rc i{background:none;box-shadow:inset 0 0 0 1px var(--line)}
 #mKl div{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;white-space:nowrap;cursor:pointer;font-size:12.5px}
 #mKl div.on{background:var(--btnh)}
 #mKl div i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--line)}
@@ -524,7 +528,8 @@ async function openPdf(buf,name){
   annOff=!!at;annN=0;$('mUndo').hidden=true;undoD=null;  // an ocrp copy: its highlights are drawn by ocrp, not twice
   if(!k&&at)try{k=nload(JSON.parse(new TextDecoder().decode(at.content)))}catch(_){}
   const doc=pdf,a0={n:0};(async()=>{for(let i=1;i<=doc.numPages&&doc===pdf;i++)a0.n+=(await (await doc.getPage(i)).getAnnotations()).filter(a=>MK.has(a.subtype)).length;doc===pdf&&(annN=a0.n)})().catch(()=>{});
-  msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));SC.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});tabUI();return true
+  msg(name+' · '+pdf.numPages+' pages'+(k?' · '+k+' notes restored':''));SC.scrollTop=0;fit();TH()&&buildThumbs().catch(()=>{});tabUI();
+  const ab=buf instanceof ArrayBuffer?buf.slice(0):buf.buffer.slice(buf.byteOffset,buf.byteOffset+buf.byteLength);recPut(fpr(),name,ab);return true
 }
 function layout(){
   const g=++gen,doc=pdf;obs?.disconnect();V.replaceChildren();
@@ -586,18 +591,33 @@ function mark(){const T=$('mThumb'),t=T.querySelector(`.tp[data-n="${curN}"]`);
 $('mThumb').onclick=e=>{const t=e.target.closest('.tp');t&&goto(+t.dataset.n)};
 setTh(ls('mrdThumbs')!=='0');
 
-// ---------- palette (Cmd/Ctrl+K): the open documents, filtered as you type ----------
-const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0;
+// ---------- recent documents: a copy of the PDF bytes in IndexedDB, so Recent can reopen them without the file ----------
+let dbP=null;
+const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',1);r.onupgradeneeded=()=>r.result.createObjectStore('recent',{keyPath:'fp'});r.onsuccess=()=>ok(r.result);r.onerror=()=>ok(null)}catch(_){ok(null)}})),
+  recAll=async()=>{const d=await db();if(!d)return[];return new Promise(ok=>{try{const q=d.transaction('recent').objectStore('recent').getAll();q.onsuccess=()=>ok(q.result.sort((a,b)=>b.t-a.t));q.onerror=()=>ok([])}catch(_){ok([])}})},
+  recPut=async(fp,name,buf)=>{const d=await db();if(!d||!fp)return;try{await new Promise(ok=>{const tx=d.transaction('recent','readwrite');tx.objectStore('recent').put({fp,name,t:Date.now(),buf});tx.oncomplete=ok;tx.onerror=ok});
+    const a=await recAll();a.slice(8).forEach(x=>d.transaction('recent','readwrite').objectStore('recent').delete(x.fp))}catch(_){}};
+// ---------- palette (Cmd/Ctrl+K): the open documents, then the recent ones, filtered as you type ----------
+const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[];
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
-  kPaint=()=>{KL.replaceChildren();if(!kHits.length){KL.append(el('p',0,'No document matches'));return}
-    kHits.forEach((x,i)=>{const d=el('div',i===kOn?'on':'');d.append(el('i',i===TI?'cur':''),el('span',0,x.n));
-      i===TI&&d.append(el('small',0,'current'));
-      d.onmouseenter=()=>{kOn=i;kPaint()};d.onmousedown=e=>{e.preventDefault();kGo(i)};KL.append(d)})},
-  kBuild=()=>{const q=KQ.value.trim().toLowerCase();
-    kHits=TABS.map((t,i)=>({i,n:(t.name||'Untitled').replace(/\.pdf$/i,'')})).filter(x=>!q||x.n.toLowerCase().includes(q));
-    kOn=kHits.findIndex(x=>x.i===TI);kOn<0&&(kOn=0);kPaint()},
-  kOpen=()=>{if(!TABS.length)return;$('mK').hidden=false;KQ.value='';kBuild();KQ.focus()},
-  kGo=i=>{const x=kHits[i];if(!x)return;kClose();x.i!==TI&&tabGo(x.i)};
+  kRows=()=>{const q=KQ.value.trim().toLowerCase(),
+    tabs=TABS.map((t,i)=>({k:'tab',i,n:tabNm(i)||'PDF',cur:i===TI})),
+    recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name)).map(r=>({k:'rec',r,n:r.name})),
+    f=x=>!q||x.n.toLowerCase().includes(q);
+    kHits=[...tabs.filter(f),...recs.filter(f)]},
+  kPaint=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));KL.replaceChildren();
+    if(!kHits.length){KL.append(el('p',0,'Nothing yet — press O to open a PDF'));return}
+    let last='';
+    kHits.forEach((x,i)=>{if(x.k!==last){last=x.k;KL.append(el('h4',0,x.k==='tab'?'Open':'Recent'))}
+      const d=el('div',(i===kOn?'on ':'')+(x.k==='rec'?'rc':''));d.append(el('i',x.cur?'cur':''),el('span',0,x.n));
+      x.cur&&d.append(el('small',0,'current'));
+      d.onmouseenter=()=>{kOn=i;KL.querySelectorAll('div').forEach((r,j)=>r.classList.toggle('on',j===i))};
+      d.onmousedown=e=>{e.preventDefault();kGo(i)};KL.append(d)})},
+  kBuild=()=>{kRows();const c=kHits.findIndex(x=>x.cur);kOn=c<0?0:c;kPaint()},
+  kOpen=()=>{$('mK').hidden=false;KQ.value='';kBuild();KQ.focus();recLoad()},
+  kGo=i=>{const x=kHits[i];if(!x)return;kClose();
+    if(x.k==='tab'){x.i!==TI&&tabGo(x.i)}else x.r.buf&&openPdf(x.r.buf,x.r.name).catch(()=>{})},
+  recLoad=async()=>{kRec=await recAll();$('mK').hidden||(kRows(),kPaint())};
 KQ.addEventListener('input',kBuild);
 KQ.addEventListener('keydown',e=>{
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!kHits.length)return;kOn=(kOn+(e.key==='ArrowDown'?1:-1)+kHits.length)%kHits.length;kPaint();KL.children[kOn]?.scrollIntoView({block:'nearest'})}
