@@ -105,6 +105,7 @@ ismiss on an empty window */
 .hl{position:absolute;z-index:1;pointer-events:none;border-radius:2px;background:#f5a50040;mix-blend-mode:multiply}.hl.on{background:#f5a50091}
 .hl.c{background:#1a73e826}.hl.c.on{background:#1a73e85c}
 .textLayer ::selection{background:#c964423d}
+.textLayer span.mq{background:#c964423d;border-radius:2px}
 #mMarq{position:fixed;z-index:8;border:1px dashed var(--onb);background:#c9644214;border-radius:3px;pointer-events:none}
 #mMarq[hidden]{display:none}
 #mSelT{position:fixed;z-index:9;display:flex;gap:2px;padding:3px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}#mSelT[hidden],#mSelT [hidden]{display:none}
@@ -861,18 +862,25 @@ SC.addEventListener('scroll',selHide,{passive:true});
 // ---------- marquee selection (Option/Alt + drag): the text inside a box, in reading order, because a PDF's own text order is not its visual one
 let MQ=null;
 const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect();
-V.addEventListener('mousedown',e=>{
+document.addEventListener('mousedown',e=>{
   if(!pdf||!e.altKey||e.button!==0||!e.target.closest('.page'))return;
   e.preventDefault();getSelection().removeAllRanges();selHide();
   MQ={x:e.clientX,y:e.clientY};mqEl.hidden=false;
   mqEl.style.left=MQ.x+'px';mqEl.style.top=MQ.y+'px';mqEl.style.width='0px';mqEl.style.height='0px';
 });
+const mqLit=new Set();
 document.addEventListener('mousemove',e=>{if(!MQ)return;
   mqEl.style.left=Math.min(MQ.x,e.clientX)+'px';mqEl.style.top=Math.min(MQ.y,e.clientY)+'px';
   mqEl.style.width=Math.abs(e.clientX-MQ.x)+'px';mqEl.style.height=Math.abs(e.clientY-MQ.y)+'px';
+  const r=mqBox(),now=new Set();
+  for(const p of V.querySelectorAll('.page')){const pr=p.getBoundingClientRect();if(pr.bottom<r.top||pr.top>r.bottom)continue;
+    for(const s of p.querySelectorAll('.textLayer span')){const b=s.getBoundingClientRect();
+      if(b.width&&b.bottom>=r.top&&b.top<=r.bottom&&b.right>=r.left&&b.left<=r.right)now.add(s)}}
+  mqLit.forEach(s=>now.has(s)||(s.classList.remove('mq'),mqLit.delete(s)));
+  now.forEach(s=>{mqLit.has(s)||(s.classList.add('mq'),mqLit.add(s))});
 });
 document.addEventListener('mouseup',()=>{if(!MQ)return;
-  const r=mqBox();MQ=null;mqEl.hidden=true;
+  const r=mqBox();MQ=null;mqEl.hidden=true;mqLit.forEach(s=>s.classList.remove('mq'));mqLit.clear();
   if(r.width<4||r.height<4)return;
   const rows=[];
   for(const p of V.querySelectorAll('.page')){
