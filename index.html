@@ -600,7 +600,7 @@ const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',1);r.o
   recAll=async()=>{const d=await db();if(!d)return[];return new Promise(ok=>{try{const q=d.transaction('recent').objectStore('recent').getAll();q.onsuccess=()=>ok(q.result.sort((a,b)=>b.t-a.t));q.onerror=()=>ok([])}catch(_){ok([])}})},
   recPut=async(fp,name,buf,handle)=>{const d=await db();if(!d||!fp)return;try{const put=r=>new Promise(ok=>{const tx=d.transaction('recent','readwrite');tx.oncomplete=()=>ok(1);tx.onerror=()=>ok(0);tx.onabort=()=>ok(0);tx.objectStore('recent').put(r)});let r={fp,name,t:Date.now(),buf};handle&&(r.handle=handle);if(!await put(r)){delete r.handle;await put(r)}
     const a=await recAll();a.slice(8).forEach(x=>d.transaction('recent','readwrite').objectStore('recent').delete(x.fp))}catch(_){}};
-const kTh=new Map();
+const kTh=new Map(),rel=t=>{const s=Math.max(0,(Date.now()-t)/1e3);return s<60?'just now':s<3600?Math.round(s/60)+' min':s<86400?Math.round(s/3600)+' h':Math.round(s/86400)+' d'};
 const mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({scale:1}),c=el('canvas'),g=140/vp.width,v2=p.getViewport({scale:g});
   c.width=Math.round(v2.width);c.height=Math.round(v2.height);
   await p.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;return c.toDataURL('image/jpeg',.72)}catch(_){return ''}};
@@ -609,7 +609,7 @@ const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map();
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   kRows=()=>{const q=KQ.value.trim().toLowerCase(),
     tabs=TABS.map((t,i)=>({k:'tab',i,n:tabNm(i),cur:i===TI})).filter(x=>x.n),  // empty slots (no PDF open yet) are not documents
-    recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name.replace(/\.pdf$/i,''))).map(r=>({k:'rec',r,n:r.name})),
+    recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name.replace(/\.pdf$/i,''))).map(r=>({k:'rec',r,n:r.name,t:r.t})),
     f=x=>!q||x.n.toLowerCase().includes(q);
     kHits=[...tabs.filter(f),...recs.filter(f)]},
   kPaint=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));imgs=new Map();KL.replaceChildren();
@@ -619,7 +619,9 @@ const kClose=()=>{$('mK').hidden=true;KQ.value=''},
       const d=el('div',(i===kOn?'on ':'')+(x.k==='rec'?'rc':'')),im=el('img','pt');
       const fp=x.k==='tab'?(x.i===TI?fpr():fprOf(TABS[x.i].pdf)):x.r.fp||'',t=fp&&kTh.get(fp)||x.r&&x.r.thumb;
       t?im.src=t:im.classList.add('mt');fp&&imgs.set(fp,im);d.append(im,el('span',0,x.n));
+      d.title=x.n+(x.k==='rec'?' — opened '+rel(x.t):'');
       x.cur&&d.append(el('small',0,'current'));
+      x.k==='rec'&&x.t&&d.append(el('small',0,rel(x.t)));
       d.onmouseenter=()=>{kOn=i;KL.querySelectorAll('div').forEach((r,j)=>r.classList.toggle('on',j===i))};
       d.onmousedown=e=>{e.preventDefault();kGo(i)};KL.append(d)});
     kHits.forEach(x=>{const fp=x.k==='tab'?(x.i===TI?fpr():fprOf(TABS[x.i].pdf)):(x.r.fp||''),doc=x.k==='tab'?(x.i===TI?pdf:TABS[x.i].pdf):null;
