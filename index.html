@@ -180,9 +180,6 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mOv{position:fixed;top:32px;right:15px;z-index:36;width:min(380px,calc(100vw - 30px));max-height:min(64vh,520px);display:flex;flex-direction:column;border-radius:10px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 24px 60px -20px #0006;overflow:hidden}
 #mOv[hidden]{display:none}
 #mOv b{padding:10px 12px 4px;font-size:12px;font-weight:600;color:var(--h4)}
-#mOv .map{position:relative;height:30px;margin:2px 12px 6px;border-radius:6px;background:var(--side)}
-#mOv .map i{position:absolute;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--onb);opacity:.66;cursor:pointer;transition:opacity .12s,transform .12s}
-#mOv .map i:hover{opacity:1;transform:scale(1.5)}
 #mOv .list{overflow:auto;padding:0 8px 10px;scrollbar-width:thin}
 #mOv .row{display:flex;gap:8px;align-items:baseline;padding:6px;border-radius:6px;cursor:pointer}
 #mOv .row:hover{background:var(--btnh)}
@@ -246,7 +243,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 </div>
 <div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>← →</kbd>Move<kbd data-k="ret">↵</kbd>Open<kbd>Esc</kbd>Close</p></div></div>
 <button id="mDot" hidden title="Notes in this paper" aria-label="Notes overview"></button>
-<div id="mOv" hidden><b id="mOvH"></b><div class="map" id="mOvM"></div><div class="list" id="mOvL"></div></div>
+<div id="mOv" hidden><b id="mOvH"></b><div class="list" id="mOvL"></div></div>
 <div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
 <script>
 'use strict';
@@ -338,16 +335,12 @@ const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(
   kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();fade(o.el);N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);!N.length&&pdf&&(col(),fit());nsave()},
   clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();fade(o.el)});N.length=0;hlAll();act(null);pdf&&(col(),fit())};
 // ---------- the notes dot: a small terracotta dot above the cards, opening an overview of every card in the paper ----------
-const OV=$('mOv'),OVM=$('mOvM'),OVL=$('mOvL'),OVH=$('mOvH');
+const OV=$('mOv'),OVL=$('mOvL'),OVH=$('mOvH');
 const ovClose=()=>{OV.hidden=true},
   ovOpen=()=>{if(!N.length)return;OV.hidden=false;ovRender()},
   ovJump=o=>{act(o);const w=want(o);w!=null&&(SC.scrollTop=Math.max(0,w-SC.clientHeight*.32));ovClose()},
-  ovRender=()=>{const tot=pdf?.numPages||1,srt=N.slice().sort((a,b)=>(a.rs?.[0]?.[0]??1e9)-(b.rs?.[0]?.[0]??1e9)||(a.rs?.[0]?.[2]??a.fy*1e3)-(b.rs?.[0]?.[2]??b.fy*1e3));
+  ovRender=()=>{const srt=N.slice().sort((a,b)=>(a.rs?.[0]?.[0]??1e9)-(b.rs?.[0]?.[0]??1e9)||(a.rs?.[0]?.[2]??a.fy*1e3)-(b.rs?.[0]?.[2]??b.fy*1e3));
     OVH.textContent=N.length+(N.length>1?' notes':' note');
-    OVM.replaceChildren();
-    for(const o of srt){const pg=o.rs?.[0]?.[0]||1,d=el('i');d.style.left=(6+Math.min(1,(pg-1)/Math.max(1,tot-1))*88)+'%';
-      d.title='Page '+pg+(o.rs?.length?' · '+o.rs.length+(o.rs.length>1?' passages':' passage'):'');
-      d.onclick=()=>ovJump(o);OVM.append(d)}
     OVL.replaceChildren();
     for(const o of srt){const r=el('div','row');
       r.append(el('em',0,o.rs?.length?'p.'+o.rs[0][0]:'—'),el('s',0,String(o.out||'').slice(0,90)||'(no text)'));
