@@ -36,8 +36,8 @@ button,.seg button,.item,.hl,.tp,.ci,#mTabs .tab{transition:background-color .16
 .page canvas,.tp canvas{animation:mFade .25s ease-out}@keyframes mFade{from{opacity:0}}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.4s;animation-timing-function:ease-in-out}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}button:active{transform:none}}
-/* ---------- top bar (svguest-style words + the tab strip; no status bar — messages and Undo live here) ---------- */
-#mBar{display:flex;align-items:center;gap:2px;height:36px;padding:0 8px;background:var(--bar);border-bottom:1px solid var(--line)}
+/* ---------- top bar (svguest-style words + the tab strip; fixed overlay that slides away while reading) ---------- */
+#mBar{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;gap:2px;height:36px;padding:0 8px;background:var(--bar);border-bottom:1px solid var(--line);transition:transform .22s cubic-bezier(.2,.8,.2,1)}body.read #mBar{transform:translateY(-100%)}
 #mBar .lnk{flex:none;border:0;background:none;padding:3px 8px;border-radius:6px;font-weight:500}
 #mBar .ddb::after{content:'▾';margin-left:4px;font-size:9px;color:var(--t3)}
 #mMsg{flex:0 1 auto;margin-left:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t3)}
@@ -169,6 +169,7 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
 <dialog id="mHelp"><form method="dialog"><h3>Shortcuts</h3><dl>
+<dt>Reading</dt><dd>The bar hides itself; move the pointer to the top edge to bring it back</dd>
 <dt>Tabs</dt><dd>Every PDF opens in its own tab, with its own notes; middle-click or × closes it</dd>
 <dt>Select text</dt><dd>Translate or Comment from the bar that appears (Auto translates at once)</dd>
 <dt>Under a translation</dt><dd>Ask the AI about the passage</dd>
@@ -590,6 +591,10 @@ const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,ty
 function setTheme(d){document.documentElement.dataset.theme=d?'dark':'light';qa('theme').textContent=d?'Light':'Dark'}
 setTheme(document.documentElement.dataset.theme==='dark');
 document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]());
+// reading: the bar slides away; a pointer near the top edge brings it back — nothing but the paper on screen
+const barOn=()=>document.body.classList.remove('read'),barOff=()=>pdf&&document.body.classList.add('read');
+addEventListener('mousemove',e=>{document.body.classList.contains('read')?e.clientY<14&&barOn():e.clientY>40&&e.target.closest('#mView,#mThumb,#mNotes')&&barOff()});
+V.addEventListener('wheel',barOff,{passive:true});
 </script>
 <!-- pdf-lib 1.17.1 (MIT, https://github.com/Hopding/pdf-lib), minified; kept as text and run by plib() on the first Save PDF -->
 <script type="text/plain" id="mPlib">!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t=t||self).PDFLib={})}(this,(function(t){"use strict";
