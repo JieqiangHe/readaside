@@ -256,7 +256,7 @@ body.mq,body.mq *{cursor:crosshair!important}  /* the marquee is armed: the poin
 </div>
 <svg id="mLink"></svg>
 <div id="mMarq" hidden></div>
-<div id="mSelT" hidden><button data-s="t" title="Translate the selection" data-tt="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg><span data-t="Translate">Translate</span></button><button data-s="c" title="Write your own comment on the selection" data-tt="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg><span data-t="Comment">Comment</span></button><span class="sh"><kbd data-k="shf">⇧</kbd><span data-t="add">add</span></span></div>
+<div id="mSelT" hidden><button data-s="t" title="Translate the selection" data-tt="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg><span data-t="Translate">Translate</span></button><button data-s="c" title="Write your own comment on the selection" data-tt="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg><span data-t="Comment">Comment</span></button><span class="sh"><kbd data-k="alt">⌥</kbd><span data-t="add">add</span></span></div>
 </div>
 <div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" data-tp="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>← →</kbd><span data-t="Move">Move</span><kbd data-k="ret">↵</kbd><span data-t="Open">Open</span><kbd>⌫</kbd><span data-t="Close tab">Close tab</span><kbd>Esc</kbd><span data-t="Close">Close</span></p></div></div>
 <div id="mOv" hidden><b id="mOvH"></b><div class="list" id="mOvL"></div><p class="mh"><kbd>M</kbd><span data-t="Close">Close</span></p></div>
@@ -877,8 +877,8 @@ let MQ=null,mqLast=null,mqParts=[];
 const mqEl=$('mMarq'),mqBox=()=>mqEl.getBoundingClientRect(),mqLit=new Set();
 addEventListener('blur',()=>{MQ=null;document.body.classList.remove('mq')});
 document.addEventListener('mousedown',e=>{
-  if(!pdf||e.button!==0||e.metaKey||e.ctrlKey||!e.target.closest('.page'))return;
-  MQ={x:e.clientX,y:e.clientY,on:0};  // armed only once the pointer moves, so a double click still picks a word
+  if(!pdf||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||!e.target.closest('.page'))return;  // Shift keeps the browser's own precise drag
+  MQ={x:e.clientX,y:e.clientY,on:0,add:e.altKey};  // armed only once the pointer moves, so a double click still picks a word
 });
 document.addEventListener('mousemove',e=>{if(!MQ)return;
   if(!MQ.on){
@@ -896,7 +896,7 @@ document.addEventListener('mousemove',e=>{if(!MQ)return;
   now.forEach(s=>{mqLit.has(s)||(s.classList.add('mq'),mqLit.add(s))});
 });
 document.addEventListener('mouseup',e=>{if(!MQ)return;
-  const r=mqBox(),on=MQ.on;MQ=null;mqEl.hidden=true;document.body.classList.remove('mq');
+  const r=mqBox(),on=MQ.on,add=MQ.add;MQ=null;mqEl.hidden=true;document.body.classList.remove('mq');
   mqLit.forEach(s=>s.classList.remove('mq'));mqLit.clear();
   if(!on)return;  // a click, not a drag: leave the native behaviour alone
   if(r.width<4||r.height<4)return;
@@ -930,7 +930,7 @@ document.addEventListener('mouseup',e=>{if(!MQ)return;
     const lft=Math.min(...it.map(i=>i.l)),rgt=Math.max(...it.map(i=>i.rt)),
       top=Math.min(...it.map(i=>i.b.top)),bot=Math.max(...it.map(i=>i.b.bottom));
     return [l.n,(lft-p0.pl)/scale,(top-p0.pt)/scale,(rgt-lft)/scale,(bot-top)/scale]});
-  if(!e.shiftKey)mqParts=[];  // Shift adds this box to what is already picked, so pieces can be concatenated
+  if(!add)mqParts=[];  // Option adds this box to what is already picked, so pieces can be concatenated
   mqParts.push({t:txt,rs});
   const t2=mqParts.map(p=>p.t).join(' '),rs2=mqParts.flatMap(p=>p.rs);
   selA={t:t2,rs:rs2,pend:1};mqLast={t:t2,rs:rs2};hlAll();
