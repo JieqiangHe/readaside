@@ -27,7 +27,7 @@ kbd{display:inline-block;min-width:1.6em;padding:0 5px;border-radius:5px;backgro
 .menu kbd{min-width:0;padding:0;box-shadow:none;background:none;font:inherit;opacity:.6}
 .seg{display:flex;gap:2px;min-width:0;padding:2px;border-radius:9px;background:var(--btnh)}.seg button{flex:1;height:20px;padding:0 6px;border:0;border-radius:7px;background:none;color:var(--h4);white-space:nowrap}.seg button:hover{background:none;color:var(--fg)}.seg button.on{background:var(--btn);color:var(--fg);box-shadow:var(--sh)}
 /* ---------- motion (all of it off with reduced motion) ---------- */
-button,.seg button,.item,.hl,.tp,#mSplit,.ci,#mTabs .tab{transition:background-color .16s,color .16s,box-shadow .2s,opacity .16s,outline-color .16s,filter .16s,transform .16s}
+button,.seg button,.item,.hl,.tp,.ci,#mTabs .tab{transition:background-color .16s,color .16s,box-shadow .2s,opacity .16s,outline-color .16s,filter .16s,transform .16s}
 .item{animation:mIn .32s cubic-bezier(.2,.8,.2,1)}.item.out{opacity:0;transform:translateX(10px) scale(.98);transition:opacity .18s,transform .18s;pointer-events:none}
 @keyframes mIn{from{opacity:0;transform:translateX(12px) scale(.98)}}
 .dd.open>.menu,#mSelT:not([hidden]){animation:mPop .16s cubic-bezier(.2,.8,.2,1)}@keyframes mPop{from{opacity:0;transform:translateY(-4px) scale(.98)}}
@@ -36,10 +36,13 @@ button,.seg button,.item,.hl,.tp,#mSplit,.ci,#mTabs .tab{transition:background-c
 .page canvas,.tp canvas{animation:mFade .25s ease-out}@keyframes mFade{from{opacity:0}}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.4s;animation-timing-function:ease-in-out}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}button:active{transform:none}}
-/* ---------- toolbar (ADHD-minimal: Open… and the tabs only; page, zoom, theme, thumbnails and ? live in Settings › View) ---------- */
-#mBar{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px 8px;background:var(--bar);border-bottom:1px solid var(--line)}
-#mBar>button{border-color:transparent;background:transparent;padding:2px 9px}
-#mBar>button[data-a=open]{background:var(--fg);color:var(--bar);border-color:transparent;font-weight:500}#mBar>button[data-a=open]:hover{background-image:none;opacity:.85}
+/* ---------- top bar (svguest-style words + the tab strip; no status bar — messages and Undo live here) ---------- */
+#mBar{display:flex;align-items:center;gap:2px;height:36px;padding:0 8px;background:var(--bar);border-bottom:1px solid var(--line)}
+#mBar .lnk{flex:none;border:0;background:none;padding:3px 8px;border-radius:6px;font-weight:500}
+#mBar .ddb::after{content:'▾';margin-left:4px;font-size:9px;color:var(--t3)}
+#mMsg{flex:0 1 auto;margin-left:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t3)}
+#mUndo{flex:none;color:var(--onb)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
 #mPgN{width:42px;height:22px;text-align:center;-moz-appearance:textfield}#mPgN::-webkit-inner-spin-button,#mPgN::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 #mPgT{margin:0 2px 0 4px;color:var(--h4);font-variant-numeric:tabular-nums}#mPgT::before{content:'/ ';color:var(--t3)}
 #mZoomB{min-width:50px;padding:2px 4px;color:var(--h4);font-variant-numeric:tabular-nums}
@@ -49,10 +52,8 @@ button,.seg button,.item,.hl,.tp,#mSplit,.ci,#mTabs .tab{transition:background-c
 #mTabs .tab button{flex:none;display:grid;place-items:center;width:17px;height:17px;padding:0;border:0;border-radius:5px;background:none;color:var(--t3);visibility:hidden}#mTabs .tab:hover button,#mTabs .tab.on button{visibility:visible}#mTabs .tab button:hover{background:var(--btnh);color:var(--fg)}#mTabs .tab button svg{width:9px;height:9px;fill:none;stroke:currentColor;stroke-width:1.6}
 /* ---------- viewer ---------- */
 #mMain{flex:1;display:flex;min-height:0;position:relative}
-#mLeft{flex:0 0 60%;min-width:200px;display:flex}
 #mViewWrap{flex:1;position:relative;display:flex;min-width:0}
 #mView{flex:1;overflow:auto;background:var(--view);padding:16px;scrollbar-width:thin}
-#mSplit{flex:0 0 5px;cursor:col-resize;background:var(--bar);border-left:1px solid var(--line)}#mSplit:hover{background:var(--onb);opacity:.4}
 #mThumb{display:none;width:116px;flex:none;overflow:auto;background:var(--side);border-right:1px solid var(--line);padding:8px 6px 12px;scrollbar-width:thin}
 body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 .tp{width:96px;margin:0 auto 10px;cursor:pointer;border-radius:3px}
@@ -71,19 +72,12 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 .hl{position:absolute;z-index:1;pointer-events:none;border-radius:2px;background:#f5a50040;mix-blend-mode:multiply}.hl.on{background:#f5a50091}
 .hl.c{background:#8e6cf926}.hl.c.on{background:#8e6cf95e}
 .textLayer ::selection{background:#7f958d52}
-#mLink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
-#mLink path{fill:none;stroke:var(--nt);stroke-width:1.2;opacity:.55}#mLink circle{fill:var(--nt);opacity:.75}
-#mLink .c path{stroke:var(--cm)}#mLink .c circle{fill:var(--cm)}
-#mLink .on path{stroke-width:2;opacity:1}#mLink .on circle{opacity:1}
 #mSelT{position:absolute;z-index:9;display:flex;gap:2px;padding:4px;border-radius:12px;background:var(--glass);-webkit-backdrop-filter:blur(14px) saturate(130%);backdrop-filter:blur(14px) saturate(130%);box-shadow:var(--shm)}#mSelT[hidden],#mSelT [hidden]{display:none}
 #mSelT button{display:flex;align-items:center;gap:5px;height:24px;padding:0 10px 0 8px;border:0;border-radius:8px;background:none;color:var(--fg)}#mSelT button:hover{background:var(--btnh)}#mSelT .chg{width:14px;height:14px;color:var(--h4)}
-/* ---------- notes panel ---------- */
-#mRight{flex:1;min-width:300px;display:flex;flex-direction:column;position:relative;background:var(--side);border-left:1px solid var(--line)}
-#mRight [hidden]{display:none!important}
-#mRH{position:relative;z-index:7;flex:none;display:flex;align-items:center;gap:1px;height:36px;padding:0 4px 0 12px;border-bottom:1px solid var(--line);background:var(--side)}#mRH b{font-weight:600}#mRH small{margin:0 auto 0 6px;color:var(--t3);font-variant-numeric:tabular-nums}
-#mLane{flex:1;min-height:0;position:relative;z-index:6;overflow:hidden}
-#mNotes{position:absolute;left:0;right:0;top:0}
-.item{position:absolute;left:10px;right:10px;display:flex;flex-direction:column;gap:4px;padding:8px 12px 9px;border-radius:14px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--line),var(--sh)}
+/* ---------- notes: cards float over the viewer, right below their passage ---------- */
+#mNotes{position:absolute;inset:0;z-index:6;overflow:hidden;pointer-events:none}
+#mViewWrap [hidden]{display:none!important}
+.item{pointer-events:auto;position:absolute;width:480px;display:flex;flex-direction:column;gap:4px;padding:8px 12px 9px;border-radius:14px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--line),0 8px 24px -8px #00000045}
 .item[hidden]{display:none}
 .item.on{box-shadow:inset 0 0 0 1.5px var(--nt),0 6px 18px -6px #00000030}.item.c.on{box-shadow:inset 0 0 0 1.5px var(--cm),0 6px 18px -6px #00000030}
 .item .ih{display:flex;align-items:center;gap:6px;height:20px;color:var(--t3);font-size:11px;white-space:nowrap}
@@ -124,12 +118,7 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 #mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
 #mConn .gr{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
 #mConn .vw{display:flex;align-items:center;gap:3px;min-width:0}#mConn .vw .ib{width:24px;height:24px;font-size:14px}#mConn .vw input{width:42px;flex:none}#mConn .kv>button{justify-self:start}
-/* ---------- status bar, help ---------- */
-#mSt{height:26px;display:flex;align-items:center;gap:14px;padding:2px 10px;background:var(--bar);border-top:1px solid var(--line);white-space:nowrap;overflow:hidden}
-#mMsg{min-width:0;overflow:hidden;text-overflow:ellipsis}
-#mSel{margin-left:auto;color:var(--h4)}
-#mSt button{flex:none;padding:0 8px;line-height:18px;border-color:transparent;background:transparent}#mSt button:hover{background:var(--btnh)}
-#mUndo{color:var(--onb)}
+/* ---------- help ---------- */
 #mHelp{padding:0;width:min(420px,96vw)}
 #mHelp form{padding:16px 18px 14px;font-size:12.5px;line-height:1.45}
 #mHelp h3{margin:0 0 8px;font-size:15px}
@@ -140,23 +129,20 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 </head>
 <body>
 <div id="mBar">
-<button data-a="open" title="Open a PDF, with its .ocrp.json notes if you have them (or drop them on the viewer)">Open…</button>
+<button class="lnk" data-a="open" title="Open a PDF, with its .ocrp.json notes if you have them (or drop them on the viewer)">Open</button>
 <input type="file" id="mFile" accept="application/pdf,.pdf,.json" multiple hidden>
+<div class="dd"><button class="lnk ddb">Notes</button><div class="menu">
+<button id="mSave" title="A .ocrp.json file to keep beside the PDF; open it with the PDF to bring the notes back">Save notes (.json)<kbd>⌘S</kbd></button>
+<button id="mPdf" title="A copy of the PDF with the highlights and notes as comments (Preview, Acrobat); open it in ocrp to bring the notes back">Save PDF with comments</button>
+<hr><button id="mClr" title="Clear all notes, highlights and the PDF's own annotations (Undo for 10 s)">Clear all</button>
+</div></div>
+<button class="lnk" id="mCfgB" title="Model, key, language, view">Settings</button>
 <div id="mTabs" role="tablist" aria-label="Open PDFs"></div>
+<span id="mMsg"></span><button class="lnk" id="mUndo" hidden>Undo</button>
 </div>
 <div id="mMain">
-<div id="mLeft"><div id="mThumb"></div><div id="mViewWrap"><div id="mView"></div>
-</div></div>
-<div id="mSplit" title="Drag to resize the panes"></div>
-<div id="mRight">
-<div id="mRH"><b>Notes</b><small id="mNc"></small>
-<div class="dd"><button class="ib ddb" title="Save the notes"><svg class="chg" viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg></button><div class="menu">
-<button id="mSave" title="A .ocrp.json file to keep beside the PDF; open it with the PDF to bring the notes back">Save notes (.json)<kbd>⌘S</kbd></button>
-<button id="mPdf" title="A copy of the PDF with the highlights and notes as comments (Preview, Acrobat); open it in ocrp to bring the notes back">Save PDF with comments</button></div></div>
-<button class="ib" id="mClr" title="Clear all notes, highlights and the PDF's own annotations (Undo in the status bar)"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5"/></svg></button>
-<button class="ib" id="mCfgB" title="Settings: model, key, language"><svg class="chg" viewBox="0 0 16 16"><path d="M3 5h6M12 5h1M3 11h1M7 11h6"/><circle cx="10.5" cy="5" r="1.5"/><circle cx="5.5" cy="11" r="1.5"/></svg></button>
-</div>
-<div id="mLane"><div id="mNotes"></div></div>
+<div id="mViewWrap"><div id="mThumb"></div><div id="mView"></div>
+<div id="mNotes"></div>
 <section id="mConn" hidden aria-label="Settings"><header><button class="ib" id="mConnX" title="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b>Settings</b></header>
 <div id="mConnB">
 <div class="card"><b>DeepSeek</b><div class="kv">
@@ -179,10 +165,8 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 <p>Reading is all keys: ← → pages, + − 0 zoom, ? for everything.</p></div>
 </div></section>
 </div>
-<svg id="mLink"></svg>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
-<div id="mSt"><span id="mMsg"></span><button id="mUndo" hidden>Undo</button><span id="mSel"></span></div>
 <dialog id="mHelp"><form method="dialog"><h3>Shortcuts</h3><dl>
 <dt>Tabs</dt><dd>Every PDF opens in its own tab, with its own notes; middle-click or × closes it</dd>
 <dt>Select text</dt><dd>Translate or Comment from the bar that appears (Auto translates at once)</dd>
@@ -215,7 +199,7 @@ const URL0='https://api.deepseek.com/chat/completions',MODELS=['deepseek-v4-pro'
     $('mModel').replaceChildren(...MODELS.map(x=>new Option(x,x)));
     $('mModel').value=MODELS.includes(m)?m:MODELS[0];
     $('mKey').value=ls('mrdDsKey')||'';$('mEp').value=ls('mrdDsEp')||URL0},
-  cfg=on=>{$('mConn').hidden=!on;on&&!$('mKey').value&&setTimeout(()=>$('mKey').focus())};
+  cfg=on=>{$('mConn').hidden=!on;if(on){selHide();!$('mKey').value&&setTimeout(()=>$('mKey').focus())}};
 {const e=$('mThink'),v=ls('mrdThink');v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>ls('mrdThink',e.value);seg('mThink')}
 for(const[i,k]of aiF)$(i).onchange=()=>ls('mrdDs'+k,$(i).value.trim());
 aiLoad();
@@ -256,17 +240,18 @@ async function ask(model,msgs,myAc,ui){
 // ---------- notes: translations (k:'t') and comments (k:'c') as cards in the right lane, linked by a line to their highlight ----------
 // o={k,t,rs:[[page,x,y,w,h]] in PDF units (null: pasted text),fy,out,m,chat:[[q,a]],el,ac}; nAct is aligned to its anchor,
 // the others are pushed up/down so no two cards overlap
-const N=[],NS=$('mNotes'),LK=$('mLink'),RM=matchMedia('(prefers-reduced-motion: reduce)');let nAct=null,nLast=null,nRaf=0,nT=0,selA=null;
+const N=[],NS=$('mNotes'),RM=matchMedia('(prefers-reduced-motion: reduce)');let nAct=null,nLast=null,nRaf=0,nT=0,selA=null;
 const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(sched),
   pgOf=n=>V.querySelector(`.page[data-n="${n}"]`),
   docH=()=>{const p=V.lastElementChild;return p?p.offsetTop+p.offsetHeight:0},
-  want=o=>{if(!o.rs)return o.fy*(docH()||1);const p=pgOf(o.rs[0][0]);return p?p.offsetTop+o.rs[0][2]*scale-6:null},
+  want=o=>{if(!o.rs)return o.fy*(docH()||1);const pg=o.rs[0][0],p=pgOf(pg);if(!p)return null;
+    let b=0;for(const r of o.rs)r[0]===pg&&(b=Math.max(b,r[2]+r[4]));return p.offsetTop+b*scale+6},  // below the note's last line on its first page
   hl=d=>{d.querySelectorAll('.hl').forEach(h=>h.remove());const n=+d.dataset.n,c=v=>`calc(var(--scale-factor)*${v}px)`;
     for(const o of N)for(const r of o.rs||[])if(r[0]===n){const h=el('div','hl'+(o.k==='c'?' c':'')+(o===nAct?' on':''));h.o=o;
       h.style.cssText=`left:${c(r[1])};top:${c(r[2])};width:${c(r[3])};height:${c(r[4])}`;d.append(h)}},
   hlAll=()=>V.querySelectorAll('.page').forEach(hl),
   act=o=>{nAct=o;N.forEach(x=>x.el.classList.toggle('on',x===o));V.querySelectorAll('.hl').forEach(h=>h.classList.toggle('on',h.o===o));sched()},
-  pick=o=>{if(o===nAct)return;V.scrollTop+=(o.w??0)-parseFloat(o.el.style.top||0);act(o)},  // activate, keeping the card where it is
+  pick=o=>{if(o===nAct)return;act(o);(o.w<V.scrollTop+40||o.w>V.scrollTop+V.clientHeight-140)&&(V.scrollTop=Math.max(0,o.w-V.clientHeight*.35))},  // activate; scroll the passage into view when off-screen
   fade=e=>{e.classList.add('out');setTimeout(()=>e.remove(),RM.matches?0:180)},
   kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();fade(o.el);N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);nsave()},
   clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();fade(o.el)});N.length=0;hlAll();act(null)};
@@ -278,10 +263,11 @@ function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n
       m=R.find(q=>q[0]===r[0]&&Math.min(q[2]+q[4],r[2]+r[4])-Math.max(q[2],r[2])>Math.min(q[4],r[4])/2&&r[1]<=q[1]+q[3]+q[4]*1.5&&q[1]<=r[1]+r[3]+r[4]*1.5);
     if(m){const x=Math.min(m[1],r[1]),y=Math.min(m[2],r[2]);m[3]=Math.max(m[1]+m[3],r[1]+r[3])-x;m[4]=Math.max(m[2]+m[4],r[2]+r[4])-y;m[1]=x;m[2]=y}else R.push(r)}
   return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
-function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based)
-  const M=$('mMain').getBoundingClientRect(),VR=V.getBoundingClientRect(),L=$('mLane').getBoundingClientRect(),W=$('mViewWrap').getBoundingClientRect(),vs=[];
-  $('mNc').textContent=N.length||'';
-  for(const o of N){o.w=want(o);o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
+function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based), in content coordinates over the viewer
+  const vs=[];
+  for(const o of N){o.w=want(o);const p=o.rs&&pgOf(o.rs[0][0]);
+    p&&(o.el.style.left=p.offsetLeft+8+'px',o.el.style.width=Math.max(280,p.offsetWidth-16)+'px');
+    o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
   vs.sort((a,b)=>a.w-b.w);
   const h=vs.map(o=>o.el.offsetHeight),y=[],G=8,k=Math.max(0,vs.indexOf(nAct));
   if(vs.length){y[k]=vs[k].w;
@@ -290,13 +276,8 @@ function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT
     for(let i=0;i<vs.length;i++)y[i]=Math.max(y[i],i?y[i-1]+h[i-1]+G:8);
     vs.forEach((o,i)=>{const t=y[i];if(o.y==null||RM.matches)o.y=t;else{o.y+=(t-o.y)*ea;Math.abs(t-o.y)<.4?o.y=t:more=1}o.el.style.top=o.y+'px'})}
   V.style.paddingBottom=Math.max(16,(vs.length?y.at(-1)+h.at(-1):0)-docH()+16)+'px';
-  NS.style.transform=`translateY(${W.top-L.top-V.scrollTop}px)`;
-  let s='';
-  for(const o of vs){if(!o.rs)continue;const r=o.rs[0],p=pgOf(r[0]).getBoundingClientRect(),b=o.el.getBoundingClientRect(),
-    vr=VR.right-M.left-14,x1=Math.min(vr,p.left+(r[1]+r[3])*scale-M.left),y1=p.top+(r[2]+r[4])*scale+1-M.top,xe=Math.min(vr,Math.max(x1,p.right-M.left)),x2=b.left-M.left,y2=b.top+14-M.top,c=Math.max(16,(x2-xe)/2);
-    if(y2<L.top-M.top||y2>L.bottom-M.top)continue;
-    s+=`<g class="${o.k}${o===nAct?' on':''}"><circle cx="${x1}" cy="${y1}" r="2.5"/><path d="M${x1} ${y1}H${xe}C${xe+c} ${y1} ${x2-c} ${y2} ${x2} ${y2}"/></g>`}
-  LK.innerHTML=s;more?sched():nT=0}
+  NS.style.transform=`translateY(${-V.scrollTop}px)`;
+  more?sched():nT=0}
 // shell(o,label): the card frame — header (dot, kind, model/date, actions .ia), placed and activated
 function shell(o,label){const it=el('div','item '+o.k),ih=el('div','ih');o.ia=el('div','ia');o.md=el('span','md');
   ih.append(el('i'),el('b',0,label),o.md,o.ia);it.append(ih);o.el=it;o.chat||=[];
@@ -375,11 +356,11 @@ async function chat(o,s,go){
   try{await ask(model,msgs,o.qc,{think:()=>{},text:x=>{acc=x;wt.hidden=true;tx.textContent=x}});if(!acc)throw Error('Empty reply')}
   catch(e){wt.hidden=true;if(e.name==='AbortError'){acc||(r.classList.add('dim'),tx.textContent='Stopped')}else{r.classList.add('er');tx.textContent='✖ '+e.message;acc=''}}
   finally{o.qc=null;go.innerHTML=svg('up');go.title='Ask (Enter)';acc&&(o.chat.push([s,acc]),nsave())}}
-$('mLane').addEventListener('wheel',e=>{const a=e.target.closest('.a,.ce,textarea');if(a&&a.scrollHeight>a.clientHeight||e.ctrlKey)return;e.preventDefault();V.scrollTop+=e.deltaMode?e.deltaY*16:e.deltaY},{passive:false});
+NS.addEventListener('wheel',e=>{const a=e.target.closest('.a,.ce,textarea');if(a&&a.scrollHeight>a.clientHeight||e.ctrlKey)return;e.preventDefault();V.scrollTop+=e.deltaMode?e.deltaY*16:e.deltaY},{passive:false});
 V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSelection().isCollapsed)return;
   const b=p.getBoundingClientRect(),n=+p.dataset.n,x=(e.clientX-b.left)/scale,y=(e.clientY-b.top)/scale,
     o=N.find(o=>o.rs?.some(r=>r[0]===n&&x>=r[1]&&x<=r[1]+r[3]&&y>=r[2]&&y<=r[2]+r[4]));o&&o!==nAct&&act(o)});
-ro.observe(V);ro.observe($('mLane'));addEventListener('resize',sched);
+ro.observe(V);ro.observe(NS);addEventListener('resize',sched);
 
 // ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>, the old miniread prefix); Save writes <name>.ocrp.json to keep beside the PDF ----------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
@@ -443,11 +424,11 @@ async function openFiles(fs,hs=[]){
 const TMAX=10,TABS=[{}];let TI=0,TN=0,TP=0;  // TN: this slot was pushed empty for an open that may still fail; TP: the tab to fall back to
 const fprOf=p=>p?.fingerprints?.[0]||'',tabNm=i=>(i===TI?pdfName:TABS[i].pdfName)||'';
 function tabHold(){TABS[TI]={pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN,st:V.scrollTop,notes:N.slice()};
-  obs?.disconnect();tobs?.disconnect();N.forEach(o=>o.el.remove());NS.replaceChildren();LK.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
+  obs?.disconnect();tobs?.disconnect();N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
   $('mUndo').hidden=true;undoD=null;clearTimeout(undoT);selHide();nLast=null}
 function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN}=t);
   pdf=pdf||null;pdfName=pdfName||'';scale=scale||1;annOff=!!annOff;annN=annN||0;curN=curN||0;TABS[i]={};
-  N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el);
+  N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el),o.y=null;
   document.title=pdf?'ocrp — '+pdfName:'ocrp';
   $('mPgT').textContent=pdf?pdf.numPages:'–';$('mPgN').max=pdf?.numPages||1;$('mPgN').value=curN||1;
   selHide();  pdf?(layout().then(()=>V.scrollTop=Math.min(t.st||0,V.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
@@ -459,7 +440,7 @@ function tabBack(){if(!TN)return;TN=0;TABS.splice(TI,1);tabShow(TP)}
 function tabGo(i){if(i===TI||!TABS[i])return;tabHold();tabShow(i)}
 function tabClose(i){const nm=i===TI?pdfName:TABS[i].pdfName||'',ns=i===TI?N.slice():TABS[i].notes||[],dp=i===TI?pdf:TABS[i].pdf;
   nsaveTab(nm,fprOf(dp),ns);ns.forEach(o=>{o.ac.abort();o.qc?.abort()});dp?.destroy().catch(()=>{});
-  if(TABS.length<2){N.forEach(o=>o.el.remove());NS.replaceChildren();LK.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
+  if(TABS.length<2){N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
     pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=0;scale=1;document.title='ocrp';
     $('mPgT').textContent='–';$('mPgN').value=1;selHide();$('mUndo').hidden=true;undoD=null;
     TABS[0]={};TI=0;tabUI();sched();return msg('Closed')}
@@ -568,8 +549,7 @@ document.addEventListener('mouseup',e=>{
   if(selT.contains(e.target))return;
   const s=getSelection();if(!s.rangeCount||!V.contains(s.anchorNode))return;
   const txt=s.toString().replace(/([A-Za-z])-\s*\n\s*(?=[a-z])/g,'$1').replace(/\s+/g,' ').trim();if(!txt)return;
-  const w=(txt.match(/[A-Za-z0-9'’-]+|[一-鿿぀-ヿ가-힯]/g)||[]).length,rg=s.getRangeAt(0);
-  $('mSel').textContent='Selected '+nl(txt.length)+' chars · '+nl(w)+' words';
+  const rg=s.getRangeAt(0);
   const auto=$('mAuto').checked&&txt!==lastSel;
   selA={t:txt,rs:rects(rg)};lastSel=txt;auto&&translate(txt);
   const c=[...rg.getClientRects()].filter(r=>r.width>1&&r.height>1&&r.height<60*scale).at(-1),M=$('mMain').getBoundingClientRect(),VR=V.getBoundingClientRect();
@@ -609,10 +589,6 @@ const A={open:()=>window.showOpenFilePicker?showOpenFilePicker({multiple:true,ty
 function setTheme(d){document.documentElement.dataset.theme=d?'dark':'light';qa('theme').textContent=d?'Light':'Dark'}
 setTheme(document.documentElement.dataset.theme==='dark');
 document.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>A[b.dataset.a]());
-const sp=$('mSplit');
-sp.onpointerdown=e=>{e.preventDefault();sp.setPointerCapture(e.pointerId);
-  sp.onpointermove=m=>{$('mLeft').style.flexBasis=m.clientX+'px';sched();selHide()}};
-sp.onpointerup=sp.onlostpointercapture=()=>sp.onpointermove=null;
 </script>
 <!-- pdf-lib 1.17.1 (MIT, https://github.com/Hopding/pdf-lib), minified; kept as text and run by plib() on the first Save PDF -->
 <script type="text/plain" id="mPlib">!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?e(exports):"function"==typeof define&&define.amd?define(["exports"],e):e((t=t||self).PDFLib={})}(this,(function(t){"use strict";
