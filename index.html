@@ -31,8 +31,7 @@ button,.seg button,.item,.hl,.tp,.ci,#mTabs .tab{transition:background-color .16
 .item{animation:mIn .32s cubic-bezier(.2,.8,.2,1)}.item.out{opacity:0;transform:translateX(10px) scale(.98);transition:opacity .18s,transform .18s;pointer-events:none}
 @keyframes mIn{from{opacity:0;transform:translateX(12px) scale(.98)}}
 .dd.open>.menu,#mSelT:not([hidden]){animation:mPop .16s cubic-bezier(.2,.8,.2,1)}@keyframes mPop{from{opacity:0;transform:translateY(-4px) scale(.98)}}
-#mConn:not([hidden]){animation:mSheet .24s cubic-bezier(.2,.8,.2,1)}@keyframes mSheet{from{opacity:0;transform:translateX(16px)}}
-#mHelp[open]{animation:mPop .2s cubic-bezier(.2,.8,.2,1)}
+#mHelp[open]{animation:mPop .2s cubic-bezier(.2,.8,.2,1)}@keyframes mSheet{from{opacity:0;transform:scale(.98) translateY(6px)}}
 .page canvas,.tp canvas{animation:mFade .25s ease-out}@keyframes mFade{from{opacity:0}}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.4s;animation-timing-function:ease-in-out}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}button:active{transform:none}}
@@ -109,16 +108,18 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 @keyframes mTr{0%,100%{opacity:.38;transform:scale(.9)}50%{opacity:1;transform:scale(1.06)}}
 @keyframes mShim{from{background-position:100% 0}to{background-position:0 0}}
 @media(prefers-reduced-motion:reduce){.item .wt svg,.item .sh{animation:none}}
-/* ---------- settings sheet ---------- */
-#mConn{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;background:var(--side)}
-#mConn>header{flex:none;display:flex;align-items:center;gap:4px;height:36px;padding:0 4px;border-bottom:1px solid var(--line)}#mConn>header b{font-weight:600}
-#mConnB{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:12px 10px 18px}
-#mConn .card{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--line)}#mConn .card>b{font-weight:600}
+/* ---------- settings: a floating sheet over a dim backdrop ---------- */
+#mConn{position:absolute;inset:0;z-index:8;display:grid;place-items:center;padding:24px;background:#0b0b0b40}
+#mConn[hidden]{display:none}
+#mConn .sheet{display:flex;flex-direction:column;width:min(560px,92vw);max-height:min(86vh,880px);border-radius:16px;background:var(--bar);box-shadow:0 0 0 1px var(--line),0 32px 90px -24px #00000066;overflow:hidden;animation:mSheet .22s cubic-bezier(.2,.8,.2,1)}
+#mConn .sheet>header{flex:none;display:flex;align-items:center;gap:6px;padding:16px 18px 8px}#mConn .sheet>header b{font-size:14px;font-weight:600}
+#mConnB{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:6px 18px 20px}
+#mConn .card{display:flex;flex-direction:column;gap:9px;padding:14px;border-radius:12px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--line)}#mConn .card>b{font-size:12.5px;font-weight:600}
 #mConn .card p{margin:0;color:var(--t3);font-size:11px;line-height:1.45}
-#mConn .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 8px;align-items:center}#mConn .kv>span{color:var(--h4)}
-#mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
-#mConn .gr{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
-#mConn .vw{display:flex;align-items:center;gap:3px;min-width:0}#mConn .vw .ib{width:24px;height:24px;font-size:14px}#mConn .vw input{width:42px;flex:none}#mConn .kv>button{justify-self:start}
+#mConn .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:7px 10px;align-items:center}#mConn .kv>span{color:var(--h4);font-size:11.5px}
+#mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:26px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
+#mConn .gr{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
+#mConn .vw{display:flex;align-items:center;gap:4px;min-width:0}#mConn .vw .ib{width:26px;height:26px;font-size:14px}#mConn .vw input{width:42px;flex:none}#mConn .kv>button{justify-self:start;height:26px}
 /* ---------- help ---------- */
 #mHelp{padding:0;width:min(420px,96vw)}
 #mHelp form{padding:16px 18px 14px;font-size:12.5px;line-height:1.45}
@@ -144,7 +145,7 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 <div id="mMain">
 <div id="mViewWrap"><div id="mThumb"></div><div id="mView"></div>
 <div id="mNotes"></div>
-<section id="mConn" hidden aria-label="Settings"><header><button class="ib" id="mConnX" title="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b>Settings</b></header>
+<section id="mConn" hidden aria-label="Settings"><div class="sheet"><header><button class="ib" id="mConnX" title="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b>Settings</b></header>
 <div id="mConnB">
 <div class="card"><b>DeepSeek</b><div class="kv">
 <span>Model</span><select id="mModel"></select>
@@ -164,7 +165,7 @@ body.thumbs #mThumb{display:block}body.thumbs #mThumb:empty{display:none}
 <span>Keys</span><button data-a="help">Shortcuts (?)</button>
 </div>
 <p>Reading is all keys: ← → pages, + − 0 zoom, ? for everything.</p></div>
-</div></section>
+</div></div></section>
 </div>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
@@ -201,11 +202,11 @@ const URL0='https://api.deepseek.com/chat/completions',MODELS=['deepseek-v4-pro'
     $('mModel').replaceChildren(...MODELS.map(x=>new Option(x,x)));
     $('mModel').value=MODELS.includes(m)?m:MODELS[0];
     $('mKey').value=ls('mrdDsKey')||'';$('mEp').value=ls('mrdDsEp')||URL0},
-  cfg=on=>{$('mConn').hidden=!on;if(on){selHide();!$('mKey').value&&setTimeout(()=>$('mKey').focus())}};
+  cfg=on=>{$('mConn').hidden=!on;on?(barOff(),selHide(),!$('mKey').value&&setTimeout(()=>$('mKey').focus())):barOn()};
 {const e=$('mThink'),v=ls('mrdThink');v&&[...e.options].some(o=>o.value===v)&&(e.value=v);e.onchange=()=>ls('mrdThink',e.value);seg('mThink')}
 for(const[i,k]of aiF)$(i).onchange=()=>ls('mrdDs'+k,$(i).value.trim());
 aiLoad();
-$('mCfgB').onclick=()=>cfg($('mConn').hidden);$('mConnX').onclick=()=>cfg(0);
+$('mCfgB').onclick=()=>cfg($('mConn').hidden);$('mConnX').onclick=()=>cfg(0);$('mConn').onclick=e=>{e.target===$('mConn')&&cfg(0)};
 
 // ---------- language, prompt ----------
 const LANGS=['Simplified Chinese','English'],
