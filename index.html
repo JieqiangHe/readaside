@@ -209,7 +209,7 @@ ismiss on an empty window */
 <div class="wh"><span class="wchip" data-t="shortcuts">shortcuts</span>
 <div class="wp"><div class="mp"><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div><div class="mc"><b></b><i></i><i></i><i></i></div></div>
 </div>
-<div class="wb"><h3>ocrp <span>old, clean, read, paper</span></h3>
+<div class="wb"><h3>ocrp <span data-t="old, clean, read, paper">old, clean, read, paper</span></h3>
 <ul>
 <li><svg viewBox="0 0 16 16"><path d="M4 2.5h6l2 2v9H4z"/><path d="M6 6.5h4M6 9h4"/></svg><b data-t="Open a PDF">Open a PDF</b><span><kbd>O</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><b data-t="Save PDF">Save PDF</b><span><kbd>P</kbd></span></li>
@@ -269,6 +269,7 @@ function seg(id){const s=$(id),g=el('div','seg'),up=()=>[...g.children].forEach(
 let UI=ls("mrdUI")==="zh"?"zh":"en";
 const ZH={
   shortcuts:"快捷键",
+  "old, clean, read, paper":"旧、干净、阅读、纸",
   "Open a PDF":"打开 PDF","Save PDF":"保存 PDF","Save notes":"保存笔记",Documents:"文档","Notes map":"笔记地图",
   Pages:"翻页",Zoom:"缩放",Find:"查找",Theme:"主题",Thumbnails:"缩略图",Language:"语言",Settings:"设置",
   Model:"模型",Think:"思考",Key:"密钥",URL:"URL",Translating:"翻译",Into:"译为",Low:"低",High:"高",Max:"最高",
