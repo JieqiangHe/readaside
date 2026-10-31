@@ -7,8 +7,8 @@
 <script>try{localStorage.mrdTheme==='dark'&&(document.documentElement.dataset.theme='dark')}catch(_){}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-:root{--fg:#222;--bar:#f3f3f3;--line:#ccc;--btn:#fff;--btnb:#bbb;--btnh:#eef3ff;--bfg:buttontext;--view:#cfcfcf;--side:#f7f7f7;--h4:#555;--h4b:#ddd;--pageb:#777;--err:#c4392f;--on:#d6e4ff;--onb:#6d94e0;--onfg:buttontext}
-[data-theme=dark]{color-scheme:dark;--fg:#e5e5e5;--bar:#000;--line:#262626;--btn:#262626;--btnb:#000;--btnh:#404040;--bfg:#e5e5e5;--view:#141414;--side:#000;--h4:#a3a3a3;--h4b:#262626;--pageb:#404040;--err:#f1877f;--on:#e5e5e5;--onb:#e5e5e5;--onfg:#171717}
+:root{--fg:#222;--bar:#f3f3f3;--line:#ccc;--btn:#fff;--btnb:#bbb;--btnh:#eef3ff;--bfg:buttontext;--view:#cfcfcf;--side:#f7f7f7;--h4:#555;--h4b:#ddd;--pageb:#777;--err:#c4392f;--erb:#cc41360f;--t3:#6e6e6e;--ok:#2f8f55;--on:#d6e4ff;--onb:#6d94e0;--onfg:buttontext}
+[data-theme=dark]{color-scheme:dark;--fg:#e5e5e5;--bar:#000;--line:#262626;--btn:#262626;--btnb:#000;--btnh:#404040;--bfg:#e5e5e5;--view:#141414;--side:#000;--h4:#a3a3a3;--h4b:#262626;--pageb:#404040;--err:#f1877f;--erb:#f07a7014;--t3:#8c8c8c;--ok:#4fc27e;--on:#e5e5e5;--onb:#e5e5e5;--onfg:#171717}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
 body{display:flex;flex-direction:column;font:12px/1.5 system-ui,sans-serif;color:var(--fg)}
@@ -59,26 +59,38 @@ body.thumbs #mThumb{display:block}
 #mRight details input,#mRight details select,#mRight details textarea{width:100%;min-width:0}
 #mRight details input[type=checkbox]{width:auto;justify-self:start;margin:0}
 #mRight .up small{display:block;margin:1px 0 2px;color:var(--h4)}
-#mSrc{margin:6px 8px;width:calc(100% - 16px);height:84px;resize:vertical}
-#mOps{display:flex;gap:4px;align-items:center;padding:0 8px 6px}
-#mOps label{display:flex;align-items:center;gap:4px;color:var(--h4)}
-#mGo{flex:1;padding:3px 6px}
-#mCnt{margin-left:auto;color:var(--h4);white-space:nowrap}
-#mBody{flex:1;min-height:0;display:flex;flex-direction:column;padding:0 8px}
-#mHist{flex:1;overflow:auto}
-.item{border-top:1px solid var(--line);padding:6px 0 8px}
-.item .hd{display:flex;align-items:center;gap:6px}
-.mt{font-size:11px;color:var(--h4);border:1px solid var(--h4b);border-radius:3px;padding:0 4px;white-space:nowrap}
-.tm{color:var(--h4);font-size:11px;white-space:nowrap}
-.st{flex:1;min-width:0;color:var(--h4);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hd button{padding:0 5px;font-size:11px}
-.item .o summary,.item .th summary{color:var(--h4);cursor:pointer;font-size:11px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item .o .ob,.item .th .tb{font-size:11px;color:var(--h4);white-space:pre-wrap;overflow-wrap:anywhere;border-left:2px solid var(--h4b);padding-left:6px;margin:3px 0 2px}
-.item .o .ob{max-height:120px;overflow:auto}
-.item .th .tb{max-height:220px;overflow:auto}
-.item .t{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.7;margin-top:4px}
-.item .t.err{color:var(--err)}
-.item .t.dim{color:var(--h4);font-size:12px}
+#mComp{flex:none;margin:8px;padding:6px 6px 6px 8px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb)}
+#mComp:focus-within{box-shadow:inset 0 0 0 1px var(--onb)}
+#mSrc{display:block;width:100%;min-height:44px;height:72px;padding:1px 2px;border:0;border-radius:0;background:transparent;resize:vertical}
+#mOps{display:flex;align-items:center;gap:3px;margin-top:4px}
+#mOps label{display:flex;align-items:center;gap:4px;color:var(--h4);font-size:11.5px}
+#mClr{flex:none;padding:0 6px;border-color:transparent;background:transparent;color:var(--h4);font-size:11px}
+#mClr:hover{background:var(--btnh);color:var(--fg)}
+#mGo{flex:none;padding:2px 12px;border-color:transparent;border-radius:6px;background:var(--fg);color:var(--side)}
+#mGo:hover{background:var(--fg);opacity:.85}
+#mCnt{margin-left:auto;color:var(--t3);font-size:11px;white-space:nowrap}
+#mBody{flex:1;min-height:0;display:flex;flex-direction:column}
+#mHist{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:10px}
+.item{display:flex;flex-direction:column}
+.item .u{align-self:flex-end;max-width:88%;padding:6px 10px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--h4b);white-space:pre-wrap;overflow-wrap:anywhere}
+.item .a{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.item .a.dim{color:var(--h4);font-size:12px}
+.item .a.er{padding:6px 9px;border-radius:8px;background:var(--erb);box-shadow:inset 0 0 0 1px var(--btnb);color:var(--err)}
+.item .mt{display:flex;align-items:center;gap:2px;margin-top:6px;color:var(--t3);font-size:11px;white-space:nowrap}
+.item .rtb{flex:none;padding:0 6px;border-color:transparent;background:transparent;color:var(--h4);font-size:11px}
+.item .rtb:hover{background:var(--btnh);color:var(--fg)}
+.item .wt{display:flex;align-items:center;gap:6px;color:var(--h4)}
+.item .wt svg{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;animation:mBob 1.2s ease-in-out infinite}
+.item .wt .wm{min-width:0;overflow:hidden;text-overflow:ellipsis;color:var(--t3)}
+.item .wt .tm{margin-left:auto;color:var(--t3);font-variant-numeric:tabular-nums}
+.item .sh{white-space:nowrap;background:linear-gradient(90deg,var(--t3) 0 38%,var(--fg) 50%,var(--t3) 62% 100%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:mShim 1.7s linear infinite}
+.item details{margin-bottom:6px}
+.item details summary{cursor:pointer;color:var(--h4);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item details.ok>summary::before{content:'✓ ';color:var(--ok)}
+.item .th{max-height:180px;overflow:auto;margin-top:3px;padding-left:8px;border-left:2px solid var(--line);font-size:11px;color:var(--h4);white-space:pre-wrap;overflow-wrap:anywhere}
+@keyframes mBob{50%{transform:translateY(-2px);opacity:.55}}
+@keyframes mShim{from{background-position:100% 0}to{background-position:0 0}}
+@media(prefers-reduced-motion:reduce){.item .wt svg,.item .sh{animation:none}}
 #mSt{height:22px;display:flex;align-items:center;gap:18px;padding:2px 2px 2px 8px;background:var(--bar);border-top:1px solid var(--line);white-space:nowrap;overflow:hidden}
 #mMsg{min-width:0;overflow:hidden;text-overflow:ellipsis}
 #mSel{margin-left:auto;color:var(--h4)}
@@ -126,12 +138,14 @@ body.thumbs #mThumb{display:block}
 <label>Into<select id="mLang"></select></label>
 <label class="up" hidden>Prompt<small>{lang} is replaced by the target language</small><textarea id="mPrompt" rows="4" spellcheck="false"></textarea></label>
 </details>
+<div id="mComp">
 <textarea id="mSrc" spellcheck="false" placeholder="Select text in the PDF, or paste it here — ⌘/Ctrl+Enter translates"></textarea>
 <div id="mOps">
 <label title="Translate as soon as text is selected in the PDF"><input type="checkbox" id="mAuto">Auto</label>
-<button id="mGo" title="⌘/Ctrl+Enter">Translate</button>
 <button id="mClr" title="Remove all translations">Clear</button>
 <span id="mCnt"></span>
+<button id="mGo" title="⌘/Ctrl+Enter">Translate</button>
+</div>
 </div>
 <div id="mBody">
 <div id="mHist"></div>
@@ -154,7 +168,7 @@ const el=(t,c,x)=>{const e=document.createElement(t);c&&(e.className=c);x!=null&
 const nl=n=>n.toLocaleString('en');
 
 // ---------- AI settings (GLM / DeepSeek) ----------
-const AI={Glm:['https://open.bigmodel.cn/api/paas/v4/chat/completions','glm-5.3','glm-5.3-flash'],Ds:['https://api.deepseek.com/chat/completions','deepseek-flash','deepseek-v4-pro']},
+const AI={Glm:['https://open.bigmodel.cn/api/paas/v4/chat/completions','glm-5.3','glm-5.3-flash'],Ds:['https://api.deepseek.com/chat/completions','deepseek-v4-pro','deepseek-flash']},
   aiF=[['mKey','Key'],['mModel','Model'],['mEp','Ep']],
   // GLM relay (same Worker as svguest): opt-in, only on GitHub Pages, only the two official GLM URLs
   RLY='https://svguest-glm.jieqiang-he-dawn.workers.dev',RLYR={'https://open.bigmodel.cn/api/paas/v4/chat/completions':'standard','https://open.bigmodel.cn/api/coding/paas/v4/chat/completions':'coding'},
@@ -182,46 +196,87 @@ $('mAuto').onchange=()=>ls('mrdAuto',$('mAuto').checked?'1':'0');
 // ---------- translate ----------
 const cnt=()=>$('mCnt').textContent=nl($('mSrc').value.length)+' chars';
 let ac;
+const glmJ={},  // GLM endpoints that answered with plain JSON instead of a stream: asked without stream next time
+  MARK='<svg viewBox="6 4.75 228 228"><path d="M29 85.86L113 36.14M127 36.14L211 85.86" stroke-width="20"/><path d="M15 83h14v14H15zM113 25h14v14h-14zM211 83h14v14h-14z" stroke-width="14"/><path d="M98 111V101Q98 95 104 95H136Q142 95 142 101V111" stroke-width="16"/><rect x="44" y="111" width="152" height="100" rx="5" stroke-width="16"/></svg>',
+  apiMsg=t=>{try{const j=JSON.parse(t),e=j.error||j;return(e.code?'['+e.code+'] ':'')+(e.message||t)}catch(_){return t}};
+// ask(): one streamed request, like svguest's call() — GLM falls back to a single JSON reply when the endpoint
+// will not stream; finish_reason:'length' comes back as cut
+async function ask(model,msgs,myAc,ui){
+  const p=$('mProv').value,u=$('mEp').value.trim(),key=$('mKey').value.trim(),rly=rlyOk()&&$('mRly').checked;
+  if(rly&&!RLYR[u])throw Error('The relay only forwards the official GLM URL (standard or Coding Plan)');
+  const post=b=>fetch(rly?RLY+'/glm/'+RLYR[u]:u,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},signal:myAc.signal,...(rly&&{credentials:'omit',redirect:'error'}),body:JSON.stringify(b)}),
+    body={model,messages:msgs,stream:true,max_tokens:32768,thinking:{type:'enabled'},reasoning_effort:$('mThink').value};
+  p==='Glm'&&glmJ[u]&&(body.stream=false);
+  let r;
+  try{r=await post(body)}
+  catch(e){
+    if(e.name!=='TypeError'||myAc.signal.aborted)throw e;
+    if(rly)throw Error('The GLM relay could not be reached. Check the network, or turn Relay off. '+e.message);
+    if(p!=='Glm'||!body.stream)throw Error('The API could not be reached. Check the network and the URL'+(p==='Glm'&&rlyOk()?' — or turn on Relay in AI settings':'')+'. '+e.message);
+    msg('GLM streaming could not open; waiting for a single reply…');glmJ[u]=1;body.stream=false;
+    try{r=await post(body)}catch(x){if(x.name==='TypeError'&&!myAc.signal.aborted)throw Error('GLM could not be reached. Check the network and the URL. '+x.message);throw x}
+  }
+  if(!r.ok)throw Error(`${r.status} ${apiMsg(await r.text())}`.slice(0,300));
+  if(p==='Glm'&&!/text\/event-stream/i.test(r.headers.get('Content-Type')||'')){
+    const t=await r.text();let j;try{j=JSON.parse(t)}catch(_){}
+    if(j?.error)throw Error(apiMsg(t));
+    glmJ[u]=1;const ch=j?.choices?.[0],c=ch?.message;
+    if(!c)throw Error('GLM sent an unexpected reply — check the URL and key');
+    c.reasoning_content&&ui.think(c.reasoning_content);c.content&&ui.text(c.content);
+    return{out:c.content||'',cut:ch.finish_reason==='length'?1:0}
+  }
+  let out='',cut=0;
+  const rd=r.body.pipeThrough(new TextDecoderStream()).getReader();let buf='';
+  const on=l=>{const d=l.startsWith('data:')&&l.slice(5).trim();if(!d||d==='[DONE]')return;let j;try{j=JSON.parse(d)}catch{return}
+    if(j.error)throw Error(j.error.message||JSON.stringify(j.error));
+    const ch=j.choices?.[0]||{},c=ch.delta||{};
+    ch.finish_reason==='length'&&(cut=1);
+    c.reasoning_content&&ui.think(c.reasoning_content);c.content&&(out+=c.content,ui.text(out))};
+  for(;;){const{value,done}=await rd.read();if(done)break;const ls2=(buf+=value).split('\n');buf=ls2.pop();ls2.forEach(on)}
+  on(buf);
+  return{out,cut}
+}
 async function translate(go){
   if(ac){ac.abort();if(!go)return}
   const text=$('mSrc').value.trim(),key=$('mKey').value.trim();
   if(!text)return msg('Select text in the PDF, or paste it into the box');
   if(!key){$('mCfg').open=true;return msg('Enter an API key first (AI settings)')}
-  const t0=performance.now(),srcN=text.length,model=$('mModel').value,
-    it=el('div','item'),hd=el('div','hd'),st=el('span','st','0.0 s'),
-    cp=btn('Copy','Copy the translation'),rm=btn('×','Remove'),
-    od=el('details','o'),os=el('summary'),out=el('div','t');
-  hd.append(el('span','mt',model),el('span','tm',new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})),st,cp,rm);
-  os.textContent=(srcN>72?text.slice(0,72)+'…':text)+' · '+nl(srcN)+' chars';
-  od.append(os,el('div','ob',text));it.append(hd,od,out);cp.disabled=true;
+  const t0=performance.now(),srcN=text.length,model=$('mModel').value,H=$('mHist'),
+    it=el('div','item'),a=el('div','a'),tx=el('span','tx'),
+    wt=el('div','wt'),wl=el('span','sh','Translating'),wm=el('span','wm',model),tm=el('span','tm','0 s'),
+    cp=btn('Copy','Copy the translation'),rm=btn('×','Remove');
+  wt.innerHTML=MARK;wt.append(wl,wm,tm);a.append(wt,tx);it.append(el('div','u',text),a);
+  const near=()=>H.scrollHeight-H.scrollTop-H.clientHeight<34,bot=near(),
+    iv=setInterval(()=>tm.textContent=Math.round((performance.now()-t0)/1e3)+' s',1e3);
+  let th=null,tb=null,tsm=null,t1=0,t2=0,thc=0,acc='',shut=0,cut=0;
+  const think=s=>{if(!th){t1=performance.now();tsm=el('summary',0,'Thinking…');tb=el('div','th');th=el('details','tk');th.open=true;th.append(tsm,tb);a.prepend(th)}
+      tb.append(s);thc+=s.length},
+    show=s=>{const b=near();acc=s;tx.textContent=s;t2||(t2=performance.now());wt.hidden=true;th&&!shut&&(shut=1,th.open=false);b&&(H.scrollTop=H.scrollHeight)};
+  H.append(it);bot&&(H.scrollTop=H.scrollHeight);
   rm.onclick=()=>it.remove();
-  cp.onclick=()=>navigator.clipboard.writeText(out.textContent).then(()=>{msg('Translation copied');cp.textContent='Copied';setTimeout(()=>cp.textContent='Copy',1200)},()=>msg('Copy failed — the browser blocked clipboard access'));
-  const stick=$('mHist').scrollTop<30;
-  $('mHist').prepend(it);stick&&($('mHist').scrollTop=0);
-  let th=null,tb=null,tsm=null,thc=0,acc='',shut=0;
-  const stats=()=>{cp.disabled=!acc;st.textContent=((performance.now()-t0)/1e3).toFixed(1)+' s · '+nl(srcN)+'→'+nl(acc.length)};
+  cp.onclick=()=>navigator.clipboard.writeText(acc).then(()=>{msg('Translation copied');cp.textContent='Copied';setTimeout(()=>cp.textContent='Copy',1200)},()=>msg('Copy failed — the browser blocked clipboard access'));
   const myAc=new AbortController(),ok=()=>ac===myAc;
   ac=myAc;$('mGo').textContent='Stop';msg('Translating with '+model+'…');
   try{
-    const u=$('mEp').value.trim(),rly=rlyOk()&&$('mRly').checked;
-    if(rly&&!RLYR[u])throw Error('The relay only forwards the official GLM URL (standard or Coding Plan)');
-    const r=await fetch(rly?RLY+'/glm/'+RLYR[u]:u,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},signal:myAc.signal,...(rly&&{credentials:'omit',redirect:'error'}),
-      body:JSON.stringify({model,messages:[{role:'system',content:$('mPrompt').value.replaceAll('{lang}',$('mLang').value)},{role:'user',content:text}],stream:true,max_tokens:32768,thinking:{type:'enabled'},reasoning_effort:$('mThink').value})});
-    if(!r.ok)throw Error(r.status+' '+(await r.text()).slice(0,300));
-    const rd=r.body.pipeThrough(new TextDecoderStream()).getReader();let buf='';
-    for(;;){const{value,done}=await rd.read();if(done)break;const ls2=(buf+=value).split('\n');buf=ls2.pop();
-      for(const l of ls2){const d=l.startsWith('data:')&&l.slice(5).trim();if(!d||d==='[DONE]')continue;let j;try{j=JSON.parse(d)}catch{continue}
-        if(j.error)throw Error(j.error.message||JSON.stringify(j.error));
-        const c=j.choices?.[0]?.delta||{};
-        if(c.reasoning_content){if(!th){tsm=el('summary');tb=el('div','tb');th=el('details','th');th.append(tsm,tb);th.open=true;od.after(th)}
-          tb.append(c.reasoning_content);thc+=c.reasoning_content.length;tsm.textContent='Thinking… '+nl(thc)+' chars'}
-        if(c.content){acc+=c.content;out.textContent=acc;stats();th&&!shut&&(shut=1,th.open=false)}}}
+    let msgs=[{role:'system',content:$('mPrompt').value.replaceAll('{lang}',$('mLang').value)},{role:'user',content:text}];
+    for(let round=0;;round++){
+      const r=await ask(model,msgs,myAc,{think,text:show});
+      cut=r.cut;
+      if(!cut||round>=3)break;
+      msg(`Cut off at the token limit; continuing (${round+1}/3)…`);
+      msgs=[...msgs,{role:'assistant',content:acc},{role:'user',content:'Continue the translation exactly where it stopped, without repeating anything.'}]
+    }
     if(!acc&&!thc)throw Error('Empty reply');
-    ok()&&msg('Translated');
+    ok()&&msg(cut?'Translated, but cut off at the token limit — lower Think or translate less text':'Translated');
   }catch(e){
-    if(e.name==='AbortError'){if(!acc){out.classList.add('dim');out.textContent='Stopped'}ok()&&msg('Stopped')}
-    else{acc||(out.style.display='none');it.append(el('div','t err','✖ '+e.message+(e instanceof TypeError?(rlyOk()&&!$('mRly').checked?' (network or CORS problem; for GLM turn on Relay in AI settings)':' (network, URL or CORS problem)'):'')));ok()&&msg('Translation failed')}
-  }finally{ok()&&(ac=null,$('mGo').textContent='Translate');stats();tsm&&(tsm.textContent='Thought for '+nl(thc)+' chars')}
+    if(e.name==='AbortError'){if(!acc){a.classList.add('dim');tx.textContent='Stopped'}ok()&&msg('Stopped')}
+    else{a.classList.add('er');tx.textContent='✖ '+e.message;ok()&&msg('Translation failed')}
+  }finally{
+    clearInterval(iv);ok()&&(ac=null,$('mGo').textContent='Translate');
+    wt.hidden=true;if(th){th.classList.add('ok');tsm.textContent='Thought for '+Math.max(1,Math.round(((t2||performance.now())-t1)/1e3))+' s'}
+    const b=near(),mt=el('div','mt',model+' · '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+((performance.now()-t0)/1e3).toFixed(1)+' s'+(acc?' · '+nl(srcN)+'→'+nl(acc.length):''));
+    cp.disabled=!acc;mt.append(cp,rm);it.append(mt);b&&(H.scrollTop=H.scrollHeight);
+  }
 }
 $('mGo').onclick=()=>translate();
 $('mClr').onclick=()=>{ac?.abort();$('mHist').replaceChildren();msg('History cleared')};
