@@ -239,7 +239,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <svg id="mLink"></svg>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
-<div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>← →</kbd>Move<kbd data-k="ret">↵</kbd>Open<kbd>Esc</kbd>Close</p></div></div>
+<div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>← →</kbd>Move<kbd data-k="ret">↵</kbd>Open<kbd>⌫</kbd>Close tab<kbd>Esc</kbd>Close</p></div></div>
 <div id="mOv" hidden><b id="mOvH"></b><div class="list" id="mOvL"></div></div>
 <div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
 <script>
@@ -248,7 +248,6 @@ const $=i=>document.getElementById(i),V=$('mView'),SC=$('mMain'),ls=(k,v)=>{try{
 const MAC=/Mac|iPhone|iPad/i.test(navigator.platform+' '+navigator.userAgent),KLBL={cmd:'Ctrl',shf:'Shift',alt:'Alt',ret:'Enter'};  // keycaps follow the OS
 const el=(t,c,x)=>{const e=document.createElement(t);c&&(e.className=c);x!=null&&(e.textContent=x);return e},
   btn=(t,ti)=>{const e=el('button',0,t);ti&&(e.title=ti);return e},msg=()=>{};
-const nl=n=>n.toLocaleString('en');
 const IC={up:'<path d="M8 13V3M4 7l4-4 4 4"/>',stop:'<rect x="4.5" y="4.5" width="7" height="7" rx="1.5" fill="currentColor" stroke="none"/>',x:'<path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/>',
     copy:'<rect x="5.5" y="5.5" width="7.5" height="7.5" rx="1.5"/><path d="M10.5 5.5V4A1.5 1.5 0 0 0 9 2.5H4A1.5 1.5 0 0 0 2.5 4v5A1.5 1.5 0 0 0 4 10.5h1.5"/>',
     retry:'<path d="M13 8a5 5 0 1 1-1.5-3.5M13 2.5v3h-3"/>'},
@@ -335,7 +334,7 @@ const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(
 const OV=$('mOv'),OVL=$('mOvL'),OVH=$('mOvH');
 const ovClose=()=>{OV.hidden=true},
   ovOpen=()=>{if(!N.length)return;OV.hidden=false;ovRender()},
-  ovJump=o=>{act(o);const w=want(o);w!=null&&(SC.scrollTop=Math.max(0,w-SC.clientHeight*.32));ovClose()},
+  ovJump=o=>{act(o);const w=want(o),pg=o.rs?.[0]?.[0];w!=null?(SC.scrollTop=Math.max(0,w-SC.clientHeight*.32)):pg&&goto(pg);ovClose()},
   ovRender=()=>{const srt=N.slice().sort((a,b)=>(a.rs?.[0]?.[0]??1e9)-(b.rs?.[0]?.[0]??1e9)||(a.rs?.[0]?.[2]??a.fy*1e3)-(b.rs?.[0]?.[2]??b.fy*1e3));
     OVH.textContent=N.length+(N.length>1?' notes':' note');
     OVL.replaceChildren();
@@ -502,7 +501,7 @@ async function keep(b,nm,mime,ext,re){
 // nmd(): the notes as a Markdown file, page by page — the passage as a quote, then the translation or the comment, then the questions
 function nmd(){
   if(!pdf)return msg('Open a PDF first');
-  const ns=N.filter(o=>o.out?.trim());
+  const ns=N.filter(o=>o.out?.trim()||o.img);
   if(!ns.length)return msg('No notes to save');
   const base=pdfName.replace(/\.pdf$/i,''),pics=[];let ix=0;
   const by=ns.slice().sort((a,b)=>(a.rs?.[0]?.[0]??1e9)-(b.rs?.[0]?.[0]??1e9)||(a.rs?.[0]?.[2]??a.fy*1e3)-(b.rs?.[0]?.[2]??b.fy*1e3)),
@@ -573,7 +572,7 @@ function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,a
   N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el),o.y=null;
   col();
   document.title=pdf?'ocrp — '+pdfName:'ocrp';document.body.classList.toggle('pdf',!!pdf);
-  selHide();hintOff();fClose();pdf?(layout().then(()=>SC.scrollTop=Math.min(t.st||0,SC.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
+  selHide();hintOff();fClose();$('mOv').hidden=true;pdf?(layout().then(()=>SC.scrollTop=Math.min(t.st||0,SC.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
   tabUI();sched()}
 function tabFresh(){if(!pdf)return true;
   if(TABS.length>=TMAX)return msg(TMAX+' tabs are open, the most ocrp keeps; close one to open another'),false;
@@ -749,7 +748,8 @@ KQ.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp'){
     e.preventDefault();if(!kHits.length)return;
     kSel(kOn+((e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1))}
-  else if(e.key==='Enter'){e.preventDefault();kGo(kOn)}
+  else if(e.key==='Enter'){e.preventDefault();clearTimeout(kFT);kRows();kPaint();kGo(kOn)}  // a filter typed just before Enter still counts
+  else if(e.key==='Backspace'||e.key==='Delete'){const x=kHits[kOn];e.preventDefault();if(!x||x.k!=='tab')return;kClose();tabClose(x.i)}
   else if(e.key==='Escape'){e.preventDefault();kClose()}});
 $('mK').addEventListener('mousedown',e=>{e.target===$('mK')&&kClose()});
 addEventListener('focus',()=>{pdf||($('mHint').hidden=false)});  // the picker closed with nothing opened: back comes the card
@@ -770,7 +770,7 @@ const fOpen=()=>{if(!pdf)return;$('mFind').hidden=false;FQ.focus();FQ.select()},
       const m=el('mark','fnd'+(first?' on':''));m.textContent=t.slice(i,i+q.length);
       sp.textContent='';sp.append(document.createTextNode(t.slice(0,i)),m,document.createTextNode(t.slice(i+q.length)));first=0}};
 FQ.addEventListener('input',()=>{clearTimeout(fTm);fTm=setTimeout(fScan,180)});
-FQ.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();fGo(e.shiftKey?-1:1)}else if(e.key==='Escape'){e.preventDefault();fClose()}});
+FQ.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const d=e.shiftKey?-1:1;fpages.length?fGo(d):(clearTimeout(fTm),fScan().then(()=>fGo(d)))}else if(e.key==='Escape'){e.preventDefault();fClose()}});
 // ---------- selection: Translate / Comment bar under the selection ----------
 let lastSel='';
 const selT=$('mSelT'),selHide=()=>selT.hidden=true;
