@@ -64,6 +64,8 @@ body.pdf #mHint{display:none}
 #mHint .hint{display:flex;flex-direction:column;align-items:center;gap:16px;color:var(--h4)}
 #mHint .open-line{margin:0;color:var(--h4);font-size:12.5px}
 #mHint .brand{margin:0 0 4px;font-size:14px;font-weight:600;color:var(--fg)}#mHint .brand span{font-weight:400;font-size:12px;color:var(--t3)}
+#mHint .keys{display:grid;grid-template-columns:repeat(3,max-content);gap:8px;justify-content:center}
+#mHint .k{display:flex;flex-direction:column;gap:5px;padding:8px 10px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb);color:var(--t3);font-size:11px;white-space:nowrap}#mHint .k span{display:flex;gap:3px}
 #mKeyFirst{pointer-events:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-radius:8px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb)}
 #mKeyFirst b{flex-basis:100%;text-align:center;font-size:12px;color:var(--fg)}
 #mKeyFirst input{width:230px}
@@ -157,6 +159,17 @@ body.pdf #mHint{display:none}
 <p>Stored in this browser; change it later in Settings (,).</p></div>
 <p class="brand">ocrp <span>— old, clean, read, paper</span></p>
 <p class="open-line">Press <kbd>O</kbd> to open a PDF, or drop it here</p>
+<div class="keys">
+<div class="k"><span><kbd>O</kbd></span>Open a PDF</div>
+<div class="k"><span><kbd>⌘</kbd><kbd>S</kbd></span>Save notes</div>
+<div class="k"><span><kbd>⌘</kbd><kbd>⇧</kbd><kbd>S</kbd></span>Save PDF</div>
+<div class="k"><span><kbd>←</kbd><kbd>→</kbd></span>Pages</div>
+<div class="k"><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span>Zoom</div>
+<div class="k"><span><kbd>T</kbd></span>Theme</div>
+<div class="k"><span><kbd>H</kbd></span>Thumbnails</div>
+<div class="k"><span><kbd>,</kbd></span>Settings</div>
+<div class="k"><span><kbd>?</kbd></span>All shortcuts</div>
+</div>
 </div></div>
 <div id="mNotes"></div>
 <section id="mConn" hidden aria-label="Settings"><div class="sheet"><header><button class="ib" id="mConnX" title="Back (Esc)"><svg class="chg" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg></button><b>Settings</b></header>
