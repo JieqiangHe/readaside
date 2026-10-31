@@ -210,9 +210,8 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <div class="wb"><h3>ocrp <span>old, clean, read, paper</span></h3>
 <ul>
 <li><svg viewBox="0 0 16 16"><path d="M4 2.5h6l2 2v9H4z"/><path d="M6 6.5h4M6 9h4"/></svg><b>Open a PDF</b><span><kbd>O</kbd></span></li>
-<li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save notes</b><span><kbd>N</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M3.5 2.5h9v11h-9z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg><b>Save PDF</b><span><kbd>P</kbd></span></li>
-<li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save Markdown</b><span><kbd data-k="shf">⇧</kbd><kbd>N</kbd></span></li>
+<li><svg viewBox="0 0 16 16"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg><b>Save Markdown</b><span><kbd>N</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><rect x="2.5" y="4.5" width="8" height="9" rx="1"/><path d="M5.5 2.5h7a1 1 0 0 1 1 1v7"/></svg><b>Documents</b><span><kbd>D</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><path d="M2.5 8h11M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg><b>Pages</b><span><kbd>←</kbd><kbd>→</kbd></span></li>
 <li><svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.2"/><path d="M7 5v4M5 7h4"/><path d="m10.2 10.2 3.3 3.3"/></svg><b>Zoom</b><span><kbd>+</kbd><kbd>−</kbd><kbd>0</kbd></span></li>
@@ -503,8 +502,6 @@ async function keep(b,nm,mime,ext,re){
   catch(e){re&&(jsH=null);return msg(e.name==='AbortError'?'':'Could not save: '+e.message)}
   const a=el('a');a.href=URL.createObjectURL(b);a.download=nm;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3);
   msg('Downloaded '+nm+' — keep it beside the PDF; open it in ocrp to bring the notes back')}
-function nfile(){if(!pdf)return msg('Open a PDF first');const d=ndata();if(!d.notes.length)return msg('No notes to save');
-  keep(new Blob([JSON.stringify(d,null,1)],{type:'application/json'}),pdfName.replace(/\.pdf$/i,'')+'.ocrp.json','application/json','.json',1)}
 // nmd(): the notes as a Markdown file, page by page — the passage as a quote, then the translation or the comment, then the questions
 function nmd(){
   if(!pdf)return msg('Open a PDF first');
@@ -814,7 +811,7 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){$('mOv').hidden||ovClose();$('mK').hidden||kClose();document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
-  if(mod){if(k==='s'){e.preventDefault();nfile()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
+  if(mod){if(k==='s'){e.preventDefault();nmd()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
   if(e.isComposing||e.keyCode===229)return;
   if(e.target.closest('input,textarea,select,button,a,[contenteditable]'))return;
   if(k==='Enter')hintOff();
@@ -822,7 +819,7 @@ document.addEventListener('keydown',e=>{
   else if(k==='f'||c==='KeyF'){e.preventDefault();fOpen()}
   else if(k==='d'||c==='KeyD'){e.preventDefault();kOpen()}
   else if(k==='p'||c==='KeyP'){e.preventDefault();npdf()}
-  else if(k==='n'||c==='KeyN'){e.preventDefault();e.shiftKey?nmd():nfile()}
+  else if(k==='n'||c==='KeyN'){e.preventDefault();nmd()}
   else if(k==='['||c==='BracketLeft')tabGo((TI-1+TABS.length)%TABS.length);else if(k===']'||c==='BracketRight')tabGo((TI+1)%TABS.length);
   else if((k===','||c==='Comma')&&!e.shiftKey){e.preventDefault();cfg($('mConn').hidden)}
   else if(k==='o'||c==='KeyO'){hintOff();A.open()}
