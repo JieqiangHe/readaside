@@ -757,7 +757,8 @@ KQ.addEventListener('keydown',e=>{
     e.preventDefault();if(!kHits.length)return;
     kSel(kOn+((e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1))}
   else if(e.key==='Enter'){e.preventDefault();clearTimeout(kFT);kRows();kPaint();kGo(kOn)}  // a filter typed just before Enter still counts
-  else if(e.key==='Backspace'||e.key==='Delete'){const x=kHits[kOn];e.preventDefault();if(!x||x.k!=='tab')return;kClose();tabClose(x.i)}
+  else if(e.key==='Backspace'||e.key==='Delete'){if(KQ.value)return;  // typing still wins; only an empty field closes a tab
+    const x=kHits[kOn];e.preventDefault();if(!x||x.k!=='tab')return;kClose();tabClose(x.i)}
   else if(e.key==='Escape'){e.preventDefault();kClose()}});
 $('mK').addEventListener('mousedown',e=>{e.target===$('mK')&&kClose()});
 addEventListener('focus',()=>{pdf||($('mHint').hidden=false)});  // the picker closed with nothing opened: back comes the card
@@ -814,6 +815,7 @@ SC.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();clea
 // one key handler for the whole app: physical key codes (e.code) so a Chinese IME with full-width
 // punctuation cannot break it, and no shortcut fires while the IME is composing
 document.addEventListener('keydown',e=>{
+  if(!$('mConn').hidden&&e.key!=='Escape'&&e.key!==','&&e.code!=='Comma')return;  // the settings sheet is modal; Esc and , still close it
   if(e.key==='Escape'){$('mOv').hidden||ovClose();$('mK').hidden||kClose();document.body.classList.contains('ask')&&hintOff();$('mFind').hidden||fClose();selHide();document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open'));$('mConn').hidden||cfg(0);return}
   const mod=e.metaKey||e.ctrlKey,k=e.key.toLowerCase(),c=e.code;
   if(mod){if(k==='s'){e.preventDefault();nmd()}else if(k==='o'){e.preventDefault();hintOff();A.open()}else if(k==='x'&&e.shiftKey){e.preventDefault();clrAll()}return}
