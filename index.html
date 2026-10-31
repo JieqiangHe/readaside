@@ -144,24 +144,23 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mConn .kv{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 10px;align-items:center}#mConn .kv>span{color:var(--h4);font-size:11.5px}
 #mConn .kv input,#mConn .kv select{width:100%;min-width:0;height:24px}#mKey{font-family:ui-monospace,monospace;font-size:11.5px}
 #mConn .gr{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;color:var(--h4);line-height:1.4}#mConn .gr input{margin:1px 0 0}
-/* ---------- palette (Cmd/Ctrl+K) ---------- */
-#mK{position:fixed;inset:0;z-index:60;background:#14141333}
+/* ---------- palette (Cmd/Ctrl+K): a horizontal strip of big page previews ---------- */
+#mK{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:#14141366}
 #mK[hidden]{display:none}
-#mK>div{position:absolute;left:50%;top:12vh;transform:translateX(-50%);width:min(560px,calc(100vw - 32px));padding:4px;border-radius:10px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 30px 70px -20px #0005}
-#mKq{display:block;width:100%;padding:7px 8px;font-size:13.5px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;outline:none}
-#mKl{max-height:min(62vh,480px);overflow:auto;padding:3px 0}
-#mKl h4{margin:8px 8px 3px;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3)}
-#mKl h4:not(:first-child){margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
-#mKl div.rc span{color:var(--h4)}
-#mKl div{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:7px;white-space:nowrap;cursor:pointer;font-size:12.5px}
-#mKl div.on{background:var(--btnh)}
-#mKl div img.pt{flex:none;width:44px;height:60px;object-fit:cover;object-position:top;border-radius:3px;background:var(--side);box-shadow:0 0 0 1px var(--line)}
-#mKl div img.pt.mt{visibility:hidden}
-#mKl div.rc img.pt{opacity:.55}
-#mKl div span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-#mKl div small{flex:none;color:var(--h4);font-size:11px}
+#mK>div{width:min(1040px,calc(100vw - 48px));border-radius:14px;background:var(--btn);box-shadow:0 0 0 1px var(--line),0 40px 90px -24px #0007;overflow:hidden}
+#mKq{display:block;width:100%;padding:10px 14px;font-size:13.5px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;outline:none}
+#mKl{display:flex;align-items:flex-start;gap:14px;overflow-x:auto;overflow-y:hidden;padding:16px;scrollbar-width:thin}
+#mKl .kc{flex:none;width:132px;padding:0;border:0;background:none;text-align:left;cursor:pointer;opacity:.5;transition:opacity .12s}
+#mKl .kc.on{opacity:1}
+#mKl .kc img{display:block;width:132px;height:185px;object-fit:cover;object-position:top;border-radius:6px;background:#fff;box-shadow:0 0 0 1px var(--line),0 10px 24px -12px #0005}
+#mKl .kc img.mt{visibility:hidden}
+#mKl .kc.on img{box-shadow:0 0 0 2px var(--onb),0 12px 28px -12px #0006}
+#mKl .kc b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:7px;font-size:11.5px;font-weight:500;line-height:1.32;color:var(--fg)}
+#mKl .kc small{display:block;margin-top:3px;font-size:10.5px;color:var(--h4)}
+#mKl .kc.rc{opacity:.32}#mKl .kc.rc.on{opacity:.85}
+#mKl .sp{flex:none;width:1px;align-self:stretch;margin:2px 2px 0;background:var(--line)}
 #mKl p{margin:8px;color:var(--h4)}
-#mK>div>p{margin:0;padding:6px 8px 3px;border-top:1px solid var(--line);color:var(--h4);font-size:11px}
+#mK>div>p{margin:0;padding:8px 14px;border-top:1px solid var(--line);color:var(--h4);font-size:11px}
 #mK>div>p kbd{margin:0 3px 0 10px}#mK>div>p kbd:first-child{margin-left:0}
 /* ---------- find ---------- */
 #mFind{position:fixed;top:46px;left:50%;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}
@@ -218,7 +217,7 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 <svg id="mLink"></svg>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
-<div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>↑↓</kbd>Move<kbd data-k="ret">↵</kbd>Open<kbd>Esc</kbd>Close</p></div></div>
+<div id="mK" hidden><div role="dialog" aria-label="Open documents"><input id="mKq" type="text" placeholder="Switch document…" spellcheck="false" autocomplete="off"><div id="mKl" role="listbox"></div><p><kbd>← →</kbd>Move<kbd data-k="ret">↵</kbd>Open<kbd>Esc</kbd>Close</p></div></div>
 <div id="mFind" hidden><input id="mFindQ" type="text" placeholder="Find in the PDF" spellcheck="false" autocomplete="off"><span id="mFindS"></span></div>
 <script>
 'use strict';
@@ -601,31 +600,34 @@ const db=()=>dbP||(dbP=new Promise(ok=>{try{const r=indexedDB.open('ocrp',1);r.o
   recPut=async(fp,name,buf,handle)=>{const d=await db();if(!d||!fp)return;try{const put=r=>new Promise(ok=>{const tx=d.transaction('recent','readwrite');tx.oncomplete=()=>ok(1);tx.onerror=()=>ok(0);tx.onabort=()=>ok(0);tx.objectStore('recent').put(r)});let r={fp,name,t:Date.now(),buf};handle&&(r.handle=handle);if(!await put(r)){delete r.handle;await put(r)}
     const a=await recAll();a.slice(8).forEach(x=>d.transaction('recent','readwrite').objectStore('recent').delete(x.fp))}catch(_){}};
 const kTh=new Map(),rel=t=>{const s=Math.max(0,(Date.now()-t)/1e3);return s<60?'just now':s<3600?Math.round(s/60)+' min':s<86400?Math.round(s/3600)+' h':Math.round(s/86400)+' d'};
-const mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({scale:1}),c=el('canvas'),g=140/vp.width,v2=p.getViewport({scale:g});
+const mkThumb=async doc=>{try{const p=await doc.getPage(1),vp=p.getViewport({scale:1}),c=el('canvas'),g=280/vp.width,v2=p.getViewport({scale:g});
   c.width=Math.round(v2.width);c.height=Math.round(v2.height);
   await p.render({canvasContext:c.getContext('2d'),viewport:v2}).promise;return c.toDataURL('image/jpeg',.72)}catch(_){return ''}};
-// ---------- palette (Cmd/Ctrl+K): the open documents, then the recent ones, filtered as you type ----------
-const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map();
+// ---------- palette (Cmd/Ctrl+K): a strip of big page previews, arrows to move, Enter to switch ----------
+const KQ=$('mKq'),KL=$('mKl');let kHits=[],kOn=0,kRec=[],imgs=new Map(),knodes=[];
 const kClose=()=>{$('mK').hidden=true;KQ.value=''},
   kRows=()=>{const q=KQ.value.trim().toLowerCase(),
     tabs=TABS.map((t,i)=>({k:'tab',i,n:tabNm(i),cur:i===TI})).filter(x=>x.n),  // empty slots (no PDF open yet) are not documents
     recs=kRec.filter(r=>!tabs.some(t=>t.n===r.name.replace(/\.pdf$/i,''))).map(r=>({k:'rec',r,n:r.name,t:r.t})),
     f=x=>!q||x.n.toLowerCase().includes(q);
     kHits=[...tabs.filter(f),...recs.filter(f)]},
-  kPaint=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));imgs=new Map();KL.replaceChildren();
+  kPaint=()=>{kOn=Math.max(0,Math.min(kOn,kHits.length-1));imgs=new Map();knodes=[];KL.replaceChildren();
     if(!kHits.length){KL.append(el('p',0,'Nothing yet — press O to open a PDF'));return}
     let last='';
-    kHits.forEach((x,i)=>{if(x.k!==last){last=x.k;KL.append(el('h4',0,x.k==='tab'?'Open':'Recent'))}
-      const d=el('div',(i===kOn?'on ':'')+(x.k==='rec'?'rc':'')),im=el('img','pt');
-      const fp=x.k==='tab'?(x.i===TI?fpr():fprOf(TABS[x.i].pdf)):x.r.fp||'',t=fp&&kTh.get(fp)||x.r&&x.r.thumb;
-      t?im.src=t:im.classList.add('mt');fp&&imgs.set(fp,im);d.append(im,el('span',0,x.n));
-      d.title=x.n+(x.k==='rec'?' — opened '+rel(x.t):'');
-      x.cur&&d.append(el('small',0,'current'));
-      x.k==='rec'&&x.t&&d.append(el('small',0,rel(x.t)));
-      d.onmouseenter=()=>{kOn=i;KL.querySelectorAll('div').forEach((r,j)=>r.classList.toggle('on',j===i))};
-      d.onmousedown=e=>{e.preventDefault();kGo(i)};KL.append(d)});
+    kHits.forEach((x,i)=>{
+      if(x.k!==last){last=x.k;i&&KL.append(el('div','sp'))}
+      const c=el('button','kc'+(i===kOn?' on':'')+(x.k==='rec'?' rc':''));c.type='button';
+      const fp=x.k==='tab'?(x.i===TI?fpr():fprOf(TABS[x.i].pdf)):x.r.fp||'',t=fp&&kTh.get(fp)||x.r&&x.r.thumb,im=el('img');
+      t?im.src=t:im.classList.add('mt');fp&&imgs.set(fp,im);
+      c.append(im,el('b',0,x.n));
+      x.cur?c.append(el('small',0,'current')):x.t&&c.append(el('small',0,rel(x.t)));
+      c.title=x.n+(x.k==='rec'?' — opened '+rel(x.t):'');
+      c.onmouseenter=()=>{kOn=i;knodes.forEach((n,j)=>n.classList.toggle('on',j===i))};
+      c.onmousedown=e=>{e.preventDefault();kGo(i)};
+      knodes[i]=c;KL.append(c)});
     kHits.forEach(x=>{const fp=x.k==='tab'?(x.i===TI?fpr():fprOf(TABS[x.i].pdf)):(x.r.fp||''),doc=x.k==='tab'?(x.i===TI?pdf:TABS[x.i].pdf):null;
-      if(!fp||!doc||kTh.has(fp))return;mkThumb(doc).then(u=>{if(!u)return;kTh.set(fp,u);const im=imgs.get(fp);im&&(im.src=u,im.classList.remove('mt'))})})},
+      if(!fp||!doc||kTh.has(fp))return;mkThumb(doc).then(u=>{if(!u)return;kTh.set(fp,u);const im=imgs.get(fp);im&&(im.src=u,im.classList.remove('mt'))})});
+    knodes[kOn]?.scrollIntoView({block:'nearest',inline:'center'})},
   kBuild=()=>{kRows();const c=kHits.findIndex(x=>x.cur);kOn=c<0?0:c;kPaint()},
   kOpen=()=>{$('mK').hidden=false;KQ.value='';kBuild();KQ.focus();recLoad()},
   kGo=i=>{const x=kHits[i];if(!x)return;kClose();
@@ -639,7 +641,10 @@ const kClose=()=>{$('mK').hidden=true;KQ.value=''},
     r.buf&&openPdf(r.buf,r.name).catch(()=>{})};
 KQ.addEventListener('input',kBuild);
 KQ.addEventListener('keydown',e=>{
-  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!kHits.length)return;kOn=(kOn+(e.key==='ArrowDown'?1:-1)+kHits.length)%kHits.length;kPaint();[...KL.children].filter(n=>n.tagName==='DIV')[kOn]?.scrollIntoView({block:'nearest'})}
+  if(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();if(!kHits.length)return;
+    const d=(e.key==='ArrowRight'||e.key==='ArrowDown')?1:-1;
+    kOn=(kOn+d+kHits.length)%kHits.length;kPaint()}
   else if(e.key==='Enter'){e.preventDefault();kGo(kOn)}
   else if(e.key==='Escape'){e.preventDefault();kClose()}});
 $('mK').addEventListener('mousedown',e=>{e.target===$('mK')&&kClose()});
