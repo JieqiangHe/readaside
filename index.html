@@ -81,8 +81,12 @@ body.pdf #mHint{display:none}
 .textLayer ::selection{background:#c9644252}
 #mSelT{position:absolute;z-index:9;display:flex;gap:2px;padding:3px;border-radius:8px;background:var(--btn);box-shadow:var(--shm)}#mSelT[hidden],#mSelT [hidden]{display:none}
 #mSelT button{display:flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border:0;border-radius:6px;background:none;color:var(--fg)}#mSelT button:hover{background:var(--btnh)}#mSelT .chg{width:14px;height:14px;color:var(--h4)}
-/* ---------- notes: cards float over the viewer, right below their passage ---------- */
-#mNotes{position:absolute;inset:0;z-index:6;overflow:hidden;pointer-events:none}
+/* ---------- notes: a borderless right column beside the page, linked to their highlight by a line ---------- */
+#mNotes{flex:none;width:0;height:100%;position:relative;z-index:6;overflow:hidden;pointer-events:none}
+#mLink{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#mLink path{fill:none;stroke:var(--nt);stroke-width:1.2;opacity:.5}#mLink circle{fill:var(--nt);opacity:.8}
+#mLink .c path{stroke:var(--cm)}#mLink .c circle{fill:var(--cm)}
+#mLink .on path{stroke-width:2;opacity:.9}#mLink .on circle{opacity:1}
 #mViewWrap [hidden]{display:none!important}
 .item{pointer-events:auto;position:absolute;width:480px;display:flex;flex-direction:column;gap:4px;padding:8px 12px 9px;border-radius:10px;background:var(--btn);box-shadow:inset 0 0 0 1px var(--btnb),var(--sh)}
 .item[hidden]{display:none}
@@ -175,6 +179,7 @@ body.pdf #mHint{display:none}
 <p>Off: pick Translate from the bar under the selection. The chat under each translation also uses this language.</p></div>
 </div></div></section>
 </div>
+<svg id="mLink"></svg>
 <div id="mSelT" hidden><button data-s="t" title="Translate the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M2.5 4h6M5.5 2.5V4M4 4c.5 2.5 2 4 4 5M7.5 4c-.5 2.5-2 4.5-4.5 5.5M9 13.5l2.5-6 2.5 6M9.8 11.6h3.4"/></svg>Translate</button><button data-s="c" title="Write your own comment on the selection"><svg class="chg" viewBox="0 0 16 16"><path d="M3 4.5A1.5 1.5 0 0 1 4.5 3h7A1.5 1.5 0 0 1 13 4.5v5a1.5 1.5 0 0 1-1.5 1.5H7l-3 2.5V11A1.5 1.5 0 0 1 3 9.5z"/></svg>Comment</button></div>
 </div>
 <dialog id="mHelp"><form method="dialog"><h3>Shortcuts</h3><dl>
@@ -255,14 +260,15 @@ async function ask(model,msgs,myAc,ui){
   on(buf);
   return{out,cut}
 }
-// ---------- notes: translations (k:'t') and comments (k:'c') as cards in the right lane, linked by a line to their highlight ----------
+// ---------- notes: translations (k:'t') and comments (k:'c') as cards in a borderless right column, linked by a line to their highlight ----------
 // o={k,t,rs:[[page,x,y,w,h]] in PDF units (null: pasted text),fy,out,m,chat:[[q,a]],el,ac}; nAct is aligned to its anchor,
 // the others are pushed up/down so no two cards overlap
-const N=[],NS=$('mNotes'),RM=matchMedia('(prefers-reduced-motion: reduce)');let nAct=null,nLast=null,nRaf=0,nT=0,selA=null;
+const N=[],NS=$('mNotes'),LK=$('mLink'),RM=matchMedia('(prefers-reduced-motion: reduce)');let nAct=null,nLast=null,nRaf=0,nT=0,selA=null;
 const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(sched),
   pgOf=n=>V.querySelector(`.page[data-n="${n}"]`),
   docH=()=>{const p=V.lastElementChild;return p?p.offsetTop+p.offsetHeight:0},
-  noteW=()=>Math.min(420,Math.max(280,Math.round(V.clientWidth*.4))),  // the card column; the page gets fitted beside it
+  noteW=()=>Math.min(420,Math.max(280,Math.round($('mViewWrap').clientWidth*.42))),  // the card column, from the wrap width so it does not shrink itself
+  col=()=>{const w=N.length?noteW()+32:0;NS.style.width=w?w+'px':'0';return w},
   want=o=>{if(!o.rs)return o.fy*(docH()||1);const pg=o.rs[0][0],p=pgOf(pg);if(!p)return null;
     let t=Infinity;for(const r of o.rs)r[0]===pg&&(t=Math.min(t,r[2]));return p.offsetTop+t*scale-4},  // the top of the note's passage; cards float down the right side
   hl=d=>{d.querySelectorAll('.hl').forEach(h=>h.remove());const n=+d.dataset.n,c=v=>`calc(var(--scale-factor)*${v}px)`;
@@ -272,8 +278,8 @@ const sched=()=>nRaf||(nRaf=requestAnimationFrame(frame)),ro=new ResizeObserver(
   act=o=>{nAct=o;N.forEach(x=>x.el.classList.toggle('on',x===o));V.querySelectorAll('.hl').forEach(h=>h.classList.toggle('on',h.o===o));sched()},
   pick=o=>{if(o===nAct)return;act(o);(o.w<V.scrollTop+40||o.w>V.scrollTop+V.clientHeight-140)&&(V.scrollTop=Math.max(0,o.w-V.clientHeight*.35))},  // activate; scroll the passage into view when off-screen
   fade=e=>{e.classList.add('out');setTimeout(()=>e.remove(),RM.matches?0:180)},
-  kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();fade(o.el);N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);!N.length&&pdf&&(V.style.paddingRight='',fit());nsave()},
-  clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();fade(o.el)});N.length=0;hlAll();act(null);pdf&&(V.style.paddingRight='',fit())};
+  kill=o=>{if(!N.includes(o))return;o.ac.abort();o.qc?.abort();fade(o.el);N.splice(N.indexOf(o),1);hlAll();act(nAct===o?N.at(-1)||null:nAct);!N.length&&pdf&&(col(),fit());nsave()},
+  clr=()=>{N.forEach(o=>{o.ac.abort();o.qc?.abort();fade(o.el)});N.length=0;hlAll();act(null);pdf&&(col(),fit())};
 // rects(range): the selection's line boxes per page, merged, in PDF units, top first
 function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n,p.getBoundingClientRect()]),R=[];
   for(const c of rg.getClientRects()){const h=c.height/scale;if(c.width<1||h<1||h>40)continue;
@@ -282,9 +288,9 @@ function rects(rg){const P=[...V.querySelectorAll('.page')].map(p=>[+p.dataset.n
       m=R.find(q=>q[0]===r[0]&&Math.min(q[2]+q[4],r[2]+r[4])-Math.max(q[2],r[2])>Math.min(q[4],r[4])/2&&r[1]<=q[1]+q[3]+q[4]*1.5&&q[1]<=r[1]+r[3]+r[4]*1.5);
     if(m){const x=Math.min(m[1],r[1]),y=Math.min(m[2],r[2]);m[3]=Math.max(m[1]+m[3],r[1]+r[3])-x;m[4]=Math.max(m[2]+m[4],r[2]+r[4])-y;m[1]=x;m[2]=y}else R.push(r)}
   return R.sort((a,b)=>a[0]-b[0]||a[2]-b[2]||a[1]-b[1])}
-function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based), in content coordinates over the viewer
-  const vs=[],vw=V.clientWidth,w=noteW(),cx=V.offsetLeft+vw-w;
-  for(const o of N){o.w=want(o);o.el.style.left=cx+'px';o.el.style.width=w+'px';
+function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT=now;let more=0;  // cards ease toward their places (time-based), in content coordinates
+  const M=$('mMain').getBoundingClientRect(),w=Math.max(0,NS.clientWidth-32)||noteW(),vs=[];
+  for(const o of N){o.w=want(o);o.el.style.left='16px';o.el.style.width=w+'px';
     o.el.hidden=o.w==null;o.w!=null&&vs.push(o)}
   vs.sort((a,b)=>a.w-b.w);
   const h=vs.map(o=>o.el.offsetHeight),y=[],G=8,k=Math.max(0,vs.indexOf(nAct));
@@ -295,13 +301,21 @@ function frame(now){nRaf=0;const ea=1-Math.exp(-Math.min(50,nT?now-nT:16)/55);nT
     vs.forEach((o,i)=>{const t=y[i];if(o.y==null||RM.matches)o.y=t;else{o.y+=(t-o.y)*ea;Math.abs(t-o.y)<.4?o.y=t:more=1}o.el.style.top=o.y+'px'})}
   V.style.paddingBottom=Math.max(16,(vs.length?y.at(-1)+h.at(-1):0)-docH()+16)+'px';
   NS.style.transform=`translateY(${-V.scrollTop}px)`;
-  more?sched():nT=0}
+  let s='';  // the line: from the highlight's right edge to the card's header
+  for(const o of vs){if(!o.rs)continue;const r=o.rs[0],p=pgOf(r[0]);if(!p)continue;
+    const pr=p.getBoundingClientRect(),b=o.el.getBoundingClientRect(),
+      x1=pr.left-M.left+(r[1]+r[3])*scale,y1=pr.top-M.top+(r[2]+r[4])*scale,
+      x2=b.left-M.left,y2=b.top-M.top+14;
+    if(x1<0||x1>M.width||y1<0||y1>M.height||y2<0||y2>M.height)continue;
+    const xe=Math.max(x1+6,pr.right-M.left),c=Math.max(10,(x2-xe)/2);
+    s+=`<g class="${o.k}${o===nAct?' on':''}"><circle cx="${x1}" cy="${y1}" r="2.5"/><path d="M${x1} ${y1}H${xe}C${xe+c} ${y1} ${x2-c} ${y2} ${x2} ${y2}"/></g>`}
+  LK.innerHTML=s;more?sched():nT=0}
 // shell(o,label): the card frame — header (dot, kind, model/date, actions .ia), placed and activated
 function shell(o,label){const it=el('div','item '+o.k),ih=el('div','ih');o.ia=el('div','ia');o.md=el('span','md');
   ih.append(el('i'),el('b',0,label),o.md,o.ia);it.append(ih);o.el=it;o.chat||=[];
   it.onclick=e=>e.target.closest('button,summary')||pick(o);it.addEventListener('focusin',()=>pick(o));
   NS.append(it);N.push(o);ro.observe(it);hlAll();act(o);
-  if(N.length===1&&pdf){V.style.paddingRight=noteW()+12+'px';fit()}  // room for the column, page refits to the left
+  if(N.length===1&&pdf){col();fit()}  // the column takes its width; the page refits into the remaining area
   return it}
 // translate(t,rs,sv): t is the text from the PDF selection; rs its rects; sv: a saved note shown again
 // without a request. Requests run side by side, one per note
@@ -380,7 +394,7 @@ NS.addEventListener('wheel',e=>{const a=e.target.closest('.a,.ce,textarea');if(a
 V.addEventListener('click',e=>{const p=e.target.closest('.page');if(!p||!getSelection().isCollapsed)return;
   const b=p.getBoundingClientRect(),n=+p.dataset.n,x=(e.clientX-b.left)/scale,y=(e.clientY-b.top)/scale,
     o=N.find(o=>o.rs?.some(r=>r[0]===n&&x>=r[1]&&x<=r[1]+r[3]&&y>=r[2]&&y<=r[2]+r[4]));o&&o!==nAct&&act(o)});
-ro.observe(V);ro.observe(NS);addEventListener('resize',()=>{N.length&&(V.style.paddingRight=noteW()+12+'px');sched()});
+ro.observe(V);ro.observe(NS);addEventListener('resize',()=>{const w0=NS.clientWidth;col();NS.clientWidth!==w0&&N.length&&fit();sched()});
 
 // ---------- saving notes: autosaved per PDF in this browser (mrdN:<fingerprint>, the old miniread prefix); Save writes <name>.ocrp.json to keep beside the PDF ----------
 let pdfName='',pdfH=null,jsH=null;  // file handles (Chrome/Edge): the save dialog starts in the PDF's folder and Save rewrites the same file
@@ -444,12 +458,12 @@ async function openFiles(fs,hs=[]){
 const TMAX=10,TABS=[{}];let TI=0,TN=0,TP=0;  // TN: this slot was pushed empty for an open that may still fail; TP: the tab to fall back to
 const fprOf=p=>p?.fingerprints?.[0]||'',tabNm=i=>(i===TI?pdfName:TABS[i].pdfName)||'';
 function tabHold(){TABS[TI]={pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN,st:V.scrollTop,notes:N.slice()};
-  obs?.disconnect();tobs?.disconnect();N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
+  obs?.disconnect();tobs?.disconnect();N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();LK.innerHTML='';
   $('mUndo').hidden=true;undoD=null;clearTimeout(undoT);selHide();nLast=null}
 function tabShow(i){const t=TABS[TI=i]||{};({pdf,pdfName,pdfH,jsH,scale,annOff,annN,curN}=t);
   pdf=pdf||null;pdfName=pdfName||'';scale=scale||1;annOff=!!annOff;annN=annN||0;curN=curN||1;TABS[i]={};
   N.length=0;for(const o of t.notes||[])N.push(o),NS.append(o.el),o.y=null;
-  V.style.paddingRight=N.length?noteW()+12+'px':'';
+  col();
   document.title=pdf?'ocrp — '+pdfName:'ocrp';document.body.classList.toggle('pdf',!!pdf);
   selHide();  pdf?(layout().then(()=>V.scrollTop=Math.min(t.st||0,V.scrollHeight)),TH()&&buildThumbs().catch(()=>{})):V.replaceChildren();
   tabUI();sched()}
@@ -461,7 +475,7 @@ function tabGo(i){if(i===TI||!TABS[i])return;tabHold();tabShow(i)}
 function tabClose(i){const nm=i===TI?pdfName:TABS[i].pdfName||'',ns=i===TI?N.slice():TABS[i].notes||[],dp=i===TI?pdf:TABS[i].pdf;
   nsaveTab(nm,fprOf(dp),ns);ns.forEach(o=>{o.ac.abort();o.qc?.abort()});dp?.destroy().catch(()=>{});
   if(TABS.length<2){N.forEach(o=>o.el.remove());NS.replaceChildren();$('mThumb').replaceChildren();V.replaceChildren();
-    pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=1;scale=1;document.title='ocrp';document.body.classList.remove('pdf');V.style.paddingRight='';
+    pdf=null;pdfName='';pdfH=jsH=null;annOff=false;annN=0;curN=1;scale=1;document.title='ocrp';document.body.classList.remove('pdf');col();LK.innerHTML='';
     selHide();$('mUndo').hidden=true;undoD=null;
     TABS[0]={};TI=0;tabUI();sched();return msg('Closed')}
   if(i===TI){tabHold();TABS.splice(i,1);tabShow(Math.min(i,TABS.length-1))}
@@ -518,8 +532,7 @@ function zoom(f){if(!pdf)return msg('Open a PDF first');
   const y=V.scrollTop/Math.max(1,V.scrollHeight);scale=ns;
   layout().then(()=>V.scrollTop=y*V.scrollHeight)}
 function fit(){if(!pdf)return msg('Open a PDF first');
-  const pr=N.length?noteW()+12:16;  // reserve the card column on the right so the page sits beside it
-  pdf.getPage(1).then(p=>{const s=(V.clientWidth-18-pr)/p.getViewport({scale:1}).width;zoom(s/scale)}).catch(()=>{})}
+  pdf.getPage(1).then(p=>{const s=(V.clientWidth-34)/p.getViewport({scale:1}).width;zoom(s/scale)}).catch(()=>{})}
 function cur(){let n=0;
   for(const p of V.querySelectorAll('.page')){if(p.offsetTop-V.scrollTop<=V.clientHeight*.4)n=+p.dataset.n;else break}
   n&&n!==curN&&(curN=n,mark())}
