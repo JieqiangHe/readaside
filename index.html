@@ -64,6 +64,13 @@ body.pdf #mHint{display:none}body.pdf.ask #mHint{display:grid}
 #mHint .mc{flex:none;width:94px;display:flex;flex-direction:column;gap:4px;padding:9px;border-radius:6px;background:var(--side);box-shadow:0 0 0 1px var(--line)}
 #mHint .mc b{display:block;height:5px;width:42%;border-radius:2px;background:var(--nt);opacity:.55}
 #mHint .mc i:last-child{width:58%}
+#mHint .mp i:nth-child(1){animation-delay:0s}#mHint .mp i:nth-child(2){animation-delay:.06s}#mHint .mp i:nth-child(4){animation-delay:.12s}#mHint .mp i:nth-child(5){animation-delay:.18s}#mHint .mp i:nth-child(6){animation-delay:.24s}
+#mHint .mp i,#mHint .mc i,#mHint .mc b{animation:mHero .42s ease-out both}
+#mHint .mp i.on{transform-origin:0 50%;animation:mSel 4.6s cubic-bezier(.2,.8,.2,1) infinite}
+#mHint .mc{animation:mCard 4.6s ease-out infinite}
+@keyframes mHero{from{opacity:0;transform:translateY(2px)}}
+@keyframes mSel{0%,14%{transform:scaleX(0);opacity:1}32%,86%{transform:scaleX(1);opacity:1}94%,100%{transform:scaleX(1);opacity:0}}
+@keyframes mCard{0%,30%{opacity:0;transform:translateX(8px)}46%,86%{opacity:1;transform:none}94%,100%{opacity:0;transform:none}}
 #mHint .wb{padding:18px 22px 4px}
 #mHint .wb h3{margin:0 0 16px;font-size:20px;font-weight:600;letter-spacing:-.02em;color:var(--fg)}
 #mHint .wb h3 span{margin-left:4px;font-size:13px;font-weight:400;letter-spacing:0;color:var(--t3)}
